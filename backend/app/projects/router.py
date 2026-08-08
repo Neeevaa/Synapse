@@ -85,7 +85,7 @@ def get_project(
 def update_project(
     project_id: UUID,
     data: UpdateProjectRequest,
-    current_user: User = Depends(require_admin()),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     service = ProjectService(db)

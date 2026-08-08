@@ -100,3 +100,18 @@ def update_task_status(
     service = TaskService(db)
     result = service.update_task_status(task_id, data, current_user)
     return success_response(message="Task status updated successfully.", data=result)
+
+
+@router.delete(
+    "/tasks/{task_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Delete a task by ID",
+)
+def delete_task(
+    task_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = TaskService(db)
+    service.delete_task(task_id, current_user)
+    return success_response(message="Task deleted successfully.", data=None)

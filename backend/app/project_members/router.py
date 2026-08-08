@@ -60,3 +60,22 @@ def add_project_member(
         message=msg,
         data=result,
     )
+
+
+@router.delete(
+    "/{project_id}/members/{user_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Remove a member from a project",
+)
+def remove_project_member(
+    project_id: UUID,
+    user_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = ProjectMemberService(db)
+    service.remove_member(project_id, user_id, current_user)
+    return success_response(
+        message="Member removed from project successfully.",
+        data=None,
+    )

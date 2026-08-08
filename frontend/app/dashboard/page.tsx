@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import ProtectedShell from "@/components/ProtectedShell";
 import { api } from "@/lib/api";
+import { formatRoleLabel } from "@/lib/roleUtils";
 import {
   FolderKanban,
   CheckSquare,
@@ -111,7 +112,7 @@ export default function UnifiedDashboardPage() {
                         Welcome back, {user.first_name}!
                       </h2>
                       <span className="px-2.5 py-0.5 rounded text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-                        {companyRole}
+                        {formatRoleLabel(companyRole)}
                       </span>
                       {user.designation && (
                         <span className="px-2.5 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground">

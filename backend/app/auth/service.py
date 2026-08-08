@@ -19,6 +19,10 @@ from app.auth.schemas import (
     ForgotPasswordRequest,
     ResetPasswordRequest,
     GoogleAuthRequest,
+    UpdateProfileRequest,
+    ChangePasswordRequest,
+    UserProfileResponse,
+    ProjectMembershipInfo,
 )
 from app.common.exceptions import (
     CompanyAlreadyExists,
@@ -31,12 +35,14 @@ from app.common.exceptions import (
 from app.common.helpers import slugify
 from app.models.company import Company
 from app.models.user import User
+from app.models.project import Project
 from app.models.project_member import ProjectMember
 from app.models.pending_membership import PendingMembership
 from app.models.email_verification import EmailVerificationToken
 from app.models.refresh_token import RefreshToken
 from app.models.password_reset import PasswordResetToken
 from app.models.enums import CompanyRole
+from app.core.security import hash_password, verify_password
 from app.core.security import hash_password, verify_password, create_access_token, hash_token
 from app.events import event_bus
 
@@ -81,6 +87,7 @@ class AuthService:
             company = Company(
                 name=data.company_name,
                 slug=slug,
+                subscription_plan=data.subscription_plan,
             )
             self.repo.create_company(company)
 
@@ -138,7 +145,7 @@ class AuthService:
             )
             raise InvalidCredentials("Invalid email or password.")
 
-        if not verify_password(data.password, user.password_hash):
+        if not user.password_hash or not verify_password(data.password, user.password_hash):
             logger.warning(
                 "Login failed: incorrect password",
                 extra={"extra_info": {"email": data.email, "user_id": str(user.id)}},
@@ -254,7 +261,7 @@ class AuthService:
                 last_name=data.last_name,
                 email=email_clean,
                 password_hash=hashed_pwd,
-                role=CompanyRole.ADMIN,
+                role=None,
                 is_active=True,
                 is_verified=True,
                 profile_completed=True,
@@ -688,7 +695,7 @@ class AuthService:
                     last_name=last_name,
                     email=email,
                     password_hash=None,
-                    role=CompanyRole.ADMIN,
+                    role=None,
                     is_active=True,
                     is_verified=True,
                     profile_completed=True,
@@ -712,6 +719,13 @@ class AuthService:
             except Exception as e:
                 self.db.rollback()
                 raise e
+
+        # If this request comes from the /join page specifically and there is no invitation
+        if data.is_join:
+            raise BaseBusinessException(
+                "No invitation found for this email address. Please request an invitation from your company administrator.",
+                status_code=400,
+            )
 
         # 4. Brand-New User -> Create Company as OWNER
         company_name = f"{first_name}'s Organization"
@@ -747,4 +761,91 @@ class AuthService:
         except Exception as e:
             self.db.rollback()
             raise e
+
+    def update_user_profile(self, user: User, data: UpdateProfileRequest) -> User:
+        """
+        Updates profile fields for a user.
+        Flips profile_completed to True ONLY when both required fields (designation and bio) are non-empty.
+        """
+        if data.first_name is not None:
+            user.first_name = data.first_name.strip()
+        if data.last_name is not None:
+            user.last_name = data.last_name.strip()
+        if data.designation is not None:
+            user.designation = data.designation.strip() or None
+        if data.bio is not None:
+            user.bio = data.bio.strip() or None
+        if data.avatar_url is not None:
+            user.avatar_url = data.avatar_url.strip() or None
+
+        has_designation = bool(user.designation and user.designation.strip())
+        has_bio = bool(user.bio and user.bio.strip())
+
+        user.profile_completed = bool(has_designation and has_bio)
+
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def get_user_profile_response(self, user: User) -> UserProfileResponse:
+        """
+        Builds full UserProfileResponse including company details and assigned project memberships with roles.
+        """
+        company_name = None
+        if user.company_id:
+            company = self.db.query(Company).filter(Company.id == user.company_id).first()
+            if company:
+                company_name = company.name
+
+        # Query project memberships
+        memberships = (
+            self.db.query(ProjectMember, Project)
+            .join(Project, ProjectMember.project_id == Project.id)
+            .filter(ProjectMember.user_id == user.id)
+            .all()
+        )
+
+        project_memberships_info = [
+            ProjectMembershipInfo(
+                project_id=pm.project_id,
+                project_name=proj.name,
+                project_description=proj.description,
+                project_role=pm.role.value if hasattr(pm.role, "value") else str(pm.role),
+            )
+            for pm, proj in memberships
+        ]
+
+        company_role_str = (
+            user.role.value if hasattr(user.role, "value") else (user.role if user.role else None)
+        )
+
+        return UserProfileResponse(
+            id=user.id,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            email=user.email,
+            company_id=user.company_id,
+            company_name=company_name,
+            role=company_role_str,
+            company_role=company_role_str,
+            designation=user.designation,
+            avatar_url=user.avatar_url,
+            bio=user.bio,
+            profile_completed=user.profile_completed,
+            is_active=user.is_active,
+            is_verified=user.is_verified,
+            project_memberships=project_memberships_info,
+        )
+
+    def change_password(self, user: User, data: ChangePasswordRequest) -> None:
+        """
+        Changes current user password after verifying old password.
+        """
+        if not user.password_hash or not verify_password(data.old_password, user.password_hash):
+            raise InvalidCredentials("Current password is incorrect.")
+
+        user.password_hash = hash_password(data.new_password)
+        self.db.add(user)
+        self.db.commit()
 

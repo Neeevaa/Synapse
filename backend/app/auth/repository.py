@@ -36,10 +36,12 @@ class AuthRepository:
             select(User).filter(User.email == email)
         ).scalar_one_or_none()
 
-    def get_user_by_id(self, user_id: UUID) -> User | None:
+    def get_user_by_id(self, user_id: UUID | str) -> User | None:
         """
         Queries a user by their user ID.
         """
+        if isinstance(user_id, str):
+            user_id = UUID(user_id)
         return self.db.execute(
             select(User).filter(User.id == user_id)
         ).scalar_one_or_none()

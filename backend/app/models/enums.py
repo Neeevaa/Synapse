@@ -3,6 +3,7 @@ from enum import Enum
 
 class SubscriptionPlan(str, Enum):
     FREE = "FREE"
+    STARTER = "STARTER"
     PRO = "PRO"
     ENTERPRISE = "ENTERPRISE"
 

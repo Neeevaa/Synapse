@@ -4,9 +4,10 @@ from sqlalchemy.orm import Session
 
 from app.models.sprint import Sprint
 from app.models.project import Project
+from app.models.project_member import ProjectMember
 from app.models.task import Task
 from app.models.user import User
-from app.models.enums import TaskStatus, SprintStatus
+from app.models.enums import TaskStatus, SprintStatus, CompanyRole, ProjectRole
 from app.sprints.repository import SprintRepository
 from app.sprints.schemas import (
     CreateSprintRequest,
@@ -15,6 +16,7 @@ from app.sprints.schemas import (
     SprintListResponse,
 )
 from app.common.exceptions import ResourceNotFound, Forbidden, BaseBusinessException
+from app.permissions.dependencies import check_project_role_or_company_admin
 
 
 class SprintService:
@@ -81,12 +83,9 @@ class SprintService:
         return self._build_sprint_response(sprint)
 
     def create_sprint(self, project_id: UUID, data: CreateSprintRequest, current_user: User) -> SprintResponse:
-        project = self.db.execute(select(Project).filter(Project.id == project_id)).scalar_one_or_none()
-        if not project:
-            raise ResourceNotFound("Project not found.")
-
-        if str(project.company_id) != str(current_user.company_id):
-            raise Forbidden("You do not have access to this project.")
+        project = check_project_role_or_company_admin(
+            self.db, current_user, project_id, [ProjectRole.PROJECT_MANAGER]
+        )
 
         try:
             sprint = Sprint(
@@ -109,9 +108,9 @@ class SprintService:
         if not sprint:
             raise ResourceNotFound("Sprint not found.")
 
-        project = self.db.execute(select(Project).filter(Project.id == sprint.project_id)).scalar_one_or_none()
-        if not project or str(project.company_id) != str(current_user.company_id):
-            raise Forbidden("You do not have access to this sprint.")
+        project = check_project_role_or_company_admin(
+            self.db, current_user, sprint.project_id, [ProjectRole.PROJECT_MANAGER]
+        )
 
         try:
             if data.name is not None:

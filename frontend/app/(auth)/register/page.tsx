@@ -6,6 +6,8 @@ import * as z from "zod";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
+import { PLANS_LIST } from "@/lib/plans";
 
 const registerSchema = z.object({
   company_name: z.string().min(2, "Company name must be at least 2 characters."),
@@ -14,6 +16,7 @@ const registerSchema = z.object({
   email: z.string().email("Invalid email format."),
   password: z.string().min(8, "Password must be at least 8 characters."),
   designation: z.string().optional(),
+  subscription_plan: z.enum(["FREE", "PRO", "ENTERPRISE"]).default("FREE"),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -107,6 +110,21 @@ export default function RegisterPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             Synapse helps you manage project workflows with AI agents.
           </p>
+        </div>
+
+        {/* Google Sign-Up */}
+        <div className="mt-6">
+          <GoogleSignInButton context="signup" />
+        </div>
+
+        {/* Divider */}
+        <div className="relative mt-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">or register with email</span>
+          </div>
         </div>
 
         {errorMsg && (
@@ -224,6 +242,42 @@ export default function RegisterPage() {
                 {errors.designation.message}
               </p>
             )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">
+              Select Initial Subscription Plan
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {PLANS_LIST.map((plan) => (
+                <label
+                  key={plan.id}
+                  className={`relative flex flex-col items-center justify-between p-3 rounded-xl border cursor-pointer transition-all hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-primary/5 ${
+                    plan.is_popular ? "border-primary/40 bg-primary/5" : "border-border bg-muted/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    value={plan.id}
+                    {...register("subscription_plan")}
+                    className="sr-only"
+                    defaultChecked={plan.id === "FREE"}
+                  />
+                  {plan.is_popular && (
+                    <span className="absolute -top-2 px-1.5 py-0.5 text-[0.6rem] font-black uppercase tracking-wider bg-primary text-primary-foreground rounded-full">
+                      Popular
+                    </span>
+                  )}
+                  <div className="text-center mt-1">
+                    <span className="text-xs font-bold text-foreground block">{plan.name}</span>
+                    <span className="text-[0.7rem] font-extrabold text-primary block mt-0.5">{plan.price}</span>
+                  </div>
+                  <span className="text-[0.65rem] text-muted-foreground text-center mt-1 line-clamp-2 leading-tight">
+                    {plan.description}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
 
           <button

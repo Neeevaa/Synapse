@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { formatRoleLabel } from "@/lib/roleUtils";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -17,7 +18,10 @@ import {
   Bot,
   Moon,
   Sun,
+  Building2,
 } from "lucide-react";
+
+import CompleteProfileModal from "@/components/CompleteProfileModal";
 
 interface UserProfile {
   id: string;
@@ -26,6 +30,8 @@ interface UserProfile {
   email: string;
   role: string;
   designation: string | null;
+  avatar_url?: string | null;
+  bio?: string | null;
   profile_completed: boolean;
   is_active: boolean;
   is_verified: boolean;
@@ -75,10 +81,12 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
       try {
         const response = await api.get("/auth/me");
         setUser(response.data.data);
-      } catch (err) {
-        console.error("Auth check failed:", err);
-        localStorage.removeItem("synapse_access_token");
-        localStorage.removeItem("synapse_refresh_token");
+      } catch (err: any) {
+        // Silently handle expired or invalid sessions and redirect to login
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("synapse_access_token");
+          localStorage.removeItem("synapse_refresh_token");
+        }
         router.push("/login");
       } finally {
         setLoading(false);
@@ -124,6 +132,10 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
     { name: "Sprints", href: "/sprints", icon: Zap },
     { name: "Tasks", href: "/tasks", icon: CheckSquare },
   ];
+
+  if (user?.role === "OWNER" || user?.role === "ADMIN") {
+    navItems.push({ name: "Company Settings", href: "/company/settings", icon: Building2 });
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground flex dark:bg-background">
@@ -213,20 +225,33 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
 
           {/* User Profile & Logout */}
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                {user?.first_name?.[0]}
-                {user?.last_name?.[0]}
-              </div>
+            <Link
+              href="/profile"
+              title="View & Edit My Profile"
+              className="flex items-center gap-3 group p-1.5 rounded-xl transition-colors hover:bg-muted/60"
+            >
+              {user?.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.avatar_url}
+                  alt="Avatar"
+                  className="size-9 rounded-full object-cover border border-primary/40 group-hover:border-primary"
+                />
+              ) : (
+                <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs border border-primary/20 group-hover:border-primary">
+                  {user?.first_name?.[0]}
+                  {user?.last_name?.[0]}
+                </div>
+              )}
               <div className="hidden sm:block text-left">
-                <div className="text-sm font-semibold text-foreground leading-tight">
+                <div className="text-sm font-semibold text-foreground leading-tight group-hover:text-primary transition-colors">
                   {user?.first_name} {user?.last_name}
                 </div>
                 <div className="text-xs text-muted-foreground uppercase font-medium">
-                  {user?.role}
+                  {formatRoleLabel(user?.role)}
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Dark Mode Toggle */}
             <button
@@ -261,6 +286,24 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           {children}
         </main>
+
+        {/* Complete Profile Onboarding Modal Overlay */}
+        {user && !user.profile_completed && (
+          <CompleteProfileModal
+            initialDesignation={user.designation}
+            initialBio={user.bio}
+            initialAvatarUrl={user.avatar_url}
+            userName={`${user.first_name} ${user.last_name}`}
+            onProfileCompleted={async () => {
+              try {
+                const res = await api.get("/auth/me");
+                setUser(res.data.data);
+              } catch (err) {
+                console.error("Failed to refresh user profile", err);
+              }
+            }}
+          />
+        )}
       </div>
     </div>
   );

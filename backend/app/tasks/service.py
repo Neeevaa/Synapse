@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.task import Task
 from app.models.project import Project
 from app.models.user import User
-from app.models.enums import TaskStatus, TaskPriority
+from app.models.enums import TaskStatus, TaskPriority, ProjectRole
 from app.tasks.repository import TaskRepository
 from app.tasks.schemas import (
     CreateTaskRequest,
@@ -15,6 +15,7 @@ from app.tasks.schemas import (
     TaskListResponse,
 )
 from app.common.exceptions import ResourceNotFound, Forbidden, BaseBusinessException
+from app.permissions.dependencies import check_project_role_or_company_admin
 
 
 class TaskService:
@@ -54,12 +55,9 @@ class TaskService:
         return TaskListResponse(tasks=responses, total=len(responses))
 
     def create_task(self, project_id: UUID, data: CreateTaskRequest, current_user: User) -> TaskResponse:
-        project = self.db.execute(select(Project).filter(Project.id == project_id)).scalar_one_or_none()
-        if not project:
-            raise ResourceNotFound("Project not found.")
-
-        if str(project.company_id) != str(current_user.company_id):
-            raise Forbidden("You do not have access to this project.")
+        project = check_project_role_or_company_admin(
+            self.db, current_user, project_id, [ProjectRole.PROJECT_MANAGER, ProjectRole.TEAM_LEAD]
+        )
 
         try:
             status_enum = TaskStatus(data.status)
@@ -95,9 +93,20 @@ class TaskService:
         if not task:
             raise ResourceNotFound("Task not found.")
 
-        project = self.db.execute(select(Project).filter(Project.id == task.project_id)).scalar_one_or_none()
-        if not project or str(project.company_id) != str(current_user.company_id):
-            raise Forbidden("You do not have access to this task.")
+        # Allow assigned user or creator to update status, or users passing PM/TL/Admin RBAC check
+        is_assignee_or_creator = (
+            (task.assignee_id and str(task.assignee_id) == str(current_user.id)) or
+            (task.created_by and str(task.created_by) == str(current_user.id))
+        )
+
+        if not is_assignee_or_creator:
+            check_project_role_or_company_admin(
+                self.db, current_user, task.project_id, [ProjectRole.PROJECT_MANAGER, ProjectRole.TEAM_LEAD]
+            )
+        else:
+            project = self.db.execute(select(Project).filter(Project.id == task.project_id)).scalar_one_or_none()
+            if not project or str(project.company_id) != str(current_user.company_id):
+                raise Forbidden("You do not have access to this task.")
 
         try:
             status_enum = TaskStatus(data.status)
@@ -129,14 +138,15 @@ class TaskService:
     def update_task(self, task_id: UUID, data: UpdateTaskRequest, current_user: User) -> TaskResponse:
         """
         Partially updates task fields: title, description, status, priority, assignee.
+        Requires PROJECT_MANAGER, TEAM_LEAD, or Company OWNER/ADMIN.
         """
         task = self.repo.get_task_by_id(task_id)
         if not task:
             raise ResourceNotFound("Task not found.")
 
-        project = self.db.execute(select(Project).filter(Project.id == task.project_id)).scalar_one_or_none()
-        if not project or str(project.company_id) != str(current_user.company_id):
-            raise Forbidden("You do not have access to this task.")
+        check_project_role_or_company_admin(
+            self.db, current_user, task.project_id, [ProjectRole.PROJECT_MANAGER, ProjectRole.TEAM_LEAD]
+        )
 
         try:
             if data.title is not None:
@@ -158,6 +168,27 @@ class TaskService:
 
             self.db.commit()
             return self._build_task_response(task)
+        except Exception as e:
+            self.db.rollback()
+            raise e
+
+    def delete_task(self, task_id: UUID, current_user: User) -> None:
+        """
+        Deletes a task by ID.
+        Requires PROJECT_MANAGER, TEAM_LEAD, or Company OWNER/ADMIN.
+        Automatic cross-tenant access rejection via check_project_role_or_company_admin.
+        """
+        task = self.repo.get_task_by_id(task_id)
+        if not task:
+            raise ResourceNotFound("Task not found.")
+
+        check_project_role_or_company_admin(
+            self.db, current_user, task.project_id, [ProjectRole.PROJECT_MANAGER, ProjectRole.TEAM_LEAD]
+        )
+
+        try:
+            self.db.delete(task)
+            self.db.commit()
         except Exception as e:
             self.db.rollback()
             raise e

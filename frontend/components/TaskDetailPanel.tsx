@@ -15,6 +15,7 @@ import {
   Check,
   Clock,
   Send,
+  Trash2,
 } from "lucide-react";
 
 /* ─── Types ─── */
@@ -47,6 +48,10 @@ interface TaskDetailPanelProps {
   taskId: string | null;
   onClose: () => void;
   onTaskUpdated: (task: TaskDetail) => void;
+  onTaskDeleted?: (taskId: string) => void;
+  currentUserId?: string | null;
+  userRole?: string | null;
+  projectRole?: string | null;
 }
 
 /* ─── Constants ─── */
@@ -87,12 +92,14 @@ function InlineField({
   onSave,
   multiline = false,
   icon,
+  editable = true,
 }: {
   label: string;
   value: string;
   onSave: (v: string) => Promise<void>;
   multiline?: boolean;
   icon?: React.ReactNode;
+  editable?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -124,7 +131,7 @@ function InlineField({
         {icon}
         {label}
       </label>
-      {editing ? (
+      {editing && editable ? (
         <div className="flex items-start gap-2">
           {multiline ? (
             <textarea
@@ -155,14 +162,19 @@ function InlineField({
         </div>
       ) : (
         <button
-          onClick={() => setEditing(true)}
-          className="group w-full text-left rounded-lg px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors border border-transparent hover:border-border"
+          onClick={() => editable && setEditing(true)}
+          disabled={!editable}
+          className={`group w-full text-left rounded-lg px-3 py-2 text-sm text-foreground transition-colors border border-transparent ${
+            editable ? "hover:bg-muted hover:border-border cursor-pointer" : "cursor-default opacity-90"
+          }`}
         >
           <span className="flex items-center justify-between gap-2">
             <span className={!value ? "text-muted-foreground/60 italic" : ""}>
-              {value || "Click to add…"}
+              {value || "No description provided."}
             </span>
-            <Edit3 className="size-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+            {editable && (
+              <Edit3 className="size-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+            )}
           </span>
         </button>
       )}
@@ -175,13 +187,33 @@ export default function TaskDetailPanel({
   taskId,
   onClose,
   onTaskUpdated,
+  onTaskDeleted,
+  currentUserId,
+  userRole,
+  projectRole,
 }: TaskDetailPanelProps) {
   const [task, setTask] = useState<TaskDetail | null>(null);
   const [comments, setComments] = useState<TaskComment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [newComment, setNewComment] = useState("");
   const [postingComment, setPostingComment] = useState(false);
+
+  // Delete Task Modal State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingTask, setDeletingTask] = useState(false);
+
+  const isCompanyAdmin = userRole === "OWNER" || userRole === "ADMIN";
+  const isPM = isCompanyAdmin || projectRole === "PROJECT_MANAGER";
+  const isTeamLead = isPM || projectRole === "TEAM_LEAD";
+  const canEditTaskFull = isTeamLead;
+  const canDeleteTask = isTeamLead;
+  const canChangeTaskStatus =
+    isTeamLead ||
+    (task &&
+      ((task.assignee_id && currentUserId && String(task.assignee_id) === String(currentUserId)) ||
+        (task.created_by && currentUserId && String(task.created_by) === String(currentUserId))));
 
   const fetchTaskAndComments = useCallback(async () => {
     if (!taskId) return;
@@ -216,10 +248,46 @@ export default function TaskDetailPanel({
 
   const patchTask = async (fields: Record<string, any>) => {
     if (!task) return;
-    const res = await api.put(`/tasks/${task.id}`, fields);
-    const updated = res.data.data;
-    setTask(updated);
-    onTaskUpdated(updated);
+    setActionError(null);
+    try {
+      if (Object.keys(fields).length === 1 && fields.status) {
+        const res = await api.patch(`/tasks/${task.id}/status`, { status: fields.status });
+        const updated = res.data.data;
+        setTask(updated);
+        onTaskUpdated(updated);
+      } else {
+        const res = await api.put(`/tasks/${task.id}`, fields);
+        const updated = res.data.data;
+        setTask(updated);
+        onTaskUpdated(updated);
+      }
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        setActionError("Permission Denied: You do not have permission to modify this task.");
+      } else {
+        setActionError(err.response?.data?.message || "Failed to update task.");
+      }
+    }
+  };
+
+  const handleDeleteTask = async () => {
+    if (!task) return;
+    setDeletingTask(true);
+    setActionError(null);
+    try {
+      await api.delete(`/tasks/${task.id}`);
+      setDeleteModalOpen(false);
+      onTaskDeleted?.(task.id);
+      onClose();
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        setActionError("Permission Denied: You do not have permission to delete this task.");
+      } else {
+        setActionError(err.response?.data?.message || "Failed to delete task.");
+      }
+    } finally {
+      setDeletingTask(false);
+    }
   };
 
   const handlePostComment = async (e: React.FormEvent) => {
@@ -234,7 +302,11 @@ export default function TaskDetailPanel({
       setComments((prev) => [...prev, res.data.data]);
       setNewComment("");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to post comment.");
+      if (err.response?.status === 403) {
+        setActionError("Permission Denied: You do not have permission to post comments.");
+      } else {
+        alert(err.response?.data?.message || "Failed to post comment.");
+      }
     } finally {
       setPostingComment(false);
     }
@@ -272,12 +344,23 @@ export default function TaskDetailPanel({
           <span className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Task Details
           </span>
-          <button
-            onClick={onClose}
-            className="size-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-          >
-            <X className="size-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {canDeleteTask && (
+              <button
+                onClick={() => setDeleteModalOpen(true)}
+                title="Delete Task"
+                className="size-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+              >
+                <Trash2 className="size-4" />
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="size-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+            >
+              <X className="size-5" />
+            </button>
+          </div>
         </div>
 
         {/* Panel Body */}
@@ -295,12 +378,20 @@ export default function TaskDetailPanel({
             </div>
           )}
 
+          {actionError && (
+            <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+              <AlertCircle className="size-4 shrink-0" />
+              {actionError}
+            </div>
+          )}
+
           {task && !loading && (
             <>
               {/* Title */}
               <InlineField
                 label="Title"
                 value={task.title}
+                editable={canEditTaskFull}
                 icon={<Edit3 className="size-3" />}
                 onSave={(v) => patchTask({ title: v })}
               />
@@ -311,38 +402,50 @@ export default function TaskDetailPanel({
                   <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     <Tag className="size-3" /> Status
                   </label>
-                  <select
-                    value={task.status}
-                    onChange={(e) => patchTask({ status: e.target.value })}
-                    className={`w-full rounded-lg border px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer ${
-                      STATUS_COLORS[task.status] || ""
-                    } bg-transparent`}
-                  >
-                    {STATUS_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
+                  {canChangeTaskStatus ? (
+                    <select
+                      value={task.status}
+                      onChange={(e) => patchTask({ status: e.target.value })}
+                      className={`w-full rounded-lg border px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer ${
+                        STATUS_COLORS[task.status] || ""
+                      } bg-transparent`}
+                    >
+                      {STATUS_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className={`inline-block w-full px-3 py-1.5 rounded-lg text-xs font-semibold border ${STATUS_COLORS[task.status] || ""}`}>
+                      {STATUS_OPTIONS.find((o) => o.value === task.status)?.label || task.status}
+                    </span>
+                  )}
                 </div>
 
                 <div className="space-y-1">
                   <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     <Flag className="size-3" /> Priority
                   </label>
-                  <select
-                    value={task.priority}
-                    onChange={(e) => patchTask({ priority: e.target.value })}
-                    className={`w-full rounded-lg border px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer ${
-                      PRIORITY_COLORS[task.priority] || ""
-                    } bg-transparent`}
-                  >
-                    {PRIORITY_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
+                  {canEditTaskFull ? (
+                    <select
+                      value={task.priority}
+                      onChange={(e) => patchTask({ priority: e.target.value })}
+                      className={`w-full rounded-lg border px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer ${
+                        PRIORITY_COLORS[task.priority] || ""
+                      } bg-transparent`}
+                    >
+                      {PRIORITY_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className={`inline-block w-full px-3 py-1.5 rounded-lg text-xs font-semibold border ${PRIORITY_COLORS[task.priority] || ""}`}>
+                      {PRIORITY_OPTIONS.find((o) => o.value === task.priority)?.label || task.priority}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -351,6 +454,7 @@ export default function TaskDetailPanel({
                 label="Description"
                 value={task.description || ""}
                 multiline
+                editable={canEditTaskFull}
                 icon={<Edit3 className="size-3" />}
                 onSave={(v) => patchTask({ description: v || null })}
               />
@@ -461,6 +565,40 @@ export default function TaskDetailPanel({
           )}
         </div>
       </aside>
+
+      {/* Delete Task Confirmation Modal */}
+      {deleteModalOpen && task && (
+        <div className="fixed inset-0 z-[75] flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md mx-4 rounded-xl border border-border bg-card p-6 shadow-xl dark:bg-card">
+            <div className="flex items-center gap-3 mb-4 text-destructive">
+              <AlertCircle className="size-6 shrink-0" />
+              <h3 className="text-lg font-bold text-foreground">Delete Task</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">
+              Are you sure you want to delete <span className="font-bold text-foreground">"{task.title}"</span>? This action cannot be undone.
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteModalOpen(false)}
+                disabled={deletingTask}
+                className="rounded-lg border border-border px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteTask}
+                disabled={deletingTask}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-destructive px-4 py-2 text-xs font-semibold text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 cursor-pointer"
+              >
+                {deletingTask ? <Loader2 className="size-3 animate-spin" /> : <Trash2 className="size-3" />}
+                Delete Task
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

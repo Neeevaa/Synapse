@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Enum, ForeignKey, String
+from sqlalchemy import Boolean, Enum, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -43,13 +43,24 @@ class User(BaseModel):
         index=True,
     )
 
-    role: Mapped[CompanyRole] = mapped_column(
-        Enum(CompanyRole),
-        default=CompanyRole.ADMIN,
+    role: Mapped[CompanyRole | None] = mapped_column(
+        Enum(CompanyRole, create_type=False),
+        nullable=True,
+        default=None,
     )
 
     designation: Mapped[str | None] = mapped_column(
         String(100),
+        nullable=True,
+    )
+
+    avatar_url: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    bio: Mapped[str | None] = mapped_column(
+        String(500),
         nullable=True,
     )
 

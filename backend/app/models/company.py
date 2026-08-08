@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Enum, String
+from sqlalchemy import Boolean, Enum, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import BaseModel
@@ -17,6 +17,21 @@ class Company(BaseModel):
         String(150),
         unique=True,
         nullable=False,
+    )
+
+    description: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    logo_url: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+
+    default_project_visibility: Mapped[str] = mapped_column(
+        String(50),
+        default="PRIVATE",
     )
 
     subscription_plan: Mapped[SubscriptionPlan] = mapped_column(

@@ -1,6 +1,7 @@
 import re
 from pydantic import BaseModel, Field, field_validator
 from uuid import UUID
+from app.models.enums import SubscriptionPlan
 
 EMAIL_REGEX = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 
@@ -23,6 +24,9 @@ class UserRegisterRequest(BaseModel):
     )
     designation: str | None = Field(
         None, max_length=100, description="Owner's professional designation"
+    )
+    subscription_plan: SubscriptionPlan = Field(
+        default=SubscriptionPlan.FREE, description="Company subscription plan selection"
     )
 
     @field_validator("email")
@@ -72,8 +76,8 @@ class LoginResponseData(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = Field(default="bearer")
-    role: str = Field(default="OWNER")
-    company_role: str | None = Field(default=None, description="CompanyRole: OWNER, ADMIN")
+    role: str | None = Field(default=None, description="CompanyRole: OWNER, ADMIN, or None")
+    company_role: str | None = Field(default=None, description="CompanyRole: OWNER, ADMIN, or None")
     project_roles: list[str] = Field(default_factory=list, description="List of ProjectRole values assigned to user")
 
 
@@ -119,17 +123,44 @@ class ResetPasswordRequest(BaseModel):
     new_password: str = Field(..., min_length=8, max_length=100)
 
 
+class ProjectMembershipInfo(BaseModel):
+    project_id: UUID
+    project_name: str
+    project_description: str | None = None
+    project_role: str
+
+
 class UserProfileResponse(BaseModel):
     id: UUID
     first_name: str
     last_name: str
     email: str
-    role: str = Field(..., description="Role of user in company")
+    company_id: UUID | None = None
+    company_name: str | None = None
+    role: str | None = Field(default=None, description="Role of user in company")
+    company_role: str | None = Field(default=None, description="Role of user in company")
     designation: str | None = Field(None)
+    avatar_url: str | None = Field(None)
+    bio: str | None = Field(None)
     profile_completed: bool
     is_active: bool
     is_verified: bool
+    project_memberships: list[ProjectMembershipInfo] = Field(default_factory=list)
+
+
+class UpdateProfileRequest(BaseModel):
+    first_name: str | None = Field(None, min_length=1, max_length=100)
+    last_name: str | None = Field(None, min_length=1, max_length=100)
+    designation: str | None = Field(None, max_length=100)
+    bio: str | None = Field(None, max_length=500)
+    avatar_url: str | None = Field(None)
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str = Field(..., min_length=1)
+    new_password: str = Field(..., min_length=8, max_length=100)
 
 
 class GoogleAuthRequest(BaseModel):
     id_token: str = Field(..., min_length=1, description="Google OAuth ID token")
+    is_join: bool = Field(default=False, description="Whether request originates from the join flow")

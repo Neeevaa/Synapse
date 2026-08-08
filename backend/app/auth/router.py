@@ -17,6 +17,8 @@ from app.auth.schemas import (
     ResetPasswordRequest,
     UserProfileResponse,
     GoogleAuthRequest,
+    UpdateProfileRequest,
+    ChangePasswordRequest,
 )
 from app.auth.service import AuthService
 from app.common.responses import APIResponse, success_response
@@ -193,25 +195,53 @@ def reset_password(
     response_model=APIResponse[UserProfileResponse],
     status_code=status.HTTP_200_OK,
     summary="Get current user profile",
-    description="Returns the profile details of the currently logged-in user by decoding the authentication token.",
+    description="Returns the profile details of the currently logged-in user, including company and project memberships.",
 )
 def get_me(
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
+    service = AuthService(db)
     return success_response(
         message="Profile retrieved successfully.",
-        data=UserProfileResponse(
-            id=current_user.id,
-            first_name=current_user.first_name,
-            last_name=current_user.last_name,
-            email=current_user.email,
-            role=current_user.role,
-            designation=current_user.designation,
-            profile_completed=current_user.profile_completed,
-            is_active=current_user.is_active,
-            is_verified=current_user.is_verified,
-        ),
+        data=service.get_user_profile_response(current_user),
     )
+
+
+@router.patch(
+    "/profile",
+    response_model=APIResponse[UserProfileResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Update current user profile",
+    description="Updates user profile fields for the authenticated user and sets profile_completed to True once required fields (designation and bio) are filled.",
+)
+def update_profile(
+    data: UpdateProfileRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = AuthService(db)
+    updated_user = service.update_user_profile(current_user, data)
+    return success_response(
+        message="Profile updated successfully.",
+        data=service.get_user_profile_response(updated_user),
+    )
+
+
+@router.post(
+    "/change-password",
+    status_code=status.HTTP_200_OK,
+    summary="Change user password",
+    description="Verifies the old password and updates to a new bcrypt hashed password for the logged-in user.",
+)
+def change_password(
+    data: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = AuthService(db)
+    service.change_password(current_user, data)
+    return success_response(message="Password changed successfully.")
 
 
 @router.get(

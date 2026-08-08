@@ -6,6 +6,7 @@ import * as z from "zod";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 const joinSchema = z.object({
   first_name: z.string().min(1, "First name is required."),
@@ -105,6 +106,25 @@ export default function JoinPage() {
           <p className="mt-2 text-sm text-muted-foreground text-center">
             Set up your account to accept your project invitation and start collaborating.
           </p>
+        </div>
+
+        {/* Google Sign-In for Join */}
+        <div className="mt-6">
+          <GoogleSignInButton
+            context="signup"
+            isJoinPage={true}
+            onNoInvitation={(msg) => setErrorMsg(msg)}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="relative mt-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">or join with email</span>
+          </div>
         </div>
 
         {errorMsg && (

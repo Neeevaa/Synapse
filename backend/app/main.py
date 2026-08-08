@@ -10,6 +10,7 @@ from app.events import setup_event_handlers
 from app.common.exceptions import BaseBusinessException
 from app.common.responses import error_response
 from app.auth.router import router as auth_router
+from app.companies.router import router as companies_router
 from app.projects.router import router as projects_router
 from app.project_members.router import router as project_members_router
 from app.sprints.router import router as sprints_router
@@ -93,6 +94,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 
 # 4. Include Domain Routers
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
+app.include_router(companies_router, prefix="/companies", tags=["Companies"])
 app.include_router(projects_router, prefix="/projects", tags=["Projects"])
 app.include_router(project_members_router, prefix="/projects", tags=["Project Members"])
 app.include_router(sprints_router, prefix="/projects", tags=["Sprints"])

@@ -1,5 +1,3 @@
-"use client";
-
 export default function Home() {
   return (
     <main className="flex min-h-screen items-center justify-center">
@@ -8,4 +6,4 @@ export default function Home() {
       </h1>
     </main>
   );
-}
+}

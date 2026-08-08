@@ -1,5 +1,5 @@
 from uuid import UUID
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from app.models.project_member import ProjectMember
@@ -14,6 +14,7 @@ from app.project_members.schemas import (
     ProjectMemberListResponse,
 )
 from app.common.exceptions import ResourceNotFound, Forbidden, BaseBusinessException
+from app.permissions.dependencies import check_project_role_or_company_admin
 
 
 class ProjectMemberService:
@@ -82,12 +83,9 @@ class ProjectMemberService:
         If user does not exist, creates a PendingMembership record (outcome='pending').
         Prevents duplicate pending invitations for the same email and project.
         """
-        project = self.db.execute(select(Project).filter(Project.id == project_id)).scalar_one_or_none()
-        if not project:
-            raise ResourceNotFound("Project not found.")
-
-        if str(project.company_id) != str(current_user.company_id):
-            raise Forbidden("You do not have access to this project.")
+        project = check_project_role_or_company_admin(
+            self.db, current_user, project_id, [ProjectRole.PROJECT_MANAGER]
+        )
 
         email_clean = data.email.strip().lower()
         role_enum = data.role if isinstance(data.role, ProjectRole) else ProjectRole(data.role)
@@ -166,3 +164,42 @@ class ProjectMemberService:
 
     def add_member(self, project_id: UUID, data: AddProjectMemberRequest, current_user: User) -> ProjectMemberResponse:
         return self.add_member_by_email(project_id, data, current_user)
+
+    def remove_member(self, project_id: UUID, target_user_id: UUID, current_user: User) -> None:
+        """
+        Removes a member from a project.
+        - Self-removal: User removing themselves from a project is permitted regardless of role.
+        - Admin/PM removal: Requires PROJECT_MANAGER or Company OWNER/ADMIN.
+        - Cannot remove the last PROJECT_MANAGER on a project.
+        """
+        is_self_removal = str(target_user_id) == str(current_user.id)
+
+        if not is_self_removal:
+            check_project_role_or_company_admin(
+                self.db, current_user, project_id, [ProjectRole.PROJECT_MANAGER]
+            )
+        else:
+            project = self.db.execute(select(Project).filter(Project.id == project_id)).scalar_one_or_none()
+            if not project or str(project.company_id) != str(current_user.company_id):
+                raise Forbidden("You do not have access to this project.")
+
+        member = self.repo.get_member(project_id, target_user_id)
+        if not member:
+            raise ResourceNotFound("Project member not found.")
+
+        if member.role == ProjectRole.PROJECT_MANAGER or member.role == "PROJECT_MANAGER":
+            pm_count = self.db.scalar(
+                select(func.count(ProjectMember.id)).filter(
+                    ProjectMember.project_id == project_id,
+                    ProjectMember.role == ProjectRole.PROJECT_MANAGER,
+                )
+            )
+            if pm_count is not None and pm_count <= 1:
+                raise BaseBusinessException("Cannot remove the last Project Manager from a project.", status_code=400)
+
+        try:
+            self.db.delete(member)
+            self.db.commit()
+        except Exception as e:
+            self.db.rollback()
+            raise e

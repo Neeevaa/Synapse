@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import ProtectedShell from "@/components/ProtectedShell";
 import { api } from "@/lib/api";
+import { formatRoleLabel } from "@/lib/roleUtils";
 import {
   Loader2,
   AlertCircle,
@@ -24,16 +25,24 @@ import {
   Kanban,
   X,
   UserCheck,
+  UserMinus,
 } from "lucide-react";
 
 /* ─── Zod Schemas ─── */
 const editProjectSchema = z.object({
-  name: z.string().min(1, "Project name is required.").max(200),
+  name: z.string().min(1, "Project name is required.").max(150),
   description: z.string().max(2000).optional().or(z.literal("")),
   status: z.string(),
 });
 
 type EditProjectFormValues = z.infer<typeof editProjectSchema>;
+
+const addMemberSchema = z.object({
+  email: z.string().min(1, "Email is required.").email("Invalid email address."),
+  role: z.string(),
+});
+
+type AddMemberFormValues = z.infer<typeof addMemberSchema>;
 
 const customResolver = (schema: z.ZodSchema) => async (data: any) => {
   const result = schema.safeParse(data);
@@ -55,23 +64,25 @@ interface ProjectDetail {
   name: string;
   description: string | null;
   status: string;
-  created_by: string | null;
-  creator_name: string | null;
+  company_id: string;
+  created_by: string;
+  creator_name?: string | null;
   created_at: string;
+  updated_at: string;
+  member_count: number;
   sprint_count: number;
   task_count: number;
-  member_count: number;
 }
 
-interface ProjectMember {
+interface ProjectMemberItem {
   id: string;
   project_id: string;
   user_id: string;
-  first_name: string;
-  last_name: string;
+  first_name: string | null;
+  last_name: string | null;
   email: string;
   role: string;
-  created_at: string;
+  is_pending?: boolean;
 }
 
 /* ─── Status Badge ─── */
@@ -100,15 +111,17 @@ export default function ProjectDetailPage() {
   const router = useRouter();
   const projectId = params.id as string;
 
-  const [activeTab, setActiveTab] = useState<"overview" | "members" | "settings">("overview");
   const [project, setProject] = useState<ProjectDetail | null>(null);
-  const [members, setMembers] = useState<ProjectMember[]>([]);
-  const [userRole, setUserRole] = useState<string>("");
-  const [currentUserId, setCurrentUserId] = useState<string>("");
+  const [members, setMembers] = useState<ProjectMemberItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"overview" | "members" | "settings">("overview");
 
-  // Edit / Settings state
+  // User & Permission State
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  // Settings Form State
   const [updating, setUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
@@ -122,7 +135,42 @@ export default function ProjectDetailPage() {
   const [memberRole, setMemberRole] = useState("BACKEND_DEVELOPER");
   const [memberNotice, setMemberNotice] = useState<{ message: string; type: "success" | "pending" } | null>(null);
 
-  const canManage = userRole === "OWNER" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER";
+  // Member Removal Modal State
+  const [memberToDelete, setMemberToDelete] = useState<ProjectMemberItem | null>(null);
+  const [removingMember, setRemovingMember] = useState(false);
+  const [removeMemberError, setRemoveMemberError] = useState<string | null>(null);
+
+  const currentUserProjectMember = members.find((m) => m.user_id === currentUserId);
+  const projectRole = currentUserProjectMember?.role;
+  const canManage = userRole === "OWNER" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER" || projectRole === "PROJECT_MANAGER";
+
+  const handleRemoveMember = async () => {
+    if (!memberToDelete) return;
+    setRemovingMember(true);
+    setRemoveMemberError(null);
+    try {
+      await api.delete(`/projects/${projectId}/members/${memberToDelete.user_id}`);
+      setMemberNotice({
+        message:
+          memberToDelete.user_id === currentUserId
+            ? "You have left the project."
+            : `Removed ${memberToDelete.first_name || memberToDelete.email} from project.`,
+        type: "success",
+      });
+      setTimeout(() => setMemberNotice(null), 5000);
+      setMemberToDelete(null);
+      fetchMembers();
+      fetchProjectDetail();
+    } catch (err: any) {
+      const msg =
+        err.response?.status === 403
+          ? "Permission Denied: You do not have permission to remove members."
+          : err.response?.data?.message || "Failed to remove project member.";
+      setRemoveMemberError(msg);
+    } finally {
+      setRemovingMember(false);
+    }
+  };
 
   const fetchProjectDetail = useCallback(async () => {
     setLoading(true);
@@ -480,9 +528,21 @@ export default function ProjectDetailPage() {
                               <div className="text-xs text-muted-foreground">{m.email}</div>
                             </div>
                           </div>
-                          <span className="px-2.5 py-1 rounded-md bg-muted text-xs font-semibold uppercase tracking-wider text-foreground">
-                            {m.role.replace(/_/g, " ")}
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <span className="px-2.5 py-1 rounded-md bg-muted text-xs font-semibold uppercase tracking-wider text-foreground">
+                              {formatRoleLabel(m.role)}
+                            </span>
+                            {(canManage || m.user_id === currentUserId) && (
+                              <button
+                                type="button"
+                                onClick={() => setMemberToDelete(m)}
+                                className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                                title={m.user_id === currentUserId ? "Leave Project" : "Remove Member"}
+                              >
+                                <UserMinus className="size-4" />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -650,6 +710,56 @@ export default function ProjectDetailPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Member Confirmation Modal */}
+      {memberToDelete && (
+        <div className="fixed inset-0 z-[75] flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md mx-4 rounded-xl border border-border bg-card p-6 shadow-xl dark:bg-card">
+            <div className="flex items-center gap-3 mb-4 text-destructive">
+              <AlertCircle className="size-6 shrink-0" />
+              <h3 className="text-lg font-bold text-foreground">
+                {memberToDelete.user_id === currentUserId ? "Leave Project" : "Remove Member"}
+              </h3>
+            </div>
+
+            {removeMemberError && (
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{removeMemberError}</span>
+              </div>
+            )}
+
+            <p className="text-sm text-muted-foreground mb-6">
+              {memberToDelete.user_id === currentUserId
+                ? "Are you sure you want to leave this project?"
+                : `Are you sure you want to remove ${memberToDelete.first_name || memberToDelete.email} from this project?`}
+            </p>
+
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setMemberToDelete(null);
+                  setRemoveMemberError(null);
+                }}
+                disabled={removingMember}
+                className="rounded-lg border border-border px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleRemoveMember}
+                disabled={removingMember}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-destructive px-4 py-2 text-xs font-semibold text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 cursor-pointer"
+              >
+                {removingMember ? <Loader2 className="size-3 animate-spin" /> : <UserMinus className="size-3" />}
+                {memberToDelete.user_id === currentUserId ? "Leave Project" : "Remove Member"}
+              </button>
+            </div>
           </div>
         </div>
       )}

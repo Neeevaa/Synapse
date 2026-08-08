@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   ExternalLink,
   Calendar,
+  Trash2,
 } from "lucide-react";
 
 /* ─── Zod Schemas ─── */
@@ -78,6 +79,7 @@ interface TaskItem {
   priority: string;
   assignee_id: string | null;
   assignee_name: string | null;
+  created_by?: string | null;
   created_at: string;
 }
 
@@ -124,6 +126,15 @@ export default function SprintBoardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // User & Permission State
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [projectRole, setProjectRole] = useState<string | null>(null);
+
+  // Card Delete Task Confirmation Modal
+  const [taskToDelete, setTaskToDelete] = useState<TaskItem | null>(null);
+  const [deletingCardTask, setDeletingCardTask] = useState(false);
+
   // Toast Error for Optimistic UI Rollback
   const [toastError, setToastError] = useState<string | null>(null);
 
@@ -157,9 +168,42 @@ export default function SprintBoardPage() {
     }
   }, [projectId]);
 
+  const fetchUserAndPermissions = useCallback(async () => {
+    try {
+      const [meRes, membersRes] = await Promise.all([
+        api.get("/auth/me"),
+        api.get(`/projects/${projectId}/members`),
+      ]);
+      const userId = meRes.data.data.id;
+      const compRole = meRes.data.data.role;
+      setCurrentUserId(userId);
+      setUserRole(compRole);
+
+      const members = membersRes.data.data.members || [];
+      const currentMember = members.find((m: any) => m.user_id === userId);
+      setProjectRole(currentMember?.role || null);
+    } catch {
+      // Handled by ProtectedShell
+    }
+  }, [projectId]);
+
   useEffect(() => {
-    if (projectId) fetchBoardData();
-  }, [projectId, fetchBoardData]);
+    if (projectId) {
+      fetchBoardData();
+      fetchUserAndPermissions();
+    }
+  }, [projectId, fetchBoardData, fetchUserAndPermissions]);
+
+  const isCompanyAdmin = userRole === "OWNER" || userRole === "ADMIN";
+  const isPM = isCompanyAdmin || projectRole === "PROJECT_MANAGER";
+  const isTeamLead = isPM || projectRole === "TEAM_LEAD";
+  const canCreateSprint = isPM;
+  const canCreateTask = isTeamLead;
+  const canDeleteTask = isTeamLead;
+  const canChangeTaskStatus = (t: TaskItem) =>
+    isTeamLead ||
+    (t.assignee_id && currentUserId && String(t.assignee_id) === String(currentUserId)) ||
+    (t.created_by && currentUserId && String(t.created_by) === String(currentUserId));
 
   const {
     register: registerTask,
@@ -183,7 +227,14 @@ export default function SprintBoardPage() {
   /* ─── Optimistic Status Movement ─── */
   const handleStatusChange = async (taskId: string, newStatus: string) => {
     const originalTasks = [...tasks];
-    if (tasks.find((t) => t.id === taskId)?.status === newStatus) return;
+    const targetTask = tasks.find((t) => t.id === taskId);
+    if (!targetTask || targetTask.status === newStatus) return;
+
+    if (!canChangeTaskStatus(targetTask)) {
+      setToastError("Permission Denied: You do not have permission to change status for this task.");
+      setTimeout(() => setToastError(null), 5000);
+      return;
+    }
 
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
@@ -193,9 +244,31 @@ export default function SprintBoardPage() {
       await api.patch(`/tasks/${taskId}/status`, { status: newStatus });
     } catch (err: any) {
       setTasks(originalTasks);
-      const msg = err.response?.data?.message || "Failed to update task. Changes reverted.";
+      const msg =
+        err.response?.status === 403
+          ? "Permission Denied: You do not have permission to change status for this task."
+          : err.response?.data?.message || "Failed to update task. Changes reverted.";
       setToastError(msg);
       setTimeout(() => setToastError(null), 5000);
+    }
+  };
+
+  const handleDeleteCardTask = async () => {
+    if (!taskToDelete) return;
+    setDeletingCardTask(true);
+    try {
+      await api.delete(`/tasks/${taskToDelete.id}`);
+      setTasks((prev) => prev.filter((t) => t.id !== taskToDelete.id));
+      setTaskToDelete(null);
+    } catch (err: any) {
+      const msg =
+        err.response?.status === 403
+          ? "Permission Denied: You do not have permission to delete tasks."
+          : err.response?.data?.message || "Failed to delete task.";
+      setToastError(msg);
+      setTimeout(() => setToastError(null), 5000);
+    } finally {
+      setDeletingCardTask(false);
     }
   };
 
@@ -217,12 +290,16 @@ export default function SprintBoardPage() {
     );
   };
 
+  const handleTaskDeleted = (deletedTaskId: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== deletedTaskId));
+  };
+
   const onCreateTaskSubmit = async (data: CreateTaskFormValues) => {
     setCreatingTask(true);
     setCreateTaskError(null);
     try {
       await api.post(`/projects/${projectId}/tasks`, {
-        title: data.title,
+        title: data.title.trim(),
         description: data.description || null,
         priority: data.priority,
         status: data.status,
@@ -232,7 +309,11 @@ export default function SprintBoardPage() {
       resetTask();
       fetchBoardData();
     } catch (err: any) {
-      setCreateTaskError(err.response?.data?.message || "Failed to create task.");
+      const msg =
+        err.response?.status === 403
+          ? "Permission Denied: Only Team Leads, PMs, or Admins can create tasks."
+          : err.response?.data?.message || "Failed to create task.";
+      setCreateTaskError(msg);
     } finally {
       setCreatingTask(false);
     }
@@ -252,7 +333,11 @@ export default function SprintBoardPage() {
       resetSprint();
       fetchBoardData();
     } catch (err: any) {
-      setCreateSprintError(err.response?.data?.message || "Failed to create sprint.");
+      const msg =
+        err.response?.status === 403
+          ? "Permission Denied: Only PMs or Admins can create sprints."
+          : err.response?.data?.message || "Failed to create sprint.";
+      setCreateSprintError(msg);
     } finally {
       setCreatingSprint(false);
     }
@@ -300,19 +385,23 @@ export default function SprintBoardPage() {
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
-              <button
-                onClick={() => setSprintModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3.5 py-2 text-sm font-medium text-foreground hover:bg-muted cursor-pointer"
-              >
-                <Calendar className="size-4 text-primary" /> New Sprint
-              </button>
+              {canCreateSprint && (
+                <button
+                  onClick={() => setSprintModalOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3.5 py-2 text-sm font-medium text-foreground hover:bg-muted cursor-pointer"
+                >
+                  <Calendar className="size-4 text-primary" /> New Sprint
+                </button>
+              )}
 
-              <button
-                onClick={() => setTaskModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-2xs hover:bg-primary/95 cursor-pointer"
-              >
-                <Plus className="size-4" /> Add Task
-              </button>
+              {canCreateTask && (
+                <button
+                  onClick={() => setTaskModalOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-2xs hover:bg-primary/95 cursor-pointer"
+                >
+                  <Plus className="size-4" /> Add Task
+                </button>
+              )}
             </div>
           </div>
 
@@ -376,15 +465,28 @@ export default function SprintBoardPage() {
                       colTasks.map((task) => (
                         <div
                           key={task.id}
-                          className="group rounded-lg border border-border bg-card p-4 shadow-2xs space-y-3 transition-all hover:border-primary/50 hover:shadow-sm dark:bg-card cursor-pointer"
+                          className="group rounded-lg border border-border bg-card p-4 shadow-2xs space-y-3 transition-all hover:border-primary/50 hover:shadow-sm dark:bg-card cursor-pointer relative"
                           onClick={() => setSelectedTaskId(task.id)}
                         >
                           <div className="flex items-start justify-between gap-2">
-                            <h4 className="text-sm font-semibold text-foreground leading-snug group-hover:text-primary transition-colors">
+                            <h4 className="text-sm font-semibold text-foreground leading-snug group-hover:text-primary transition-colors pr-4">
                               {task.title}
                             </h4>
                             <div className="flex items-center gap-1.5 shrink-0">
                               <PriorityBadge priority={task.priority} />
+                              {canDeleteTask && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTaskToDelete(task);
+                                  }}
+                                  title="Delete Task"
+                                  className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </button>
+                              )}
                               <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-60 transition-opacity" />
                             </div>
                           </div>
@@ -404,17 +506,23 @@ export default function SprintBoardPage() {
                               {task.assignee_name || "Unassigned"}
                             </span>
 
-                            <select
-                              value={task.status}
-                              onChange={(e) => handleStatusChange(task.id, e.target.value)}
-                              className="text-[0.7rem] bg-muted text-foreground border border-border rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary/50 cursor-pointer"
-                            >
-                              <option value="TODO">To Do</option>
-                              <option value="IN_PROGRESS">In Progress</option>
-                              <option value="IN_REVIEW">In Review</option>
-                              <option value="DONE">Done</option>
-                              <option value="CANCELLED">Cancelled</option>
-                            </select>
+                            {canChangeTaskStatus(task) ? (
+                              <select
+                                value={task.status}
+                                onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                                className="text-[0.7rem] bg-muted text-foreground border border-border rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary/50 cursor-pointer"
+                              >
+                                <option value="TODO">To Do</option>
+                                <option value="IN_PROGRESS">In Progress</option>
+                                <option value="IN_REVIEW">In Review</option>
+                                <option value="DONE">Done</option>
+                                <option value="CANCELLED">Cancelled</option>
+                              </select>
+                            ) : (
+                              <span className="text-[0.68rem] font-semibold text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded border border-border/50">
+                                {BOARD_COLUMNS.find((c) => c.key === task.status)?.label || task.status}
+                              </span>
+                            )}
                           </div>
                         </div>
                       ))
@@ -432,7 +540,45 @@ export default function SprintBoardPage() {
         taskId={selectedTaskId}
         onClose={() => setSelectedTaskId(null)}
         onTaskUpdated={handleTaskUpdated}
+        onTaskDeleted={handleTaskDeleted}
+        currentUserId={currentUserId}
+        userRole={userRole}
+        projectRole={projectRole}
       />
+
+      {/* Card Delete Task Confirmation Modal */}
+      {taskToDelete && (
+        <div className="fixed inset-0 z-[75] flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md mx-4 rounded-xl border border-border bg-card p-6 shadow-xl dark:bg-card">
+            <div className="flex items-center gap-3 mb-4 text-destructive">
+              <AlertCircle className="size-6 shrink-0" />
+              <h3 className="text-lg font-bold text-foreground">Delete Task</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">
+              Are you sure you want to delete <span className="font-bold text-foreground">"{taskToDelete.title}"</span>? This action cannot be undone.
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setTaskToDelete(null)}
+                disabled={deletingCardTask}
+                className="rounded-lg border border-border px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteCardTask}
+                disabled={deletingCardTask}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-destructive px-4 py-2 text-xs font-semibold text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 cursor-pointer"
+              >
+                {deletingCardTask ? <Loader2 className="size-3 animate-spin" /> : <Trash2 className="size-3" />}
+                Delete Task
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Create Task Modal */}
       {taskModalOpen && (

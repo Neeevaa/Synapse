@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { Loader2, AlertCircle } from "lucide-react";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email format."),
@@ -50,14 +51,19 @@ export default function LoginPage() {
     setErrorMsg(null);
     try {
       const response = await api.post("/auth/login", data);
-      const { access_token, refresh_token, role } = response.data.data;
+      const { access_token, refresh_token, role, company_role } = response.data.data;
 
       // Store tokens in local storage
       localStorage.setItem("synapse_access_token", access_token);
       localStorage.setItem("synapse_refresh_token", refresh_token);
 
-      // Unified dashboard redirection
-      router.push("/dashboard");
+      // Role-based dashboard redirection
+      const effectiveRole = company_role || role;
+      if (effectiveRole === "OWNER" || effectiveRole === "ADMIN") {
+        router.push("/dashboard");
+      } else {
+        router.push("/member-dashboard");
+      }
     } catch (err: any) {
       const msg =
         err.response?.data?.message || "Invalid email or password.";
@@ -82,6 +88,21 @@ export default function LoginPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             Sign in to access your organization dashboard.
           </p>
+        </div>
+
+        {/* Google Sign-In */}
+        <div className="mt-6">
+          <GoogleSignInButton context="signin" />
+        </div>
+
+        {/* Divider */}
+        <div className="relative mt-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">or sign in with email</span>
+          </div>
         </div>
 
         {errorMsg && (

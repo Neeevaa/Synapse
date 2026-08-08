@@ -9,7 +9,7 @@ from app.models.project_member import ProjectMember
 from app.models.sprint import Sprint
 from app.models.task import Task
 from app.models.user import User
-from app.models.enums import ProjectStatus
+from app.models.enums import ProjectStatus, ProjectRole, CompanyRole
 from app.projects.repository import ProjectRepository
 from app.projects.schemas import (
     CreateProjectRequest,
@@ -19,6 +19,7 @@ from app.projects.schemas import (
     ProjectListResponse,
 )
 from app.common.exceptions import ResourceNotFound, Forbidden
+from app.permissions.dependencies import check_project_role_or_company_admin
 
 logger = logging.getLogger("app")
 
@@ -110,10 +111,11 @@ class ProjectService:
             )
             self.repo.create_project(project)
 
-            # Auto add creator as ProjectMember
+            # Auto add creator as ProjectMember with PROJECT_MANAGER role
             member = ProjectMember(
                 project_id=project.id,
                 user_id=user.id,
+                role=ProjectRole.PROJECT_MANAGER,
             )
             self.db.add(member)
 
@@ -147,12 +149,9 @@ class ProjectService:
         """
         Updates project details.
         """
-        project = self.repo.get_project_by_id(project_id)
-        if not project:
-            raise ResourceNotFound("Project not found.")
-
-        if str(project.company_id) != str(user.company_id):
-            raise Forbidden("You do not have access to this project.")
+        project = check_project_role_or_company_admin(
+            self.db, user, project_id, [ProjectRole.PROJECT_MANAGER]
+        )
 
         try:
             if data.name is not None:

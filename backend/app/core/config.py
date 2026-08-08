@@ -14,8 +14,8 @@ class DatabaseSettings:
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Synapse"
-    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "739603254405-bh9v6k5kaccp7duuoasp4sfgnufsnkqe.apps.googleusercontent.com")
-    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "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")
+    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
+    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
     
     jwt: JWTSettings = JWTSettings()
     db: DatabaseSettings = DatabaseSettings()
