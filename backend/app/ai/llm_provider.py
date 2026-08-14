@@ -46,29 +46,67 @@ class MockLLMProvider(BaseLLMProvider):
         system_instruction: str,
         response_schema: Type[T],
     ) -> Tuple[T, dict]:
-        # Deterministic mock JSON payload matching ReviewOutputSchema
-        mock_raw_data = {
-            "findings": [
-                {
-                    "severity": "HIGH",
-                    "issue_type": "INCONSISTENCY",
-                    "title": "OAuth2 Token Expiry Mismatch",
-                    "description": "Requirement specifies 60-minute token expiry, but recent technical review meeting decided on 15-minute expiry with refresh rotation.",
-                    "evidence": "Meeting notes from Security Sync explicitly state: 'Access tokens must expire in 15 minutes to reduce window of compromise.'",
-                    "recommendation": "Update requirement token expiry value from 60 minutes to 15 minutes and document refresh token rotation logic.",
-                    "source_references": ["MTG-Security Sync"],
-                },
-                {
-                    "severity": "MEDIUM",
-                    "issue_type": "MISSING_EDGE_CASE",
-                    "title": "Unspecified User Behavior on Session Revocation",
-                    "description": "The specification does not describe active websocket session disconnect behavior when user revokes permissions.",
-                    "evidence": "Supporting project context was unavailable for this finding.",
-                    "recommendation": "Add explicit acceptance criteria defining immediate WebSocket teardown on session revocation.",
-                    "source_references": [],
-                },
-            ]
-        }
+        schema_name = response_schema.__name__
+        if "MeetingAnalysis" in schema_name or "Meeting" in schema_name:
+            mock_raw_data = {
+                "summary": "Team aligned on payment gateway integration architecture and backend webhook logging.",
+                "decisions": [
+                    "Approved Stripe integration for payment processing.",
+                    "Backend will implement dedicated webhook listener.",
+                ],
+                "risks": [
+                    "Unhandled webhook retry payloads could create duplicate transaction entries.",
+                ],
+                "action_items": [
+                    {
+                        "title": "Configure Stripe API Keys",
+                        "description": "Set up production environment secrets",
+                        "priority": "HIGH",
+                        "requirement_key": "REQ-10",
+                    }
+                ],
+                "task_suggestions": [
+                    {
+                        "title": "Implement Stripe Webhook Handler",
+                        "description": "Backend API endpoint to parse and verify Stripe webhook events.",
+                        "workstream": "BACKEND",
+                        "priority": "HIGH",
+                        "story_points": 5,
+                        "requirement_key": "REQ-10",
+                    },
+                    {
+                        "title": "Design Checkout Confirmation Modal",
+                        "description": "UI/UX component for payment receipt page.",
+                        "workstream": "UI_UX",
+                        "priority": "MEDIUM",
+                        "story_points": 3,
+                        "requirement_key": "REQ-10",
+                    },
+                ],
+            }
+        else:
+            mock_raw_data = {
+                "findings": [
+                    {
+                        "severity": "HIGH",
+                        "issue_type": "INCONSISTENCY",
+                        "title": "OAuth2 Token Expiry Mismatch",
+                        "description": "Requirement specifies 60-minute token expiry, but recent technical review meeting decided on 15-minute expiry with refresh rotation.",
+                        "evidence": "Meeting notes from Security Sync explicitly state: 'Access tokens must expire in 15 minutes to reduce window of compromise.'",
+                        "recommendation": "Update requirement token expiry value from 60 minutes to 15 minutes and document refresh token rotation logic.",
+                        "source_references": ["MTG-Security Sync"],
+                    },
+                    {
+                        "severity": "MEDIUM",
+                        "issue_type": "MISSING_EDGE_CASE",
+                        "title": "Unspecified User Behavior on Session Revocation",
+                        "description": "The specification does not describe active websocket session disconnect behavior when user revokes permissions.",
+                        "evidence": "Supporting project context was unavailable for this finding.",
+                        "recommendation": "Add explicit acceptance criteria defining immediate WebSocket teardown on session revocation.",
+                        "source_references": [],
+                    },
+                ]
+            }
 
         validated_object = response_schema.model_validate(mock_raw_data)
         return validated_object, mock_raw_data

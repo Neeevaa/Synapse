@@ -218,6 +218,7 @@ class FindingHumanDecision(str, Enum):
     ACCEPTED = "ACCEPTED"
     REJECTED = "REJECTED"
     MODIFIED = "MODIFIED"
+    FALSE_POSITIVE = "FALSE_POSITIVE"
 
 
 class EvaluationCondition(str, Enum):

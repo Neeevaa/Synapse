@@ -150,6 +150,20 @@ def test_human_decision_feedback_persistence(client: TestClient, db_session: Ses
     assert mod_data["human_decision"] == "MODIFIED"
     assert mod_data["recommendation"] == "Update token rotation timeout to 15 mins."
 
+    # 3. Mark as False Positive
+    patch_fp = {
+        "human_decision": "FALSE_POSITIVE",
+        "human_comment": "Flagged as false positive during review."
+    }
+    res_fp = client.patch(
+        f"/projects/{proj.id}/requirements/{req.id}/reviews/{review_id}/findings/{finding_id}",
+        json=patch_fp,
+        headers=headers,
+    )
+    assert res_fp.status_code == 200
+    fp_data = res_fp.json()["data"]
+    assert fp_data["human_decision"] == "FALSE_POSITIVE"
+
 
 def test_cross_company_review_isolation(client: TestClient, db_session: Session):
     co_a = create_company(db_session, name="Company A Rev")

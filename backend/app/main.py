@@ -26,6 +26,7 @@ from app.requirements.review_router import router as review_router
 from app.evaluations.evaluation_router import router as evaluation_router
 from app.dashboard.router import router as dashboard_router
 from app.traceability.router import router as traceability_router
+from app.meetings.intelligence_router import router as meeting_intelligence_router
 
 # 1. Initialize Structured Logging
 setup_logging()
@@ -119,6 +120,7 @@ app.include_router(review_router, prefix="", tags=["AI Requirement Review"])
 app.include_router(evaluation_router, prefix="", tags=["Super Admin Research Evaluation"])
 app.include_router(dashboard_router, prefix="/dashboard", tags=["Dashboard Context"])
 app.include_router(traceability_router, prefix="/projects/{project_id}/traceability", tags=["Lifecycle Traceability"])
+app.include_router(meeting_intelligence_router, prefix="/projects/{project_id}/meetings", tags=["Meeting Intelligence"])
 
 
 @app.get("/")

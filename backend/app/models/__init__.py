@@ -31,6 +31,10 @@ from app.models.requirement_review import (
     RequirementReview,
     RequirementReviewFinding,
 )
+from app.models.meeting_intelligence import (
+    MeetingAnalysis,
+    MeetingTaskSuggestion,
+)
 from app.models.evaluation import (
     EvaluationDataset,
     EvaluationCase,
