@@ -2,7 +2,16 @@
 Test configuration and fixtures for Synapse backend integration tests.
 Uses an in-memory SQLite database to keep tests fast and isolated.
 """
+import os
 import pytest
+
+@pytest.fixture(autouse=True)
+def reset_llm_provider_env():
+    os.environ["LLM_PROVIDER"] = "mock"
+    os.environ["EMBEDDING_PROVIDER"] = "mock"
+    yield
+    os.environ["LLM_PROVIDER"] = "mock"
+    os.environ["EMBEDDING_PROVIDER"] = "mock"
 from uuid import uuid4
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, Session
@@ -16,6 +25,7 @@ from app.models.base import Base
 from app.models.company import Company
 from app.models.user import User
 from app.models.project import Project
+from app.models.sprint import Sprint
 from app.models.project_member import ProjectMember
 from app.models.pending_membership import PendingMembership
 from app.models.enums import CompanyRole, ProjectRole, SubscriptionPlan
@@ -180,6 +190,44 @@ def create_pending_membership(
         email=email,
         role=role,
         invited_by=inviter.id,
+    )
+    db.add(pm)
+    db.commit()
+    db.refresh(pm)
+    return pm
+
+
+def create_sprint(
+    db: Session,
+    project: Project,
+    *,
+    name: str = "Test Sprint",
+    status: str = "ACTIVE",
+) -> Sprint:
+    """Insert a Sprint row and return it."""
+    sprint = Sprint(
+        id=uuid4(),
+        project_id=project.id,
+        name=name,
+        status=status,
+    )
+    db.add(sprint)
+    db.commit()
+    db.refresh(sprint)
+    return sprint
+
+
+def add_project_member(
+    db: Session,
+    project: Project,
+    user: User,
+    role: ProjectRole = ProjectRole.DEVELOPER,
+) -> ProjectMember:
+    """Insert a ProjectMember row and return it."""
+    pm = ProjectMember(
+        project_id=project.id,
+        user_id=user.id,
+        role=role,
     )
     db.add(pm)
     db.commit()

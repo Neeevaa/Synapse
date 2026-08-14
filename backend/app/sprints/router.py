@@ -18,7 +18,7 @@ router = APIRouter()
 
 
 @router.get(
-    "/{project_id}/sprints",
+    "/projects/{project_id}/sprints",
     response_model=APIResponse[SprintListResponse],
     status_code=status.HTTP_200_OK,
     summary="List all sprints for a project",
@@ -37,7 +37,7 @@ def list_sprints(
 
 
 @router.get(
-    "/{project_id}/sprints/active",
+    "/projects/{project_id}/sprints/active",
     response_model=APIResponse[SprintResponse],
     status_code=status.HTTP_200_OK,
     summary="Get active sprint for a project",
@@ -56,7 +56,7 @@ def get_active_sprint(
 
 
 @router.post(
-    "/{project_id}/sprints",
+    "/projects/{project_id}/sprints",
     response_model=APIResponse[SprintResponse],
     status_code=status.HTTP_201_CREATED,
     summary="Create a new sprint",

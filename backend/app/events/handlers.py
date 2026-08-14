@@ -1,6 +1,8 @@
 import logging
 from app.events.dispatcher import event_bus
 from app.mail.service import mail_service
+from app.db.database import SessionLocal
+from app.activities.service import ActivityService
 
 logger = logging.getLogger("app")
 
@@ -17,7 +19,16 @@ def handle_user_registered(data: dict) -> None:
     # Send verification email via MailService
     mail_service.send_verification_email(email, token)
 
-    # Log audit event
+    # Log audit event & persist activity
+    if user_id:
+        with SessionLocal() as db:
+            ActivityService(db).log_activity(
+                user_id=user_id,
+                company_id=company_id,
+                action="USER_REGISTERED",
+                description="Registered new organization user account.",
+            )
+
     logger.info(
         "User registration audit log created",
         extra={
@@ -32,13 +43,22 @@ def handle_user_registered(data: dict) -> None:
 
 def handle_user_logged_in(data: dict) -> None:
     """
-    Handles successful user login: logs structured audit details.
+    Handles successful user login: logs structured audit details and persists activity log.
     """
     user_id = data.get("user_id")
     email = data.get("email")
     company_id = data.get("company_id")
 
-    # Log audit event
+    if user_id:
+        with SessionLocal() as db:
+            ActivityService(db).log_activity(
+                user_id=user_id,
+                company_id=company_id,
+                action="USER_LOGGED_IN",
+                description="Logged into Synapse workspace.",
+                details=f"Email: {email}",
+            )
+
     logger.info(
         "User login audit log created",
         extra={
@@ -54,12 +74,19 @@ def handle_user_logged_in(data: dict) -> None:
 
 def handle_user_verified(data: dict) -> None:
     """
-    Handles successful email verification: logs structured audit details.
+    Handles successful email verification: logs structured audit details and persists activity log.
     """
     user_id = data.get("user_id")
     email = data.get("email")
 
-    # Log audit event
+    if user_id:
+        with SessionLocal() as db:
+            ActivityService(db).log_activity(
+                user_id=user_id,
+                action="USER_VERIFIED",
+                description="Verified account email address.",
+            )
+
     logger.info(
         "User email verified audit log created",
         extra={
@@ -83,7 +110,6 @@ def handle_password_reset_requested(data: dict) -> None:
     # Send email
     mail_service.send_reset_password_email(email, token)
 
-    # Audit log
     logger.info(
         "Password reset request audit log created",
         extra={
@@ -98,12 +124,19 @@ def handle_password_reset_requested(data: dict) -> None:
 
 def handle_password_reset_completed(data: dict) -> None:
     """
-    Handles successful password reset: logs audit info.
+    Handles successful password reset: logs audit info and persists activity log.
     """
     user_id = data.get("user_id")
     email = data.get("email")
 
-    # Audit log
+    if user_id:
+        with SessionLocal() as db:
+            ActivityService(db).log_activity(
+                user_id=user_id,
+                action="PASSWORD_RESET_COMPLETED",
+                description="Completed account password reset.",
+            )
+
     logger.info(
         "Password reset completion audit log created",
         extra={

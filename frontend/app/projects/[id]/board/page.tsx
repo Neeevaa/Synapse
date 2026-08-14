@@ -36,6 +36,7 @@ const createSprintSchema = z
   .object({
     name: z.string().min(1, "Sprint name is required.").max(150),
     goal: z.string().max(1000).optional().or(z.literal("")),
+    capacity: z.coerce.number().min(0, "Capacity must be non-negative.").max(1000).optional().or(z.literal("")),
     start_date: z.string().optional().or(z.literal("")),
     end_date: z.string().optional().or(z.literal("")),
   })
@@ -77,6 +78,8 @@ interface TaskItem {
   description: string | null;
   status: string;
   priority: string;
+  workstream?: string | null;
+  story_points?: number | null;
   assignee_id: string | null;
   assignee_name: string | null;
   created_by?: string | null;
@@ -89,6 +92,9 @@ interface SprintDetail {
   name: string;
   goal: string | null;
   status: string;
+  capacity?: number | null;
+  allocated_points?: number;
+  remaining_capacity?: number | null;
   start_date: string | null;
   end_date: string | null;
   total_tasks: number;
@@ -103,6 +109,26 @@ const BOARD_COLUMNS = [
   { key: "CANCELLED", label: "Cancelled", color: "border-red-500/30 text-red-600 dark:text-red-400" },
 ];
 
+const WORKSTREAM_BADGES: Record<string, { label: string; style: string }> = {
+  GENERAL: { label: "General", style: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20" },
+  UI_UX: { label: "UI/UX", style: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20" },
+  FRONTEND: { label: "Frontend", style: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" },
+  BACKEND: { label: "Backend", style: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20" },
+  QA: { label: "QA", style: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" },
+  DEVOPS: { label: "DevOps", style: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20" },
+  AI_ML: { label: "AI/ML", style: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
+};
+
+function WorkstreamBadge({ workstream }: { workstream?: string | null }) {
+  const ws = workstream || "GENERAL";
+  const badge = WORKSTREAM_BADGES[ws] || WORKSTREAM_BADGES.GENERAL;
+  return (
+    <span className={`px-2 py-0.5 rounded text-xs border font-bold uppercase tracking-wider ${badge.style}`}>
+      {badge.label}
+    </span>
+  );
+}
+
 function PriorityBadge({ priority }: { priority: string }) {
   const colors: Record<string, string> = {
     LOW: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border-zinc-500/20",
@@ -111,7 +137,7 @@ function PriorityBadge({ priority }: { priority: string }) {
     URGENT: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 font-bold",
   };
   return (
-    <span className={`px-2 py-0.5 rounded text-[0.65rem] border font-semibold uppercase tracking-wider ${colors[priority] || colors.MEDIUM}`}>
+    <span className={`px-2 py-0.5 rounded text-xs border font-bold uppercase tracking-wider ${colors[priority] || colors.MEDIUM}`}>
       {priority}
     </span>
   );
@@ -155,12 +181,16 @@ export default function SprintBoardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [sprintRes, tasksRes] = await Promise.all([
-        api.get(`/projects/${projectId}/sprints/active`),
-        api.get(`/projects/${projectId}/tasks`),
-      ]);
-      setSprint(sprintRes.data.data);
-      setTasks(tasksRes.data.data.tasks);
+      const sprintRes = await api.get(`/projects/${projectId}/sprints/active`);
+      const activeSprint = sprintRes.data.data;
+      setSprint(activeSprint);
+
+      if (activeSprint?.id) {
+        const tasksRes = await api.get(`/projects/${projectId}/tasks?sprint_id=${activeSprint.id}`);
+        setTasks(tasksRes.data.data.tasks || []);
+      } else {
+        setTasks([]);
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to load board data.");
     } finally {
@@ -323,9 +353,11 @@ export default function SprintBoardPage() {
     setCreatingSprint(true);
     setCreateSprintError(null);
     try {
+      const cap = data.capacity !== "" && data.capacity !== undefined ? Number(data.capacity) : null;
       await api.post(`/projects/${projectId}/sprints`, {
         name: data.name.trim(),
         goal: data.goal || null,
+        capacity: cap,
         start_date: data.start_date ? new Date(data.start_date).toISOString() : null,
         end_date: data.end_date ? new Date(data.end_date).toISOString() : null,
       });
@@ -405,18 +437,56 @@ export default function SprintBoardPage() {
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="mt-6 pt-4 border-t border-border space-y-2">
-            <div className="flex justify-between text-xs font-semibold text-foreground">
-              <span>Sprint Progress</span>
-              <span>{doneCount} / {totalCount} tasks done ({progressPercent}%)</span>
+          {/* Progress & Capacity Bars */}
+          <div className="mt-6 pt-4 border-t border-border grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Task Progress */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs font-semibold text-foreground">
+                <span>Sprint Task Completion</span>
+                <span>{doneCount} / {totalCount} tasks done ({progressPercent}%)</span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full bg-secondary transition-all duration-500"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
             </div>
-            <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full bg-secondary transition-all duration-500"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
+
+            {/* Story Points Capacity Meter */}
+            {sprint && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-semibold text-foreground flex-wrap gap-1">
+                  <span className="flex items-center gap-1.5">
+                    Story Points Capacity
+                    {sprint.capacity !== null && sprint.capacity !== undefined && (sprint.allocated_points ?? 0) > sprint.capacity && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-destructive/10 text-destructive border border-destructive/20 inline-flex items-center gap-1">
+                        <AlertTriangle className="size-3 shrink-0" /> Over Capacity (+{(sprint.allocated_points ?? 0) - sprint.capacity} pts)
+                      </span>
+                    )}
+                  </span>
+                  <span>
+                    {sprint.capacity !== null && sprint.capacity !== undefined
+                      ? `${sprint.allocated_points ?? 0} / ${sprint.capacity} points`
+                      : `${sprint.allocated_points ?? 0} points allocated (Uncapped)`}
+                  </span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-500 ${
+                      sprint.capacity !== null && sprint.capacity !== undefined && (sprint.allocated_points ?? 0) > sprint.capacity
+                        ? "bg-destructive"
+                        : "bg-primary"
+                    }`}
+                    style={{
+                      width: sprint.capacity
+                        ? `${Math.min(100, Math.round(((sprint.allocated_points ?? 0) / sprint.capacity) * 100))}%`
+                        : "100%",
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -472,7 +542,8 @@ export default function SprintBoardPage() {
                             <h4 className="text-sm font-semibold text-foreground leading-snug group-hover:text-primary transition-colors pr-4">
                               {task.title}
                             </h4>
-                            <div className="flex items-center gap-1.5 shrink-0">
+                            <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+                              <WorkstreamBadge workstream={task.workstream} />
                               <PriorityBadge priority={task.priority} />
                               {canDeleteTask && (
                                 <button
@@ -718,6 +789,21 @@ export default function SprintBoardPage() {
                   placeholder="Key objectives and deliverables for this sprint..."
                   className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Target Capacity (Story Points)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="1000"
+                  {...registerSprint("capacity")}
+                  placeholder="e.g. 40"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                {sprintFormErrors.capacity && (
+                  <p className="mt-1 text-xs text-destructive">{sprintFormErrors.capacity.message}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

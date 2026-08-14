@@ -12,3 +12,28 @@ from app.models.invitation import Invitation
 from app.models.refresh_token import RefreshToken
 from app.models.email_verification import EmailVerificationToken
 from app.models.password_reset import PasswordResetToken
+from app.models.user_activity import UserActivity
+from app.models.admin_audit_log import AdminAuditLog
+from app.models.company_resource import CompanyResourceAllocation
+from app.models.requirement import Requirement, RequirementVersion
+from app.models.meeting import (
+    Meeting,
+    MeetingParticipant,
+    MeetingAgendaItem,
+    MeetingActionItem,
+)
+from app.models.knowledge import (
+    KnowledgeDocument,
+    KnowledgeChunk,
+    KnowledgeRetrievalLog,
+)
+from app.models.requirement_review import (
+    RequirementReview,
+    RequirementReviewFinding,
+)
+from app.models.evaluation import (
+    EvaluationDataset,
+    EvaluationCase,
+    EvaluationRun,
+    EvaluationCaseResult,
+)

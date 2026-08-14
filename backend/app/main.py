@@ -17,6 +17,15 @@ from app.sprints.router import router as sprints_router
 from app.tasks.router import router as tasks_router
 from app.task_comments.router import router as task_comments_router
 from app.ai_jobs.router import router as ai_jobs_router
+from app.activities.router import router as activities_router
+from app.admin.router import router as admin_router
+from app.requirements.router import router as requirements_router
+from app.meetings.router import router as meetings_router
+from app.knowledge.router import router as knowledge_router
+from app.requirements.review_router import router as review_router
+from app.evaluations.evaluation_router import router as evaluation_router
+from app.dashboard.router import router as dashboard_router
+from app.traceability.router import router as traceability_router
 
 # 1. Initialize Structured Logging
 setup_logging()
@@ -97,10 +106,19 @@ app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 app.include_router(companies_router, prefix="/companies", tags=["Companies"])
 app.include_router(projects_router, prefix="/projects", tags=["Projects"])
 app.include_router(project_members_router, prefix="/projects", tags=["Project Members"])
-app.include_router(sprints_router, prefix="/projects", tags=["Sprints"])
+app.include_router(sprints_router, prefix="", tags=["Sprints"])
 app.include_router(tasks_router, prefix="", tags=["Tasks"])
 app.include_router(task_comments_router, prefix="", tags=["Task Comments"])
 app.include_router(ai_jobs_router, prefix="", tags=["AI Jobs"])
+app.include_router(activities_router, prefix="/activities", tags=["Activities"])
+app.include_router(admin_router, prefix="/admin", tags=["Platform Admin"])
+app.include_router(requirements_router, prefix="", tags=["Requirements"])
+app.include_router(meetings_router, prefix="", tags=["Meetings"])
+app.include_router(knowledge_router, prefix="", tags=["Knowledge Base & RAG Context"])
+app.include_router(review_router, prefix="", tags=["AI Requirement Review"])
+app.include_router(evaluation_router, prefix="", tags=["Super Admin Research Evaluation"])
+app.include_router(dashboard_router, prefix="/dashboard", tags=["Dashboard Context"])
+app.include_router(traceability_router, prefix="/projects/{project_id}/traceability", tags=["Lifecycle Traceability"])
 
 
 @app.get("/")

@@ -31,9 +31,9 @@ class ProjectService:
 
     def list_projects(self, user: User) -> ProjectListResponse:
         """
-        Lists all projects for the current user's company.
+        Lists projects accessible to the current user (all for OWNER/ADMIN, assigned for ProjectMembers).
         """
-        projects = self.repo.get_projects_by_company(user.company_id)
+        projects = self.repo.get_projects_for_user(user)
 
         project_responses = []
         for p in projects:
@@ -61,12 +61,7 @@ class ProjectService:
         """
         Gets project detail along with sprint, task, and member counts.
         """
-        project = self.repo.get_project_by_id(project_id)
-        if not project:
-            raise ResourceNotFound("Project not found.")
-
-        if str(project.company_id) != str(user.company_id):
-            raise Forbidden("You do not have access to this project.")
+        project = check_project_role_or_company_admin(self.db, user, project_id)
 
         creator_name = None
         if project.creator:
@@ -102,6 +97,10 @@ class ProjectService:
         """
         Creates a new project for the user's company and adds creator as Project Member.
         """
+        if user.company_id:
+            from app.subscriptions.service import EntitlementService
+            EntitlementService(self.db).check_project_limit(user.company_id)
+
         try:
             project = Project(
                 company_id=user.company_id,

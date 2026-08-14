@@ -9,8 +9,9 @@ from app.models.enums import CompanyRole
 class User(BaseModel):
     __tablename__ = "users"
 
-    company_id: Mapped[UUID] = mapped_column(
-        ForeignKey("companies.id", ondelete="CASCADE")
+    company_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("companies.id", ondelete="CASCADE"),
+        nullable=True,
     )
 
     first_name: Mapped[str] = mapped_column(
@@ -77,6 +78,12 @@ class User(BaseModel):
     profile_completed: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
+    )
+
+    is_super_admin: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
     )
 
     company = relationship(

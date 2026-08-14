@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -27,8 +27,13 @@ class Sprint(BaseModel):
 
     status: Mapped[SprintStatus] = mapped_column(
         Enum(SprintStatus),
-        default=SprintStatus.ACTIVE,
+        default=SprintStatus.PLANNED,
         nullable=False,
+    )
+
+    capacity: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
     )
 
     start_date: Mapped[datetime | None] = mapped_column(

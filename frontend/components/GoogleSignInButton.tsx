@@ -50,19 +50,23 @@ export default function GoogleSignInButton({
         id_token: idToken,
         is_join: isJoinPage,
       });
-      const { access_token, refresh_token, role, company_role } =
+      const { access_token, refresh_token, role, company_role, is_super_admin } =
         res.data.data;
 
       // Store tokens in localStorage
       localStorage.setItem("synapse_access_token", access_token);
       localStorage.setItem("synapse_refresh_token", refresh_token);
 
-      // Role-based redirect: OWNER/ADMIN → /dashboard, others → /member-dashboard
-      const effectiveRole = company_role || role;
-      if (effectiveRole === "OWNER" || effectiveRole === "ADMIN") {
-        router.push("/dashboard");
+      // Super Admin priority redirect -> /admin
+      if (is_super_admin) {
+        router.push("/admin");
       } else {
-        router.push("/member-dashboard");
+        const effectiveRole = company_role || role;
+        if (effectiveRole === "OWNER" || effectiveRole === "ADMIN") {
+          router.push("/dashboard");
+        } else {
+          router.push("/member-dashboard");
+        }
       }
     } catch (err: any) {
       const msg =

@@ -1,5 +1,8 @@
 import os
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+load_dotenv()
 
 
 class JWTSettings:
@@ -17,6 +20,14 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
     
+    EMBEDDING_DIMENSION: int = int(os.getenv("EMBEDDING_DIMENSION", "1536"))
+    EMBEDDING_PROVIDER: str = os.getenv("EMBEDDING_PROVIDER", "mock")
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "mock")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+
     jwt: JWTSettings = JWTSettings()
     db: DatabaseSettings = DatabaseSettings()
 

@@ -38,8 +38,20 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Check if unauthorized and request is not a retry
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
+
+    const requestUrl = originalRequest.url || "";
+    const isAuthUrl =
+      requestUrl.includes("/auth/token") ||
+      requestUrl.includes("/auth/login") ||
+      requestUrl.includes("/auth/refresh") ||
+      requestUrl.includes("/auth/register") ||
+      requestUrl.includes("/auth/google");
+
+    // Check if unauthorized, not an auth endpoint, and request is not a retry
+    if (error.response?.status === 401 && !isAuthUrl && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -63,6 +75,19 @@ api.interceptors.response.use(
 
       if (!refreshToken) {
         isRefreshing = false;
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("synapse_access_token");
+          localStorage.removeItem("synapse_refresh_token");
+          const path = window.location.pathname;
+          if (
+            !path.startsWith("/login") &&
+            !path.startsWith("/register") &&
+            !path.startsWith("/forgot-password") &&
+            !path.startsWith("/reset-password")
+          ) {
+            window.location.href = "/login";
+          }
+        }
         return Promise.reject(error);
       }
 
@@ -96,7 +121,15 @@ api.interceptors.response.use(
         if (typeof window !== "undefined") {
           localStorage.removeItem("synapse_access_token");
           localStorage.removeItem("synapse_refresh_token");
-          window.location.href = "/login";
+          const path = window.location.pathname;
+          if (
+            !path.startsWith("/login") &&
+            !path.startsWith("/register") &&
+            !path.startsWith("/forgot-password") &&
+            !path.startsWith("/reset-password")
+          ) {
+            window.location.href = "/login";
+          }
         }
         return Promise.reject(refreshError);
       }

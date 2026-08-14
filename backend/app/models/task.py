@@ -1,9 +1,9 @@
-from sqlalchemy import Enum, ForeignKey, String, Text
+from sqlalchemy import Enum, ForeignKey, String, Text, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import BaseModel
-from app.models.enums import TaskStatus, TaskPriority
+from app.models.enums import TaskStatus, TaskPriority, TaskWorkstream
 
 
 class Task(BaseModel):
@@ -38,6 +38,23 @@ class Task(BaseModel):
     priority: Mapped[TaskPriority] = mapped_column(
         Enum(TaskPriority, create_type=False),
         default=TaskPriority.MEDIUM,
+        nullable=False,
+    )
+
+    workstream: Mapped[TaskWorkstream | None] = mapped_column(
+        Enum(TaskWorkstream, name="taskworkstream", create_type=False),
+        default=TaskWorkstream.GENERAL,
+        nullable=True,
+    )
+
+    story_points: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    position: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
         nullable=False,
     )
 

@@ -36,12 +36,27 @@ class SprintService:
             )
         ) or 0
 
+        allocated_points = self.db.scalar(
+            select(func.coalesce(func.sum(Task.story_points), 0)).filter(
+                Task.sprint_id == sprint.id
+            )
+        ) or 0
+
+        remaining_capacity = (
+            (sprint.capacity - allocated_points)
+            if sprint.capacity is not None
+            else None
+        )
+
         return SprintResponse(
             id=sprint.id,
             project_id=sprint.project_id,
             name=sprint.name,
             goal=sprint.goal,
             status=sprint.status,
+            capacity=sprint.capacity,
+            allocated_points=allocated_points,
+            remaining_capacity=remaining_capacity,
             start_date=sprint.start_date,
             end_date=sprint.end_date,
             total_tasks=total,
@@ -50,25 +65,13 @@ class SprintService:
         )
 
     def list_sprints(self, project_id: UUID, current_user: User) -> SprintListResponse:
-        project = self.db.execute(select(Project).filter(Project.id == project_id)).scalar_one_or_none()
-        if not project:
-            raise ResourceNotFound("Project not found.")
-
-        if str(project.company_id) != str(current_user.company_id):
-            raise Forbidden("You do not have access to this project.")
-
+        project = check_project_role_or_company_admin(self.db, current_user, project_id)
         sprints = self.repo.get_sprints_by_project(project_id)
         responses = [self._build_sprint_response(s) for s in sprints]
         return SprintListResponse(sprints=responses, total=len(responses))
 
     def get_active_sprint(self, project_id: UUID, current_user: User) -> SprintResponse:
-        project = self.db.execute(select(Project).filter(Project.id == project_id)).scalar_one_or_none()
-        if not project:
-            raise ResourceNotFound("Project not found.")
-
-        if str(project.company_id) != str(current_user.company_id):
-            raise Forbidden("You do not have access to this project.")
-
+        project = check_project_role_or_company_admin(self.db, current_user, project_id)
         sprint = self.repo.get_active_sprint(project_id)
         if not sprint:
             # Auto-create a default active sprint if none exists
@@ -76,6 +79,7 @@ class SprintService:
                 project_id=project_id,
                 name="Sprint 1",
                 goal="Initial Project Sprint",
+                status=SprintStatus.ACTIVE,
             )
             self.repo.create_sprint(sprint)
             self.db.commit()
@@ -88,10 +92,19 @@ class SprintService:
         )
 
         try:
+            status_enum = SprintStatus.PLANNED
+            if data.status:
+                try:
+                    status_enum = SprintStatus(data.status)
+                except ValueError:
+                    status_enum = SprintStatus.PLANNED
+
             sprint = Sprint(
                 project_id=project_id,
                 name=data.name,
                 goal=data.goal,
+                status=status_enum,
+                capacity=data.capacity,
                 start_date=data.start_date,
                 end_date=data.end_date,
             )
@@ -122,6 +135,8 @@ class SprintService:
                     sprint.status = SprintStatus(data.status)
                 except ValueError:
                     raise BaseBusinessException("Invalid sprint status value.", status_code=400)
+            if data.capacity is not None:
+                sprint.capacity = data.capacity
             if data.start_date is not None:
                 sprint.start_date = data.start_date
             if data.end_date is not None:

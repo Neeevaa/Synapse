@@ -267,35 +267,40 @@ export default function ProjectsPage() {
 
       {/* ─── Create Project Modal ─── */}
       {modalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-lg mx-4 rounded-xl border border-border bg-card p-6 shadow-xl dark:bg-card">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-bold text-foreground">
-                Create New Project
-              </h3>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="w-full max-w-2xl rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-2xl space-y-6">
+            <div className="flex items-start justify-between border-b border-border pb-4">
+              <div>
+                <h3 className="text-xl font-extrabold text-foreground">
+                  Create New Project
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Initialize a new workspace project for your development team.
+                </p>
+              </div>
               <button
                 onClick={() => {
                   setModalOpen(false);
                   reset();
                   setCreateError(null);
                 }}
-                className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               >
                 <X className="size-5" />
               </button>
             </div>
 
             {createError && (
-              <div className="mb-4 flex items-center gap-2.5 rounded-lg bg-destructive/10 p-3 text-sm text-destructive dark:bg-destructive/20">
+              <div className="flex items-center gap-3 rounded-xl bg-destructive/10 border border-destructive/20 p-4 text-xs font-semibold text-destructive">
                 <AlertCircle className="size-5 shrink-0" />
                 <span>{createError}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit(onCreateSubmit)} className="space-y-4">
-              <div>
-                <label htmlFor="project_name" className="block text-sm font-medium text-foreground mb-1">
-                  Project Name
+            <form onSubmit={handleSubmit(onCreateSubmit)} className="space-y-5">
+              <div className="space-y-2">
+                <label htmlFor="project_name" className="block text-xs font-bold uppercase tracking-wider text-foreground">
+                  Project Name <span className="text-destructive">*</span>
                 </label>
                 <input
                   id="project_name"
@@ -304,35 +309,35 @@ export default function ProjectsPage() {
                   {...register("name")}
                   placeholder="e.g. Synapse Mobile App"
                   suppressHydrationWarning
-                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:bg-background"
+                  className="w-full h-11 rounded-xl border border-border bg-background px-4 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
                 {errors.name && (
-                  <p className="mt-1 text-xs text-destructive">
+                  <p className="text-xs font-semibold text-destructive">
                     {errors.name.message}
                   </p>
                 )}
               </div>
 
-              <div>
-                <label htmlFor="project_description" className="block text-sm font-medium text-foreground mb-1">
-                  Description (Optional)
+              <div className="space-y-2">
+                <label htmlFor="project_description" className="block text-xs font-bold uppercase tracking-wider text-foreground">
+                  Project Description (Optional)
                 </label>
                 <textarea
                   id="project_description"
                   autoComplete="off"
                   {...register("description")}
-                  rows={3}
-                  placeholder="Briefly describe the project goals..."
-                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:bg-background resize-none"
+                  rows={4}
+                  placeholder="Provide high-level context, goals, and target deliverables for this project..."
+                  className="w-full rounded-xl border border-border bg-background p-4 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                 />
                 {errors.description && (
-                  <p className="mt-1 text-xs text-destructive">
+                  <p className="text-xs font-semibold text-destructive">
                     {errors.description.message}
                   </p>
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="pt-4 border-t border-border flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -340,19 +345,16 @@ export default function ProjectsPage() {
                     reset();
                     setCreateError(null);
                   }}
-                  className="px-4 py-2 text-sm font-medium text-foreground rounded-lg border border-border hover:bg-muted transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl border border-border bg-background text-xs font-bold text-foreground hover:bg-muted transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creating}
-                  suppressHydrationWarning
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-xs font-bold text-primary-foreground shadow-2xs hover:bg-primary/95 transition-colors disabled:opacity-50 cursor-pointer"
                 >
-                  {creating && (
-                    <Loader2 className="size-4 animate-spin" />
-                  )}
+                  {creating && <Loader2 className="size-4 animate-spin" />}
                   Create Project
                 </button>
               </div>

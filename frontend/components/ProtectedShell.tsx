@@ -19,6 +19,7 @@ import {
   Moon,
   Sun,
   Building2,
+  ShieldAlert,
 } from "lucide-react";
 
 import CompleteProfileModal from "@/components/CompleteProfileModal";
@@ -28,7 +29,9 @@ interface UserProfile {
   first_name: string;
   last_name: string;
   email: string;
-  role: string;
+  role: string | null;
+  company_role?: string | null;
+  is_super_admin?: boolean;
   designation: string | null;
   avatar_url?: string | null;
   bio?: string | null;
@@ -69,6 +72,8 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkAuth = async () => {
       const token = localStorage.getItem("synapse_access_token");
       const refreshToken = localStorage.getItem("synapse_refresh_token");
@@ -80,21 +85,45 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
 
       try {
         const response = await api.get("/auth/me");
-        setUser(response.data.data);
+        if (isMounted) {
+          setUser(response.data.data);
+        }
       } catch (err: any) {
-        // Silently handle expired or invalid sessions and redirect to login
         if (typeof window !== "undefined") {
           localStorage.removeItem("synapse_access_token");
           localStorage.removeItem("synapse_refresh_token");
         }
         router.push("/login");
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    if (user.is_super_admin) {
+      if (!pathname.startsWith("/admin")) {
+        router.push("/admin");
+      }
+    } else if (pathname.startsWith("/admin")) {
+      const effectiveRole = user.company_role || user.role;
+      if (effectiveRole === "OWNER" || effectiveRole === "ADMIN") {
+        router.push("/dashboard");
+      } else {
+        router.push("/member-dashboard");
+      }
+    }
+  }, [user, pathname, router]);
 
   const handleLogout = async () => {
     setLogoutLoading(true);
@@ -126,14 +155,18 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
     );
   }
 
-  const navItems = [
+  let navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Projects", href: "/projects", icon: FolderKanban },
     { name: "Sprints", href: "/sprints", icon: Zap },
     { name: "Tasks", href: "/tasks", icon: CheckSquare },
   ];
 
-  if (user?.role === "OWNER" || user?.role === "ADMIN") {
+  if (user?.is_super_admin) {
+    navItems = [
+      { name: "Platform Admin", href: "/admin", icon: ShieldAlert },
+    ];
+  } else if (user?.role === "OWNER" || user?.role === "ADMIN") {
     navItems.push({ name: "Company Settings", href: "/company/settings", icon: Building2 });
   }
 

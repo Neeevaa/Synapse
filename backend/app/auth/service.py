@@ -38,13 +38,15 @@ from app.models.user import User
 from app.models.project import Project
 from app.models.project_member import ProjectMember
 from app.models.pending_membership import PendingMembership
+from app.models.invitation import Invitation
 from app.models.email_verification import EmailVerificationToken
 from app.models.refresh_token import RefreshToken
 from app.models.password_reset import PasswordResetToken
-from app.models.enums import CompanyRole
+from app.models.enums import CompanyRole, ProjectRole, Specialization, InvitationStatus
 from app.core.security import hash_password, verify_password
 from app.core.security import hash_password, verify_password, create_access_token, hash_token
 from app.events import event_bus
+from app.activities.service import ActivityService
 
 logger = logging.getLogger("app")
 
@@ -235,22 +237,57 @@ class AuthService:
         if existing_user:
             raise UserAlreadyExists("Email already registered.")
 
-        # Find pending invitations for this email, ordered by earliest invite first
+        # Check for explicit token if provided
+        target_invitation = None
+        if data.invitation_token:
+            import hashlib
+            token_hash = hashlib.sha256(data.invitation_token.encode("utf-8")).hexdigest()
+            target_invitation = self.db.execute(
+                select(Invitation).filter(
+                    Invitation.token_hash == token_hash,
+                    Invitation.status == InvitationStatus.PENDING,
+                )
+            ).scalar_one_or_none()
+
+            if target_invitation and target_invitation.expires_at < datetime.utcnow():
+                target_invitation.status = InvitationStatus.EXPIRED
+                self.db.commit()
+                raise BaseBusinessException("This invitation link has expired.", status_code=400)
+
+        # Find pending invitations for this email
+        invitations = self.db.execute(
+            select(Invitation)
+            .filter(
+                Invitation.email == email_clean,
+                Invitation.status == InvitationStatus.PENDING,
+                Invitation.expires_at >= datetime.utcnow(),
+            )
+            .order_by(Invitation.created_at.asc())
+        ).scalars().all()
+
         pendings = self.db.execute(
             select(PendingMembership)
             .filter(PendingMembership.email == email_clean)
             .order_by(PendingMembership.created_at.asc())
         ).scalars().all()
 
-        if not pendings:
+        if not invitations and not pendings and not target_invitation:
             raise BaseBusinessException(
                 "No invitation found for this email address. Please request an invitation from your company administrator.",
                 status_code=400,
             )
 
-        # Get company ID from the earliest invited project
-        first_project = pendings[0].project
-        company_id = first_project.company_id
+        # Determine company_id
+        if target_invitation:
+            company_id = target_invitation.company_id
+        elif invitations:
+            company_id = invitations[0].company_id
+        else:
+            company_id = pendings[0].project.company_id
+
+        if company_id:
+            from app.subscriptions.service import EntitlementService
+            EntitlementService(self.db).check_user_limit(company_id)
 
         try:
             hashed_pwd = hash_password(data.password)
@@ -269,14 +306,40 @@ class AuthService:
             self.repo.create_user(user)
             self.db.flush()
 
-            # Convert all pending invitations to ProjectMember records
+            # Convert all matching invitations to ProjectMember records
+            processed_projects = set()
+            for inv in invitations:
+                if inv.project_id not in processed_projects:
+                    spec = inv.specialization
+                    if (inv.project_role == ProjectRole.DEVELOPER or inv.project_role == "DEVELOPER") and not spec:
+                        spec = Specialization.OTHER
+
+                    member = ProjectMember(
+                        project_id=inv.project_id,
+                        user_id=user.id,
+                        role=inv.project_role,
+                        specialization=spec,
+                    )
+                    self.db.add(member)
+                    processed_projects.add(inv.project_id)
+
+                inv.status = InvitationStatus.ACCEPTED
+                inv.used_at = datetime.utcnow()
+
             for p in pendings:
-                member = ProjectMember(
-                    project_id=p.project_id,
-                    user_id=user.id,
-                    role=p.role,
-                )
-                self.db.add(member)
+                if p.project_id not in processed_projects:
+                    spec = p.specialization
+                    if (p.role == ProjectRole.DEVELOPER or p.role == "DEVELOPER") and not spec:
+                        spec = Specialization.OTHER
+
+                    member = ProjectMember(
+                        project_id=p.project_id,
+                        user_id=user.id,
+                        role=p.role,
+                        specialization=spec,
+                    )
+                    self.db.add(member)
+                    processed_projects.add(p.project_id)
                 self.db.delete(p)
 
             self.db.commit()
@@ -613,6 +676,7 @@ class AuthService:
             token_type="bearer",
             role=company_role_str or "MEMBER",
             company_role=company_role_str,
+            is_super_admin=user.is_super_admin,
             project_roles=project_roles_str,
         )
 
@@ -677,16 +741,42 @@ class AuthService:
                 self.db.rollback()
                 raise e
 
-        # 3. Check for PendingMembership (invited user)
+        # 3. Check for Invitations or PendingMembership (invited user)
+        target_invitation = None
+        if data.invitation_token:
+            import hashlib
+            token_hash = hashlib.sha256(data.invitation_token.encode("utf-8")).hexdigest()
+            target_invitation = self.db.execute(
+                select(Invitation).filter(
+                    Invitation.token_hash == token_hash,
+                    Invitation.status == InvitationStatus.PENDING,
+                    Invitation.expires_at >= datetime.utcnow(),
+                )
+            ).scalar_one_or_none()
+
+        invitations = self.db.execute(
+            select(Invitation)
+            .filter(
+                Invitation.email == email,
+                Invitation.status == InvitationStatus.PENDING,
+                Invitation.expires_at >= datetime.utcnow(),
+            )
+            .order_by(Invitation.created_at.asc())
+        ).scalars().all()
+
         pendings = self.db.execute(
             select(PendingMembership)
             .filter(PendingMembership.email == email)
             .order_by(PendingMembership.created_at.asc())
         ).scalars().all()
 
-        if pendings:
-            first_project = pendings[0].project
-            company_id = first_project.company_id
+        if invitations or pendings or target_invitation:
+            if target_invitation:
+                company_id = target_invitation.company_id
+            elif invitations:
+                company_id = invitations[0].company_id
+            else:
+                company_id = pendings[0].project.company_id
 
             try:
                 user = User(
@@ -705,13 +795,39 @@ class AuthService:
                 self.repo.create_user(user)
                 self.db.flush()
 
+                processed_projects = set()
+                for inv in invitations:
+                    if inv.project_id not in processed_projects:
+                        spec = inv.specialization
+                        if (inv.project_role == ProjectRole.DEVELOPER or inv.project_role == "DEVELOPER") and not spec:
+                            spec = Specialization.OTHER
+
+                        member = ProjectMember(
+                            project_id=inv.project_id,
+                            user_id=user.id,
+                            role=inv.project_role,
+                            specialization=spec,
+                        )
+                        self.db.add(member)
+                        processed_projects.add(inv.project_id)
+
+                    inv.status = InvitationStatus.ACCEPTED
+                    inv.used_at = datetime.utcnow()
+
                 for p in pendings:
-                    member = ProjectMember(
-                        project_id=p.project_id,
-                        user_id=user.id,
-                        role=p.role,
-                    )
-                    self.db.add(member)
+                    if p.project_id not in processed_projects:
+                        spec = p.specialization
+                        if (p.role == ProjectRole.DEVELOPER or p.role == "DEVELOPER") and not spec:
+                            spec = Specialization.OTHER
+
+                        member = ProjectMember(
+                            project_id=p.project_id,
+                            user_id=user.id,
+                            role=p.role,
+                            specialization=spec,
+                        )
+                        self.db.add(member)
+                        processed_projects.add(p.project_id)
                     self.db.delete(p)
 
                 self.db.commit()
@@ -786,6 +902,14 @@ class AuthService:
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
+
+        ActivityService(self.db).log_activity(
+            user_id=user.id,
+            company_id=user.company_id,
+            action="PROFILE_UPDATED",
+            description="Updated personal profile information.",
+        )
+
         return user
 
     def get_user_profile_response(self, user: User) -> UserProfileResponse:
@@ -829,6 +953,7 @@ class AuthService:
             company_name=company_name,
             role=company_role_str,
             company_role=company_role_str,
+            is_super_admin=user.is_super_admin,
             designation=user.designation,
             avatar_url=user.avatar_url,
             bio=user.bio,
@@ -848,4 +973,11 @@ class AuthService:
         user.password_hash = hash_password(data.new_password)
         self.db.add(user)
         self.db.commit()
+
+        ActivityService(self.db).log_activity(
+            user_id=user.id,
+            company_id=user.company_id,
+            action="PASSWORD_CHANGED",
+            description="Changed account security password.",
+        )
 

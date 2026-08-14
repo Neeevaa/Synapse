@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import ProtectedShell from "@/components/ProtectedShell";
+import UserActivityFeed from "@/components/UserActivityFeed";
 import { api } from "@/lib/api";
 import {
   User,
@@ -352,7 +353,7 @@ export default function MyProfilePage() {
                         <label className="block text-xs font-bold text-foreground">
                           Email Address
                         </label>
-                        <span className="text-[0.65rem] font-bold text-muted-foreground uppercase tracking-wider bg-muted px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider bg-muted px-2 py-0.5 rounded-md flex items-center gap-1">
                           <Lock className="size-3" /> Read-Only
                         </span>
                       </div>
@@ -490,6 +491,9 @@ export default function MyProfilePage() {
                     </button>
                   </form>
                 </div>
+
+                {/* User Activity Feed Timeline */}
+                <UserActivityFeed title="My Recent Activity" pageSize={5} />
               </div>
 
               {/* Right Column: Read-Only Workspace Memberships */}
@@ -546,12 +550,12 @@ export default function MyProfilePage() {
                               {pm.project_name}
                             </span>
                             {pm.project_key && (
-                              <span className="text-[0.65rem] font-extrabold text-muted-foreground uppercase tracking-wider block mt-0.5">
+                              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mt-0.5">
                                 Key: {pm.project_key}
                               </span>
                             )}
                           </div>
-                          <span className="px-2 py-0.5 rounded-md text-[0.65rem] font-extrabold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 shrink-0">
+                          <span className="px-2 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 shrink-0">
                             {pm.project_role}
                           </span>
                         </div>

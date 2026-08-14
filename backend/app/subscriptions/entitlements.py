@@ -1,0 +1,150 @@
+from dataclasses import dataclass, field
+from app.models.enums import SubscriptionPlan
+
+# Feature Code Constants
+FEATURE_BASIC_TASKS = "FEATURE_BASIC_TASKS"
+FEATURE_ADVANCED_TASKS = "FEATURE_ADVANCED_TASKS"
+FEATURE_BASIC_AI_ASSISTANCE = "FEATURE_BASIC_AI_ASSISTANCE"
+FEATURE_AI_ASSISTANCE = "FEATURE_AI_ASSISTANCE"
+FEATURE_BASIC_PROJECT_ANALYTICS = "FEATURE_BASIC_PROJECT_ANALYTICS"
+FEATURE_ADVANCED_ANALYTICS = "FEATURE_ADVANCED_ANALYTICS"
+FEATURE_AI_TEST_CASES = "FEATURE_AI_TEST_CASES"
+FEATURE_MEETING_SUMMARIES = "FEATURE_MEETING_SUMMARIES"
+FEATURE_SEMANTIC_SEARCH = "FEATURE_SEMANTIC_SEARCH"
+FEATURE_PREDICTIVE_DELAY = "FEATURE_PREDICTIVE_DELAY"
+FEATURE_CONTEXTUAL_DELAY = "FEATURE_CONTEXTUAL_DELAY"
+FEATURE_REQUIREMENT_SCANNING = "FEATURE_REQUIREMENT_SCANNING"
+FEATURE_RAG = "FEATURE_RAG"
+FEATURE_KNOWLEDGE_GRAPH = "FEATURE_KNOWLEDGE_GRAPH"
+FEATURE_AI_AGENTS = "FEATURE_AI_AGENTS"
+FEATURE_API = "FEATURE_API"
+FEATURE_WEBHOOKS = "FEATURE_WEBHOOKS"
+FEATURE_SSO = "FEATURE_SSO"
+FEATURE_ADVANCED_RBAC = "FEATURE_ADVANCED_RBAC"
+FEATURE_AUDIT_CONTROLS = "FEATURE_AUDIT_CONTROLS"
+FEATURE_DEDICATED_INFRASTRUCTURE = "FEATURE_DEDICATED_INFRASTRUCTURE"
+FEATURE_DEDICATED_DATABASE = "FEATURE_DEDICATED_DATABASE"
+FEATURE_CUSTOM_AI_AGENTS = "FEATURE_CUSTOM_AI_AGENTS"
+FEATURE_ADVANCED_AI_GOVERNANCE = "FEATURE_ADVANCED_AI_GOVERNANCE"
+FEATURE_CUSTOM_INTEGRATIONS = "FEATURE_CUSTOM_INTEGRATIONS"
+FEATURE_CUSTOM_DATA_RETENTION = "FEATURE_CUSTOM_DATA_RETENTION"
+FEATURE_SLA_SUPPORT = "FEATURE_SLA_SUPPORT"
+
+
+@dataclass
+class SubscriptionEntitlements:
+    plan: SubscriptionPlan
+    max_users: int  # -1 for unlimited
+    max_active_projects: int  # -1 for unlimited
+    max_storage_bytes: int  # -1 for unlimited
+    max_ai_executions: int  # -1 for unlimited
+    max_automation_workflows: int  # -1 for unlimited
+    enabled_features: set[str] = field(default_factory=set)
+
+
+# Official Synapse Subscription Entitlement Definitions
+FREE_ENTITLEMENTS = SubscriptionEntitlements(
+    plan=SubscriptionPlan.FREE,
+    max_users=3,
+    max_active_projects=2,
+    max_storage_bytes=500 * 1024 * 1024,  # 500 MB
+    max_ai_executions=50,
+    max_automation_workflows=0,
+    enabled_features={
+        FEATURE_BASIC_TASKS,
+        FEATURE_BASIC_AI_ASSISTANCE,
+        FEATURE_BASIC_PROJECT_ANALYTICS,
+    },
+)
+
+STARTER_ENTITLEMENTS = SubscriptionEntitlements(
+    plan=SubscriptionPlan.STARTER,
+    max_users=10,
+    max_active_projects=10,
+    max_storage_bytes=5 * 1024 * 1024 * 1024,  # 5 GB
+    max_ai_executions=300,
+    max_automation_workflows=10,
+    enabled_features={
+        FEATURE_BASIC_TASKS,
+        FEATURE_BASIC_AI_ASSISTANCE,
+        FEATURE_BASIC_PROJECT_ANALYTICS,
+        FEATURE_ADVANCED_TASKS,
+        FEATURE_AI_ASSISTANCE,
+        FEATURE_AI_TEST_CASES,
+        FEATURE_MEETING_SUMMARIES,
+        FEATURE_SEMANTIC_SEARCH,
+    },
+)
+
+PRO_ENTITLEMENTS = SubscriptionEntitlements(
+    plan=SubscriptionPlan.PRO,
+    max_users=50,
+    max_active_projects=-1,
+    max_storage_bytes=25 * 1024 * 1024 * 1024,  # 25 GB
+    max_ai_executions=-1,
+    max_automation_workflows=-1,
+    enabled_features={
+        FEATURE_BASIC_TASKS,
+        FEATURE_BASIC_AI_ASSISTANCE,
+        FEATURE_BASIC_PROJECT_ANALYTICS,
+        FEATURE_ADVANCED_TASKS,
+        FEATURE_AI_ASSISTANCE,
+        FEATURE_AI_TEST_CASES,
+        FEATURE_MEETING_SUMMARIES,
+        FEATURE_SEMANTIC_SEARCH,
+        FEATURE_PREDICTIVE_DELAY,
+        FEATURE_CONTEXTUAL_DELAY,
+        FEATURE_REQUIREMENT_SCANNING,
+        FEATURE_RAG,
+        FEATURE_KNOWLEDGE_GRAPH,
+        FEATURE_ADVANCED_ANALYTICS,
+        FEATURE_AI_AGENTS,
+        FEATURE_API,
+        FEATURE_WEBHOOKS,
+    },
+)
+
+ENTERPRISE_ENTITLEMENTS = SubscriptionEntitlements(
+    plan=SubscriptionPlan.ENTERPRISE,
+    max_users=-1,
+    max_active_projects=-1,
+    max_storage_bytes=100 * 1024 * 1024 * 1024,  # 100 GB default
+    max_ai_executions=-1,
+    max_automation_workflows=-1,
+    enabled_features={
+        FEATURE_BASIC_TASKS,
+        FEATURE_BASIC_AI_ASSISTANCE,
+        FEATURE_BASIC_PROJECT_ANALYTICS,
+        FEATURE_ADVANCED_TASKS,
+        FEATURE_AI_ASSISTANCE,
+        FEATURE_AI_TEST_CASES,
+        FEATURE_MEETING_SUMMARIES,
+        FEATURE_SEMANTIC_SEARCH,
+        FEATURE_PREDICTIVE_DELAY,
+        FEATURE_CONTEXTUAL_DELAY,
+        FEATURE_REQUIREMENT_SCANNING,
+        FEATURE_RAG,
+        FEATURE_KNOWLEDGE_GRAPH,
+        FEATURE_ADVANCED_ANALYTICS,
+        FEATURE_AI_AGENTS,
+        FEATURE_API,
+        FEATURE_WEBHOOKS,
+        FEATURE_DEDICATED_INFRASTRUCTURE,
+        FEATURE_DEDICATED_DATABASE,
+        FEATURE_CUSTOM_AI_AGENTS,
+        FEATURE_ADVANCED_AI_GOVERNANCE,
+        FEATURE_SSO,
+        FEATURE_ADVANCED_RBAC,
+        FEATURE_AUDIT_CONTROLS,
+        FEATURE_CUSTOM_INTEGRATIONS,
+        FEATURE_CUSTOM_DATA_RETENTION,
+        FEATURE_SLA_SUPPORT,
+    },
+)
+
+PLAN_ENTITLEMENTS_MAP = {
+    SubscriptionPlan.FREE: FREE_ENTITLEMENTS,
+    SubscriptionPlan.STARTER: STARTER_ENTITLEMENTS,
+    SubscriptionPlan.PRO: PRO_ENTITLEMENTS,
+    SubscriptionPlan.ENTERPRISE: ENTERPRISE_ENTITLEMENTS,
+}

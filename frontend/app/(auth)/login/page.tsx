@@ -51,18 +51,22 @@ export default function LoginPage() {
     setErrorMsg(null);
     try {
       const response = await api.post("/auth/login", data);
-      const { access_token, refresh_token, role, company_role } = response.data.data;
+      const { access_token, refresh_token, role, company_role, is_super_admin } = response.data.data;
 
       // Store tokens in local storage
       localStorage.setItem("synapse_access_token", access_token);
       localStorage.setItem("synapse_refresh_token", refresh_token);
 
-      // Role-based dashboard redirection
-      const effectiveRole = company_role || role;
-      if (effectiveRole === "OWNER" || effectiveRole === "ADMIN") {
-        router.push("/dashboard");
+      // Super Admin priority redirect -> /admin
+      if (is_super_admin) {
+        router.push("/admin");
       } else {
-        router.push("/member-dashboard");
+        const effectiveRole = company_role || role;
+        if (effectiveRole === "OWNER" || effectiveRole === "ADMIN") {
+          router.push("/dashboard");
+        } else {
+          router.push("/member-dashboard");
+        }
       }
     } catch (err: any) {
       const msg =

@@ -43,6 +43,7 @@ class TeamMemberRegisterRequest(BaseModel):
     last_name: str = Field(..., min_length=1, max_length=100)
     email: str = Field(..., min_length=3, max_length=255)
     password: str = Field(..., min_length=8, max_length=100)
+    invitation_token: str | None = Field(default=None, description="Optional raw invitation token")
 
     @field_validator("email")
     @classmethod
@@ -78,8 +79,8 @@ class LoginResponseData(BaseModel):
     token_type: str = Field(default="bearer")
     role: str | None = Field(default=None, description="CompanyRole: OWNER, ADMIN, or None")
     company_role: str | None = Field(default=None, description="CompanyRole: OWNER, ADMIN, or None")
+    is_super_admin: bool = Field(default=False, description="Whether user is a platform Super Admin")
     project_roles: list[str] = Field(default_factory=list, description="List of ProjectRole values assigned to user")
-
 
 
 class VerifyEmailRequest(BaseModel):
@@ -139,6 +140,7 @@ class UserProfileResponse(BaseModel):
     company_name: str | None = None
     role: str | None = Field(default=None, description="Role of user in company")
     company_role: str | None = Field(default=None, description="Role of user in company")
+    is_super_admin: bool = Field(default=False, description="Whether user is a platform Super Admin")
     designation: str | None = Field(None)
     avatar_url: str | None = Field(None)
     bio: str | None = Field(None)
@@ -164,3 +166,4 @@ class ChangePasswordRequest(BaseModel):
 class GoogleAuthRequest(BaseModel):
     id_token: str = Field(..., min_length=1, description="Google OAuth ID token")
     is_join: bool = Field(default=False, description="Whether request originates from the join flow")
+    invitation_token: str | None = Field(default=None, description="Optional raw invitation token")

@@ -7,6 +7,7 @@ from app.tasks.schemas import (
     CreateTaskRequest,
     UpdateTaskRequest,
     UpdateTaskStatusRequest,
+    ReorderBacklogRequest,
     TaskResponse,
     TaskListResponse,
 )
@@ -27,12 +28,49 @@ router = APIRouter()
 def list_tasks(
     project_id: UUID,
     sprint_id: UUID | None = Query(None),
+    workstream: str | None = Query(None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     service = TaskService(db)
-    result = service.list_tasks(project_id, current_user, sprint_id)
+    result = service.list_tasks(project_id, current_user, sprint_id, workstream)
     return success_response(message="Tasks retrieved successfully.", data=result)
+
+
+@router.get(
+    "/projects/{project_id}/backlog",
+    response_model=APIResponse[TaskListResponse],
+    status_code=status.HTTP_200_OK,
+    summary="List unassigned backlog tasks for a project",
+    description="Returns project tasks with no sprint assigned, ordered by position ASC.",
+)
+def get_backlog(
+    project_id: UUID,
+    workstream: str | None = Query(None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = TaskService(db)
+    result = service.get_backlog(project_id, current_user, workstream)
+    return success_response(message="Backlog tasks retrieved successfully.", data=result)
+
+
+@router.post(
+    "/projects/{project_id}/backlog/reorder",
+    response_model=APIResponse[TaskListResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Reorder backlog items for a project",
+    description="Updates task positions sequentially using an ordered array of task IDs. Requires PM/TL/Admin.",
+)
+def reorder_backlog(
+    project_id: UUID,
+    data: ReorderBacklogRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = TaskService(db)
+    result = service.reorder_backlog(project_id, data.task_ids, current_user)
+    return success_response(message="Backlog reordered successfully.", data=result)
 
 
 @router.post(

@@ -94,7 +94,7 @@ export default function SprintsPage() {
                         {project.name}
                       </h4>
                     </div>
-                    <span className="px-2 py-0.5 rounded text-[0.65rem] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                    <span className="px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                       {project.status}
                     </span>
                   </div>

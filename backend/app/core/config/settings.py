@@ -7,6 +7,7 @@ from app.core.config.ai import AISettings
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Synapse"
+    FRONTEND_URL: str = "http://localhost:3000"
     GOOGLE_CLIENT_ID: str = "739603254405-bh9v6k5kaccp7duuoasp4sfgnufsnkqe.apps.googleusercontent.com"
     GOOGLE_CLIENT_SECRET: str = "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"
 

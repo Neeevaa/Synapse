@@ -75,17 +75,30 @@ def require_admin():
     return require_role([CompanyRole.OWNER, CompanyRole.ADMIN])
 
 
+def require_super_admin():
+    """
+    Dependency factory to restrict access strictly to platform Super Admins (is_super_admin == True).
+    Independent of company_id or project_id context.
+    """
+    def dependency(current_user: User = Depends(get_current_user)) -> User:
+        if current_user.is_super_admin:
+            return current_user
+        raise Forbidden("Only platform Super Admins can access this resource.")
+
+    return dependency
+
+
 def check_project_role_or_company_admin(
     db: Session,
     user: User,
     project_id: UUID,
-    allowed_project_roles: list[ProjectRole],
+    allowed_project_roles: list[ProjectRole] | None = None,
 ) -> Project:
     """
     Verifies project access and permissions for a user:
-    1. Rejects cross-tenant access if project.company_id != user.company_id (checked before role evaluation).
+    1. Rejects cross-tenant access if project.company_id != user.company_id.
     2. Allows company OWNER or ADMIN.
-    3. Allows user if their ProjectMember.role for project_id matches any of allowed_project_roles.
+    3. Allows user if their ProjectMember.role for project_id matches allowed_project_roles (or any ProjectMember if None).
     """
     project = db.execute(select(Project).filter(Project.id == project_id)).scalar_one_or_none()
     if not project:
@@ -106,7 +119,10 @@ def check_project_role_or_company_admin(
         )
     ).scalar_one_or_none()
 
-    if pm and pm.role in allowed_project_roles:
+    if not pm:
+        raise Forbidden("You do not have access to this project.")
+
+    if allowed_project_roles is None or pm.role in allowed_project_roles:
         return project
 
     raise Forbidden("Only Project Managers, Admins, or Owners can update project details.")

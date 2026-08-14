@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import BaseModel
-from app.models.enums import ProjectRole
+from app.models.enums import ProjectRole, Specialization
 
 
 class ProjectMember(BaseModel):
@@ -23,6 +23,11 @@ class ProjectMember(BaseModel):
         Enum(ProjectRole, create_type=False),
         default=ProjectRole.DEVELOPER,
         nullable=False,
+    )
+
+    specialization: Mapped[Specialization | None] = mapped_column(
+        Enum(Specialization, create_type=False),
+        nullable=True,
     )
 
     project = relationship(

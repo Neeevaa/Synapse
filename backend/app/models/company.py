@@ -2,7 +2,7 @@ from sqlalchemy import Boolean, Enum, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import BaseModel
-from app.models.enums import SubscriptionPlan
+from app.models.enums import SubscriptionPlan, CompanyStatus
 
 
 class Company(BaseModel):
@@ -37,6 +37,12 @@ class Company(BaseModel):
     subscription_plan: Mapped[SubscriptionPlan] = mapped_column(
         Enum(SubscriptionPlan),
         default=SubscriptionPlan.FREE,
+    )
+
+    status: Mapped[CompanyStatus] = mapped_column(
+        Enum(CompanyStatus, name="companystatus"),
+        default=CompanyStatus.ACTIVE,
+        nullable=False,
     )
 
     is_active: Mapped[bool] = mapped_column(

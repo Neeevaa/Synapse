@@ -1,385 +1,336 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ProtectedShell from "@/components/ProtectedShell";
 import { api } from "@/lib/api";
-import { formatRoleLabel } from "@/lib/roleUtils";
 import {
-  FolderKanban,
-  CheckSquare,
-  Users,
-  Zap,
-  ArrowRight,
-  Plus,
+  DashboardContextData,
+  TaskItem,
+  FormatBadge,
+  WorkstreamBadge,
+  MyActiveTasksWidget,
+  CurrentSprintWidget,
+  SpecializationWidgetContainer,
+  ViewerWorkspaceView,
+  TeamLeadWorkspaceView,
+  ProjectManagerWorkspaceView,
+  OwnerAdminWorkspaceView,
+} from "@/components/dashboard/WorkspaceWidgets";
+import {
   Loader2,
   AlertCircle,
-  UserCheck,
+  FolderKanban,
   Building,
-  Activity,
-  ShieldCheck,
-  BarChart3,
-  GitPullRequest,
-  Eye,
-  AlertTriangle,
+  UserCheck,
+  Plus,
+  ArrowRight,
+  ChevronDown,
+  Layers,
 } from "lucide-react";
 
-interface ProjectItem {
-  id: string;
-  name: string;
-  description: string | null;
-  status: string;
-  creator_name: string | null;
-  created_at: string;
-}
-
-interface UserProfile {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  role: string;
-  company_role?: string;
-  project_roles?: string[];
-  designation?: string | null;
-}
-
 export default function UnifiedDashboardPage() {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const router = useRouter();
+
+  const [context, setContext] = useState<DashboardContextData | null>(null);
+  const [activeTasks, setActiveTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [contextLoading, setContextLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchDashboardData = useCallback(async () => {
-    setLoading(true);
+  // Fetch server-driven dashboard context
+  const fetchDashboardContext = useCallback(async (targetProjectId?: string) => {
+    if (targetProjectId) {
+      setContextLoading(true);
+    } else {
+      setLoading(true);
+    }
     setError(null);
+
     try {
-      const [userRes, projectsRes] = await Promise.all([
-        api.get("/auth/me"),
-        api.get("/projects"),
-      ]);
-      setUser(userRes.data.data);
-      setProjects(projectsRes.data.data.projects);
+      const url = targetProjectId
+        ? `/dashboard/context?project_id=${targetProjectId}`
+        : "/dashboard/context";
+
+      const res = await api.get(url);
+      const data: DashboardContextData = res.data.data;
+
+      // Super Admin Guard -> Redirect to /admin
+      if (data.user.is_super_admin) {
+        router.replace("/admin");
+        return;
+      }
+
+      setContext(data);
+
+      // If active project resolved, fetch active tasks assigned to user
+      if (data.active_project?.project_id) {
+        try {
+          const tasksRes = await api.get(
+            `/projects/${data.active_project.project_id}/tasks`
+          );
+          const allTasks: TaskItem[] = tasksRes.data.data.tasks || [];
+          // Filter tasks assigned to current user or active in project
+          const myTasks = allTasks.filter(
+            (t) => t.assignee_name && t.assignee_name.includes(data.user.first_name)
+          );
+          setActiveTasks(myTasks.length > 0 ? myTasks : allTasks);
+        } catch {
+          setActiveTasks([]);
+        }
+      } else {
+        setActiveTasks([]);
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to load dashboard data.");
+      setError(err.response?.data?.message || "Failed to load dashboard context.");
     } finally {
       setLoading(false);
+      setContextLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+    fetchDashboardContext();
+  }, [fetchDashboardContext]);
 
-  const companyRole = user?.company_role || user?.role;
-  const isOwner = companyRole === "OWNER";
-  const isAdmin = companyRole === "ADMIN";
-  const projectRoles = user?.project_roles || [];
-  const isPM = projectRoles.includes("PROJECT_MANAGER");
-  const isDeveloper = projectRoles.includes("DEVELOPER") || (!isOwner && !isAdmin && !isPM && !projectRoles.includes("VIEWER"));
-  const isViewer = projectRoles.includes("VIEWER");
+  // Handle active project switcher selection
+  const handleProjectSwitch = (newProjectId: string) => {
+    if (!newProjectId || newProjectId === context?.active_project?.project_id) return;
+    fetchDashboardContext(newProjectId);
+  };
+
+  const user = context?.user;
+  const activeProj = context?.active_project;
+  const capabilities = context?.capabilities;
+  const companyRole = user?.company_role;
+  const projectRole = activeProj?.project_role;
+  const specialization = activeProj?.specialization;
+
+  const isOwnerAdmin = companyRole === "OWNER" || companyRole === "ADMIN";
+  const isPM = projectRole === "PROJECT_MANAGER";
+  const isTeamLead = projectRole === "TEAM_LEAD";
+  const isViewer = capabilities?.is_read_only || projectRole === "VIEWER";
+  const isDeveloper = !isOwnerAdmin && !isPM && !isTeamLead && !isViewer;
 
   return (
-    <ProtectedShell pageTitle="Dashboard">
-      <div className="space-y-6">
-        {/* Loading State */}
+    <ProtectedShell pageTitle="Unified Workspace Dashboard">
+      <div className="space-y-6 max-w-7xl mx-auto">
+        {/* Loading State Skeleton */}
         {loading && (
-          <div className="flex items-center justify-center py-20">
+          <div className="flex flex-col items-center justify-center py-24 space-y-4">
             <Loader2 className="size-10 text-primary animate-spin" />
+            <p className="text-sm font-semibold text-muted-foreground">
+              Loading server-driven workspace context...
+            </p>
           </div>
         )}
 
-        {/* Error State */}
+        {/* Error Boundary */}
         {error && !loading && (
-          <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-4 text-sm text-destructive">
-            <AlertCircle className="size-5 shrink-0" />
-            <span>{error}</span>
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/10 p-6 text-center max-w-lg mx-auto space-y-2">
+            <AlertCircle className="size-8 text-destructive mx-auto" />
+            <h3 className="text-base font-bold text-foreground">Workspace Error</h3>
+            <p className="text-xs text-muted-foreground">{error}</p>
           </div>
         )}
 
-        {!loading && !error && user && (
-          <>
-            {/* Header Banner */}
-            <div className="rounded-xl border border-border bg-card p-6 shadow-2xs dark:bg-card">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {!loading && !error && context && (
+          <div className="space-y-6">
+            {/* TOP WELCOME BANNER & ACTIVE PROJECT SWITCHER */}
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-2xs space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <UserCheck className="size-6 text-primary" />
+                  <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <UserCheck className="size-6" />
                   </div>
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-2xl font-bold text-foreground">
-                        Welcome back, {user.first_name}!
+                      <h2 className="text-xl sm:text-2xl font-extrabold text-foreground">
+                        Welcome back, {user?.first_name}!
                       </h2>
-                      <span className="px-2.5 py-0.5 rounded text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-                        {formatRoleLabel(companyRole)}
-                      </span>
-                      {user.designation && (
-                        <span className="px-2.5 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground">
-                          {user.designation}
-                        </span>
+
+                      {companyRole && (
+                        <FormatBadge
+                          label={`Company: ${companyRole}`}
+                          colorClass="bg-primary/10 text-primary border-primary/20"
+                        />
+                      )}
+
+                      {projectRole && (
+                        <FormatBadge
+                          label={`Role: ${projectRole}`}
+                          colorClass="bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                        />
+                      )}
+
+                      {specialization && (
+                        <WorkstreamBadge workstream={specialization} />
                       )}
                     </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {isOwner
-                        ? "Organization Overview, Company Analytics & Project Controls."
-                        : isAdmin
-                        ? "Organization Overview, Project Statistics & Team Controls."
+
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {isOwnerAdmin
+                        ? "Company Overview, Analytics & Organization Controls."
                         : isPM
                         ? "Managed Projects, Sprint Progress & Deliverables."
+                        : isTeamLead
+                        ? "Team Workload, Deliverables & Workstream Distribution."
                         : isViewer
-                        ? "Read-only Project Overview & Status Updates."
-                        : "Assigned Tasks, Active Sprint Work & Code Reviews."}
+                        ? "Read-only Project Workspace & Milestone Overview."
+                        : "Assigned Tasks, Active Sprint Work & Specialization Workstation."}
                     </p>
                   </div>
                 </div>
 
-                {(isOwner || isAdmin || isPM) && (
+                {capabilities?.can_manage_members && (
                   <Link
                     href="/projects"
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-2xs hover:bg-primary/95 shrink-0"
+                    className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-2xs hover:bg-primary/95 transition-all cursor-pointer shrink-0"
                   >
                     <Plus className="size-4" /> New Project
                   </Link>
                 )}
               </div>
-            </div>
 
-            {/* DYNAMIC WIDGETS BY ROLE */}
-
-            {/* 1. OWNER WIDGETS */}
-            {isOwner && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Company Projects
-                    </span>
+              {/* ACTIVE PROJECT CONTEXT SWITCHER DROPDOWN */}
+              {context.projects.length > 0 && (
+                <div className="pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/30 p-4 rounded-xl">
+                  <div className="flex items-center gap-2 text-xs font-bold text-foreground">
                     <Building className="size-4 text-primary" />
+                    <span>Company: <strong className="text-foreground">{activeProj?.company_name || "Synapse"}</strong></span>
                   </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">{projects.length}</div>
-                </div>
 
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Organization Analytics
-                    </span>
-                    <BarChart3 className="size-4 text-secondary" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">100% Operational</div>
-                </div>
-
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Team Management
-                    </span>
-                    <Users className="size-4 text-emerald-500" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">Active</div>
-                </div>
-
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      AI System Health
-                    </span>
-                    <Zap className="size-4 text-amber-500" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">Healthy</div>
-                </div>
-              </div>
-            )}
-
-            {/* 2. ADMIN WIDGETS */}
-            {isAdmin && !isOwner && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Project Statistics
-                    </span>
-                    <Building className="size-4 text-primary" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">{projects.length} Total</div>
-                </div>
-
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Team Controls
-                    </span>
-                    <ShieldCheck className="size-4 text-emerald-500" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">Admin Access</div>
-                </div>
-
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Platform Status
-                    </span>
-                    <Activity className="size-4 text-secondary" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">Active</div>
-                </div>
-              </div>
-            )}
-
-            {/* 3. PROJECT MANAGER WIDGETS */}
-            {isPM && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Managed Projects
-                    </span>
-                    <FolderKanban className="size-4 text-primary" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">{projects.length}</div>
-                </div>
-
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Sprint Progress
-                    </span>
-                    <Zap className="size-4 text-emerald-500" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">On Track</div>
-                </div>
-
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Active Risks
-                    </span>
-                    <AlertTriangle className="size-4 text-amber-500" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">0 Blockers</div>
-                </div>
-              </div>
-            )}
-
-            {/* 4. DEVELOPER WIDGETS */}
-            {isDeveloper && !isOwner && !isAdmin && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Assigned Workspace Projects
-                    </span>
-                    <FolderKanban className="size-4 text-primary" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">{projects.length}</div>
-                </div>
-
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Active Sprint Work
-                    </span>
-                    <CheckSquare className="size-4 text-secondary" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">Active</div>
-                </div>
-
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Code Review Requests
-                    </span>
-                    <GitPullRequest className="size-4 text-purple-500" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">0 Pending</div>
-                </div>
-              </div>
-            )}
-
-            {/* 5. VIEWER WIDGETS */}
-            {isViewer && !isOwner && !isAdmin && !isPM && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Read-Only Projects
-                    </span>
-                    <Eye className="size-4 text-primary" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">{projects.length}</div>
-                </div>
-
-                <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Access Level
-                    </span>
-                    <ShieldCheck className="size-4 text-muted-foreground" />
-                  </div>
-                  <div className="mt-3 text-2xl font-bold text-foreground">Viewer</div>
-                </div>
-              </div>
-            )}
-
-            {/* Projects Overview Grid */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-foreground">Projects Overview</h3>
-                <Link href="/projects" className="text-xs font-semibold text-primary hover:underline">
-                  View All Projects
-                </Link>
-              </div>
-
-              {projects.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-                  {isOwner || isAdmin || isPM
-                    ? "No projects created yet. Click 'New Project' to get started."
-                    : "No projects assigned to your workspace yet."}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {projects.map((project) => (
-                    <div
-                      key={project.id}
-                      className="rounded-xl border border-border bg-card p-5 shadow-2xs flex flex-col justify-between hover:border-primary/50 transition-all dark:bg-card"
-                    >
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <h4 className="text-base font-bold text-foreground line-clamp-1">
-                            {project.name}
-                          </h4>
-                          <span className="px-2 py-0.5 rounded text-[0.65rem] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                            {project.status}
-                          </span>
-                        </div>
-                        {project.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                            {project.description}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
-                        <Link
-                          href={`/projects/${project.id}`}
-                          className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
-                        >
-                          View Details
-                        </Link>
-                        <Link
-                          href={`/projects/${project.id}/board`}
-                          className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-2xs hover:bg-primary/95"
-                        >
-                          Open Board <ArrowRight className="size-3" />
-                        </Link>
-                      </div>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <label className="text-xs font-bold text-muted-foreground">Active Project:</label>
+                    <div className="relative">
+                      <select
+                        value={activeProj?.project_id || ""}
+                        onChange={(e) => handleProjectSwitch(e.target.value)}
+                        disabled={contextLoading}
+                        className="pl-3 pr-8 py-1.5 text-xs font-bold rounded-xl border border-border bg-background text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer disabled:opacity-50"
+                      >
+                        {context.projects.map((p) => (
+                          <option key={p.project_id} value={p.project_id}>
+                            {p.project_name} ({p.project_role}{p.specialization ? ` — ${p.specialization}` : ""})
+                          </option>
+                        ))}
+                      </select>
+                      {contextLoading && (
+                        <Loader2 className="size-3.5 text-primary animate-spin absolute right-2 top-2.5" />
+                      )}
                     </div>
-                  ))}
+                  </div>
                 </div>
               )}
             </div>
-          </>
+
+            {/* NO ACTIVE PROJECT STATE */}
+            {!activeProj && (
+              <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center space-y-3">
+                <FolderKanban className="size-10 text-muted-foreground/40 mx-auto" />
+                <h3 className="text-base font-bold text-foreground">No Authorized Projects Found</h3>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                  You are not currently assigned to any project in this organization. Contact your Project Manager or Company Owner for project invitations.
+                </p>
+              </div>
+            )}
+
+            {/* WORKSPACE RENDERING DRIVEN BY ROLE PRECEDENCE FOR ACTIVE PROJECT */}
+
+            {activeProj && (
+              <div className="space-y-6">
+                {/* 1. VIEWER WORKSPACE (Read-Only) */}
+                {isViewer && <ViewerWorkspaceView context={context} />}
+
+                {/* 2. OWNER / ADMIN WORKSPACE */}
+                {isOwnerAdmin && <OwnerAdminWorkspaceView context={context} />}
+
+                {/* 3. PROJECT MANAGER WORKSPACE */}
+                {isPM && !isOwnerAdmin && <ProjectManagerWorkspaceView context={context} />}
+
+                {/* 4. TEAM LEAD WORKSPACE */}
+                {isTeamLead && !isOwnerAdmin && !isPM && (
+                  <TeamLeadWorkspaceView context={context} tasks={activeTasks} />
+                )}
+
+                {/* 5. DEVELOPER WORKSPACE (Common + Specialization Layer) */}
+                {isDeveloper && (
+                  <div className="space-y-6">
+                    <CurrentSprintWidget metrics={context.metrics} projectId={activeProj.project_id} />
+                    <MyActiveTasksWidget tasks={activeTasks} projectId={activeProj.project_id} />
+                    <SpecializationWidgetContainer
+                      specialization={specialization || null}
+                      tasks={activeTasks}
+                      projectId={activeProj.project_id}
+                    />
+                  </div>
+                )}
+
+                {/* PROJECTS OVERVIEW GRID FOR ACTIVE CONTEXT */}
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-2xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-border pb-3">
+                    <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                      <FolderKanban className="size-5 text-primary" /> Authorized Workspace Projects ({context.projects.length})
+                    </h3>
+                    <Link href="/projects" className="text-xs font-bold text-primary hover:underline">
+                      View All Projects
+                    </Link>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {context.projects.map((p) => {
+                      const isCurrent = p.project_id === activeProj.project_id;
+                      return (
+                        <div
+                          key={p.project_id}
+                          className={`rounded-xl border p-4 shadow-2xs space-y-3 transition-all ${
+                            isCurrent
+                              ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                              : "border-border bg-background hover:border-border/80"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <h4 className="text-xs font-bold text-foreground truncate">{p.project_name}</h4>
+                            <FormatBadge
+                              label={p.project_role}
+                              colorClass={isCurrent ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border"}
+                            />
+                          </div>
+
+                          {p.specialization && (
+                            <div>
+                              <WorkstreamBadge workstream={p.specialization} />
+                            </div>
+                          )}
+
+                          <div className="pt-2 border-t border-border/60 flex items-center justify-between text-xs">
+                            {isCurrent ? (
+                              <span className="font-extrabold text-primary">Active Workspace</span>
+                            ) : (
+                              <button
+                                onClick={() => handleProjectSwitch(p.project_id)}
+                                className="font-bold text-primary hover:underline cursor-pointer"
+                              >
+                                Switch Context
+                              </button>
+                            )}
+
+                            <Link
+                              href={`/projects/${p.project_id}`}
+                              className="font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1"
+                            >
+                              Project Page <ArrowRight className="size-3" />
+                            </Link>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </ProtectedShell>

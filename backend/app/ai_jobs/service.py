@@ -45,6 +45,19 @@ class AIJobService:
         return self._build_job_response(job)
 
     def create_job(self, data: CreateAIJobRequest, current_user: User) -> AIJobResponse:
+        from app.models.project import Project
+        from app.subscriptions.service import EntitlementService
+        from app.subscriptions.entitlements import FEATURE_BASIC_AI_ASSISTANCE
+
+        project = self.db.execute(
+            select(Project).filter(Project.id == data.project_id)
+        ).scalar_one_or_none()
+
+        if project and project.company_id:
+            ent = EntitlementService(self.db)
+            ent.check_feature_entitlement(project.company_id, FEATURE_BASIC_AI_ASSISTANCE)
+            ent.check_ai_execution_limit(project.company_id)
+
         try:
             job = AIJob(
                 project_id=data.project_id,

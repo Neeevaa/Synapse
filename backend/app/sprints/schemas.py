@@ -6,6 +6,8 @@ from datetime import datetime
 class CreateSprintRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=150, description="Sprint name")
     goal: str | None = Field(None, max_length=1000, description="Sprint goal")
+    status: str | None = Field(default="PLANNED", description="SprintStatus: PLANNED, ACTIVE, COMPLETED")
+    capacity: int | None = Field(None, ge=0, le=1000, description="Target capacity in story points")
     start_date: datetime | None = None
     end_date: datetime | None = None
 
@@ -29,6 +31,7 @@ class UpdateSprintRequest(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=150)
     goal: str | None = Field(None, max_length=1000)
     status: str | None = None
+    capacity: int | None = Field(None, ge=0, le=1000)
     start_date: datetime | None = None
     end_date: datetime | None = None
 
@@ -56,6 +59,9 @@ class SprintResponse(BaseModel):
     name: str
     goal: str | None = None
     status: str
+    capacity: int | None = Field(None, description="Target capacity in story points")
+    allocated_points: int = Field(0, description="Sum of story points currently assigned to sprint")
+    remaining_capacity: int | None = Field(None, description="Remaining capacity (capacity - allocated_points), can be negative")
     start_date: datetime | None = None
     end_date: datetime | None = None
     total_tasks: int = 0
