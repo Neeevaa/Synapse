@@ -1,5 +1,6 @@
 from logging.config import fileConfig
 
+# pyrefly: ignore [missing-import]
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from app.models import Base
@@ -18,6 +19,10 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
+from dotenv import load_dotenv
+
+load_dotenv()
+
 import os
 target_metadata = Base.metadata
 

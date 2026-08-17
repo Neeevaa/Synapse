@@ -12,14 +12,13 @@ class JWTSettings:
 
 
 class DatabaseSettings:
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+psycopg://postgres:postgres@localhost:5432/synapse")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+psycopg://postgres:ryan@localhost:5432/synapse")
 
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Synapse"
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
-    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
-    
+    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "") 
     EMBEDDING_DIMENSION: int = int(os.getenv("EMBEDDING_DIMENSION", "1536"))
     EMBEDDING_PROVIDER: str = os.getenv("EMBEDDING_PROVIDER", "mock")
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "mock")

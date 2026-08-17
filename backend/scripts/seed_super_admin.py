@@ -10,6 +10,8 @@ from app.models.user import User
 from app.core.security import hash_password
 
 
+from app.models.enums import CompanyRole
+
 def seed_super_admin():
     db = SessionLocal()
     try:
@@ -36,7 +38,7 @@ def seed_super_admin():
                     first_name="Super",
                     last_name="Admin",
                     company_id=None,
-                    role=None,
+                    role=CompanyRole.ADMIN,
                     is_super_admin=True,
                     is_verified=True,
                     is_active=True,
