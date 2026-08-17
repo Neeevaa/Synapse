@@ -26,6 +26,8 @@ class InvitationStatus(str, Enum):
 class CompanyRole(str, Enum):
     OWNER = "OWNER"
     ADMIN = "ADMIN"
+    MEMBER = "MEMBER"
+    VIEWER = "VIEWER"
 
 
 class ProjectRole(str, Enum):
