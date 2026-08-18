@@ -1,8 +1,15 @@
 import logging
 import hashlib
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
+
+def _to_naive_utc(dt: datetime | None) -> datetime | None:
+    if dt is None:
+        return None
+    if dt.tzinfo is not None:
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt
 
 logger = logging.getLogger("app")
 
@@ -139,7 +146,7 @@ class ProjectMemberService:
 
         if existing_pending_inv:
             # If expired, mark expired to allow new invite
-            if existing_pending_inv.expires_at < datetime.utcnow():
+            if _to_naive_utc(existing_pending_inv.expires_at) < datetime.utcnow():
                 existing_pending_inv.status = InvitationStatus.EXPIRED
                 self.db.commit()
             else:
@@ -343,12 +350,13 @@ class ProjectMemberService:
             raise ResourceNotFound("Invalid or unknown invitation token.")
 
         now = datetime.utcnow()
-        if invitation.status == InvitationStatus.PENDING and invitation.expires_at < now:
+        exp_naive = _to_naive_utc(invitation.expires_at)
+        if invitation.status == InvitationStatus.PENDING and exp_naive and exp_naive < now:
             invitation.status = InvitationStatus.EXPIRED
             self.db.commit()
 
         status_str = invitation.status.value if isinstance(invitation.status, InvitationStatus) else str(invitation.status)
-        is_valid = invitation.status == InvitationStatus.PENDING and invitation.expires_at >= now
+        is_valid = invitation.status == InvitationStatus.PENDING and exp_naive is not None and exp_naive >= now
 
         inviter_name = f"{invitation.inviter.first_name} {invitation.inviter.last_name}" if invitation.inviter else "Project Manager"
         company_name = invitation.company.name if invitation.company else "Company"
@@ -370,19 +378,81 @@ class ProjectMemberService:
             is_valid=is_valid,
         )
 
-    def accept_invitation(self, raw_token: str, current_user: User) -> ProjectMemberResponse:
+    def get_my_pending_invitations(self, current_user: User) -> list[ValidateInvitationResponse]:
         """
-        Authenticated user accepts a valid project invitation token.
+        Retrieves all active pending invitations for the authenticated user's email address.
+        Uses a single database JOIN query to prevent N+1 issues and filters out deleted projects.
         """
-        token_hash = hash_invitation_token(raw_token)
-        invitation = self.db.execute(
-            select(Invitation).filter(Invitation.token_hash == token_hash)
-        ).scalar_one_or_none()
+        email_clean = current_user.email.strip().lower()
+        now = datetime.utcnow()
+
+        invitations = self.db.execute(
+            select(Invitation)
+            .join(Project, Invitation.project_id == Project.id)
+            .filter(
+                func.lower(Invitation.email) == email_clean,
+                Invitation.status == InvitationStatus.PENDING,
+                Invitation.expires_at >= now,
+            )
+            .order_by(Invitation.created_at.desc())
+        ).scalars().all()
+
+        results = []
+        for inv in invitations:
+            # Check if user is already a member of this project
+            existing_member = self.repo.get_member(inv.project_id, current_user.id)
+            if existing_member:
+                continue
+
+            inviter_name = f"{inv.inviter.first_name} {inv.inviter.last_name}" if inv.inviter else "Project Manager"
+            company_name = inv.company.name if inv.company else "Company"
+            project_name = inv.project.name if inv.project else "Project"
+
+            results.append(
+                ValidateInvitationResponse(
+                    id=inv.id,
+                    company_id=inv.company_id,
+                    company_name=company_name,
+                    project_id=inv.project_id,
+                    project_name=project_name,
+                    email=inv.email,
+                    project_role=inv.project_role.value if isinstance(inv.project_role, ProjectRole) else str(inv.project_role),
+                    specialization=inv.specialization.value if inv.specialization else None,
+                    personal_message=inv.personal_message,
+                    inviter_name=inviter_name,
+                    status=inv.status.value if isinstance(inv.status, InvitationStatus) else str(inv.status),
+                    expires_at=inv.expires_at,
+                    is_valid=True,
+                )
+            )
+
+        return results
+
+    def accept_invitation(
+        self,
+        raw_token: str | None,
+        current_user: User,
+        invitation_id: UUID | None = None,
+    ) -> ProjectMemberResponse:
+        """
+        Authenticated user accepts a valid project invitation token or invitation_id.
+        """
+        invitation = None
+        if raw_token:
+            token_hash = hash_invitation_token(raw_token)
+            invitation = self.db.execute(
+                select(Invitation).filter(Invitation.token_hash == token_hash)
+            ).scalar_one_or_none()
+        elif invitation_id:
+            invitation = self.db.execute(
+                select(Invitation).filter(Invitation.id == invitation_id)
+            ).scalar_one_or_none()
 
         if not invitation:
             raise ResourceNotFound("Invalid or unknown invitation token.")
 
-        if invitation.status == InvitationStatus.EXPIRED or (invitation.status == InvitationStatus.PENDING and invitation.expires_at < datetime.utcnow()):
+        exp_naive = _to_naive_utc(invitation.expires_at)
+        if invitation.status == InvitationStatus.EXPIRED or (invitation.status == InvitationStatus.PENDING and exp_naive and exp_naive < datetime.utcnow()):
             invitation.status = InvitationStatus.EXPIRED
             self.db.commit()
             raise BaseBusinessException("This invitation link has expired.", status_code=400)

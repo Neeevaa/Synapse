@@ -66,6 +66,28 @@ interface ProjectMemberItem {
   user_name: string;
   user_email: string;
   role: string;
+  specialization?: string | null;
+}
+
+function formatMemberRole(mem: { role: string; specialization?: string | null }): string {
+  if (mem.specialization) {
+    const specMap: Record<string, string> = {
+      UI_UX: "UI/UX Designer",
+      FRONTEND: "Frontend Developer",
+      BACKEND: "Backend Developer",
+      AI_ML: "AI/ML Engineer",
+      QA: "QA / Testing",
+      DEVOPS: "DevOps Engineer",
+      FULLSTACK: "Fullstack Developer",
+      OTHER: "Developer",
+    };
+    return specMap[mem.specialization] || mem.specialization;
+  }
+  if (mem.role === "PROJECT_MANAGER") return "Project Manager";
+  if (mem.role === "TEAM_LEAD") return "Team Lead";
+  if (mem.role === "DEVELOPER") return "Developer";
+  if (mem.role === "VIEWER") return "Viewer";
+  return mem.role || "Member";
 }
 
 export default function MeetingsListPage() {
@@ -119,6 +141,7 @@ export default function MeetingsListPage() {
         user_name: m.user_name || `${m.user?.first_name || ""} ${m.user?.last_name || ""}`.trim() || m.user?.email || "Member",
         user_email: m.user_email || m.user?.email || "",
         role: m.role,
+        specialization: m.specialization,
       }));
       setProjectMembers(formatted);
     } catch {}
@@ -609,7 +632,7 @@ export default function MeetingsListPage() {
                       >
                         {projectMembers.map((mem) => (
                           <option key={mem.id} value={mem.user_id}>
-                            {mem.user_name} ({mem.role})
+                            {mem.user_name} ({formatMemberRole(mem)})
                           </option>
                         ))}
                       </select>
@@ -636,7 +659,7 @@ export default function MeetingsListPage() {
                                 className="accent-cyan-500 rounded"
                               />
                               <span className="truncate">{mem.user_name}</span>
-                              <span className="text-[10px] text-slate-500 ml-auto font-mono">({mem.role})</span>
+                              <span className="text-[10px] text-slate-500 ml-auto font-mono">({formatMemberRole(mem)})</span>
                             </label>
                           );
                         })}

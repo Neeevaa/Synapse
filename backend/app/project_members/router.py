@@ -174,6 +174,24 @@ def validate_invitation_token(
     )
 
 
+@router.get(
+    "/invitations/my-pending",
+    response_model=APIResponse[list[ValidateInvitationResponse]],
+    status_code=status.HTTP_200_OK,
+    summary="Get all active pending invitations for the current user",
+)
+def get_my_pending_invitations(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = ProjectMemberService(db)
+    result = service.get_my_pending_invitations(current_user)
+    return success_response(
+        message="Pending invitations retrieved successfully.",
+        data=result,
+    )
+
+
 @router.post(
     "/invitations/accept",
     response_model=APIResponse[ProjectMemberResponse],
@@ -186,7 +204,7 @@ def accept_invitation_token(
     db: Session = Depends(get_db),
 ):
     service = ProjectMemberService(db)
-    result = service.accept_invitation(data.token, current_user)
+    result = service.accept_invitation(data.token, current_user, invitation_id=data.invitation_id)
     return success_response(
         message="Invitation accepted and project membership granted.",
         data=result,

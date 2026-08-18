@@ -249,10 +249,12 @@ class AuthService:
                 )
             ).scalar_one_or_none()
 
-            if target_invitation and target_invitation.expires_at < datetime.utcnow():
-                target_invitation.status = InvitationStatus.EXPIRED
-                self.db.commit()
-                raise BaseBusinessException("This invitation link has expired.", status_code=400)
+            if target_invitation:
+                inv_exp = target_invitation.expires_at.replace(tzinfo=None) if target_invitation.expires_at.tzinfo else target_invitation.expires_at
+                if inv_exp < datetime.utcnow():
+                    target_invitation.status = InvitationStatus.EXPIRED
+                    self.db.commit()
+                    raise BaseBusinessException("This invitation link has expired.", status_code=400)
 
         # Find pending invitations for this email
         invitations = self.db.execute(

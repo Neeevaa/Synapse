@@ -38,7 +38,7 @@ def list_sprints(
 
 @router.get(
     "/projects/{project_id}/sprints/active",
-    response_model=APIResponse[SprintResponse],
+    response_model=APIResponse[SprintResponse | None],
     status_code=status.HTTP_200_OK,
     summary="Get active sprint for a project",
 )
@@ -92,4 +92,22 @@ def update_sprint(
     return success_response(
         message="Sprint updated successfully.",
         data=result,
+    )
+
+
+@router.delete(
+    "/sprints/{sprint_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Delete a sprint",
+)
+def delete_sprint(
+    sprint_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = SprintService(db)
+    service.delete_sprint(sprint_id, current_user)
+    return success_response(
+        message="Sprint deleted successfully.",
+        data=None,
     )

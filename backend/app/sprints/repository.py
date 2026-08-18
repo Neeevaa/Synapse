@@ -47,3 +47,10 @@ class SprintRepository:
         self.db.add(sprint)
         self.db.flush()
         return sprint
+
+    def delete_sprint(self, sprint: Sprint) -> None:
+        """
+        Deletes a sprint.
+        """
+        self.db.delete(sprint)
+        self.db.flush()

@@ -1,7 +1,7 @@
 from uuid import uuid4
 from sqlalchemy import Column, String, Text, Integer, ForeignKey, DateTime, Enum, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 from app.models.base import Base
 from app.models.enums import (
@@ -66,7 +66,11 @@ class Meeting(Base):
         onupdate=func.now(),
     )
 
-    project = relationship("Project", backref="meetings")
+    project = relationship(
+        "Project",
+        backref=backref("meetings", cascade="all, delete-orphan", passive_deletes=True),
+        passive_deletes=True,
+    )
     company = relationship("Company", backref="meetings")
     organizer = relationship("User", foreign_keys=[organizer_id])
 

@@ -39,6 +39,33 @@ export default function UnifiedDashboardPage() {
   const [contextLoading, setContextLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Pending Invitations Discovery State
+  const [pendingInvites, setPendingInvites] = useState<any[]>([]);
+  const [acceptingInviteId, setAcceptingInviteId] = useState<string | null>(null);
+
+  const fetchPendingInvites = useCallback(async () => {
+    try {
+      const res = await api.get("/projects/invitations/my-pending");
+      setPendingInvites(res.data.data || []);
+    } catch {
+      // Non-blocking for dashboard
+    }
+  }, []);
+
+  const handleAcceptPendingInvite = async (invitationId: string) => {
+    setAcceptingInviteId(invitationId);
+    try {
+      const res = await api.post("/projects/invitations/accept", { invitation_id: invitationId });
+      const projId = res.data.data.project_id;
+      setPendingInvites((prev) => prev.filter((i) => i.id !== invitationId));
+      fetchDashboardContext(projId);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to accept invitation.");
+    } finally {
+      setAcceptingInviteId(null);
+    }
+  };
+
   // Fetch server-driven dashboard context
   const fetchDashboardContext = useCallback(async (targetProjectId?: string) => {
     if (targetProjectId) {
@@ -47,6 +74,7 @@ export default function UnifiedDashboardPage() {
       setLoading(true);
     }
     setError(null);
+    fetchPendingInvites();
 
     try {
       const url = targetProjectId
@@ -116,6 +144,43 @@ export default function UnifiedDashboardPage() {
   return (
     <ProtectedShell pageTitle="Unified Workspace Dashboard">
       <div className="space-y-6 max-w-7xl mx-auto">
+        {/* Pending Project Invitation Banner */}
+        {pendingInvites.length > 0 && !loading && (
+          <div className="rounded-xl border border-primary/30 bg-gradient-to-r from-primary/10 via-card to-card p-5 shadow-2xs space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded text-[0.7rem] font-bold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
+                    Pending Invitation
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Action Required
+                  </span>
+                </div>
+                <h4 className="text-base font-bold text-foreground">
+                  You have been invited to join <span className="text-primary font-bold">{pendingInvites[0].project_name}</span> at {pendingInvites[0].company_name}
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  Role: <strong className="text-foreground">{pendingInvites[0].project_role}</strong>
+                  {pendingInvites[0].specialization && <> | Specialization: <strong className="text-foreground">{pendingInvites[0].specialization}</strong></>}
+                  {" "}— Invited by {pendingInvites[0].inviter_name}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  disabled={acceptingInviteId === pendingInvites[0].id}
+                  onClick={() => handleAcceptPendingInvite(pendingInvites[0].id)}
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary/95 shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {acceptingInviteId === pendingInvites[0].id && <Loader2 className="size-3.5 animate-spin" />}
+                  Accept & Join Workspace
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Loading State Skeleton */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-24 space-y-4">

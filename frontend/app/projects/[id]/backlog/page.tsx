@@ -83,6 +83,27 @@ function getWorkstreamBadge(ws: string | null) {
   );
 }
 
+function formatMemberRole(m: ProjectMemberItem): string {
+  if (m.specialization) {
+    const specMap: Record<string, string> = {
+      UI_UX: "UI/UX Designer",
+      FRONTEND: "Frontend Developer",
+      BACKEND: "Backend Developer",
+      AI_ML: "AI/ML Engineer",
+      QA: "QA / Testing",
+      DEVOPS: "DevOps Engineer",
+      FULLSTACK: "Fullstack Developer",
+      OTHER: "Developer",
+    };
+    return specMap[m.specialization] || m.specialization;
+  }
+  if (m.role === "PROJECT_MANAGER") return "Project Manager";
+  if (m.role === "TEAM_LEAD") return "Team Lead";
+  if (m.role === "DEVELOPER") return "Developer";
+  if (m.role === "VIEWER") return "Viewer";
+  return m.role || "Member";
+}
+
 export default function ProjectBacklogPage() {
   const params = useParams();
   const projectId = params?.id as string;
@@ -538,7 +559,7 @@ export default function ProjectBacklogPage() {
                     <option value="UNASSIGNED">Unassigned Only</option>
                     {members.map((m) => (
                       <option key={m.user_id || m.id} value={m.user_id || ""}>
-                        {m.first_name} {m.last_name}
+                        {m.first_name} {m.last_name} ({formatMemberRole(m)})
                       </option>
                     ))}
                   </select>
@@ -699,7 +720,7 @@ export default function ProjectBacklogPage() {
                                 <option value="">Unassigned</option>
                                 {members.map((m) => (
                                   <option key={m.user_id || m.id} value={m.user_id || ""}>
-                                    {m.first_name} {m.last_name}
+                                    {m.first_name} {m.last_name} ({formatMemberRole(m)})
                                   </option>
                                 ))}
                               </select>
@@ -1100,7 +1121,7 @@ export default function ProjectBacklogPage() {
                       <option value="">Unassigned</option>
                       {members.map((m) => (
                         <option key={m.user_id || m.id} value={m.user_id || ""}>
-                          {m.first_name} {m.last_name} ({m.role})
+                          {m.first_name} {m.last_name} ({formatMemberRole(m)})
                         </option>
                       ))}
                     </select>

@@ -1,7 +1,7 @@
 from uuid import uuid4
 from sqlalchemy import Column, String, Text, Integer, Float, ForeignKey, DateTime, Enum, JSON, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 from app.models.base import Base
 from app.models.enums import (
@@ -67,7 +67,11 @@ class MeetingAnalysis(Base):
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
     meeting = relationship("Meeting", backref="analyses")
-    project = relationship("Project", backref="meeting_analyses")
+    project = relationship(
+        "Project",
+        backref=backref("meeting_analyses", cascade="all, delete-orphan", passive_deletes=True),
+        passive_deletes=True,
+    )
     company = relationship("Company", backref="meeting_analyses")
     ai_job = relationship("AIJob", foreign_keys=[ai_job_id])
 

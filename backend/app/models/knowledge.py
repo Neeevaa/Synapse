@@ -1,7 +1,7 @@
 from uuid import uuid4
 from sqlalchemy import Column, String, Text, Integer, Float, ForeignKey, DateTime, Enum, JSON, func
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 try:
     from pgvector.sqlalchemy import Vector
@@ -71,7 +71,11 @@ class KnowledgeDocument(Base):
         onupdate=func.now(),
     )
 
-    project = relationship("Project", backref="knowledge_documents")
+    project = relationship(
+        "Project",
+        backref=backref("knowledge_documents", cascade="all, delete-orphan", passive_deletes=True),
+        passive_deletes=True,
+    )
     company = relationship("Company", backref="knowledge_documents")
     chunks = relationship(
         "KnowledgeChunk",
@@ -120,7 +124,11 @@ class KnowledgeChunk(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     document = relationship("KnowledgeDocument", back_populates="chunks")
-    project = relationship("Project", backref="knowledge_chunks")
+    project = relationship(
+        "Project",
+        backref=backref("knowledge_chunks", cascade="all, delete-orphan", passive_deletes=True),
+        passive_deletes=True,
+    )
     company = relationship("Company", backref="knowledge_chunks")
 
 
@@ -154,6 +162,10 @@ class KnowledgeRetrievalLog(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    project = relationship("Project", backref="retrieval_logs")
+    project = relationship(
+        "Project",
+        backref=backref("retrieval_logs", cascade="all, delete-orphan", passive_deletes=True),
+        passive_deletes=True,
+    )
     company = relationship("Company", backref="retrieval_logs")
     user = relationship("User", foreign_keys=[user_id])

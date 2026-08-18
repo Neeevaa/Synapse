@@ -530,44 +530,103 @@ export default function ProjectDetailPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Link
-                    href={`/projects/${project.id}/traceability`}
-                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground shadow-xs transition-colors hover:bg-muted cursor-pointer"
-                  >
-                    <GitFork className="size-4 text-amber-500" /> Traceability Matrix
-                  </Link>
-                  <Link
-                    href={`/projects/${project.id}/knowledge`}
-                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground shadow-xs transition-colors hover:bg-muted cursor-pointer"
-                  >
-                    <Database className="size-4 text-purple-400" /> Knowledge Base
-                  </Link>
-                  <Link
-                    href={`/projects/${project.id}/meetings`}
-                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground shadow-xs transition-colors hover:bg-muted cursor-pointer"
-                  >
-                    <Video className="size-4 text-cyan-400" /> Meetings
-                  </Link>
-                  <Link
-                    href={`/projects/${project.id}/requirements`}
-                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground shadow-xs transition-colors hover:bg-muted cursor-pointer"
-                  >
-                    <FileText className="size-4 text-emerald-400" /> Requirements
-                  </Link>
-                  <Link
-                    href={`/projects/${project.id}/backlog`}
-                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground shadow-xs transition-colors hover:bg-muted cursor-pointer"
-                  >
-                    <Layers className="size-4 text-primary" /> Backlog
-                  </Link>
-                  <Link
-                    href={`/projects/${project.id}/board`}
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/95 cursor-pointer"
-                  >
-                    <Kanban className="size-4" /> Open Sprint Board
-                  </Link>
+              {/* Grouped Feature Navigation Grid */}
+              <div className="mt-6 pt-6 border-t border-border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* GROUP 1 — PLAN */}
+                <div className="rounded-xl border border-border bg-card/60 p-3 space-y-2">
+                  <div className="text-[0.7rem] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Zap className="size-3 text-primary" /> Plan
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Link
+                      href={`/projects/${project.id}/board`}
+                      className="flex items-center justify-between p-2 rounded-lg bg-primary/10 hover:bg-primary/15 text-primary text-xs font-semibold transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Kanban className="size-3.5" /> Sprint Board
+                      </span>
+                      <span className="text-[0.65rem] px-1.5 py-0.5 rounded bg-primary/20 text-primary font-bold">Active</span>
+                    </Link>
+                    <Link
+                      href={`/projects/${project.id}/backlog`}
+                      className="flex items-center justify-between p-2 rounded-lg bg-background hover:bg-muted text-foreground text-xs font-medium border border-border transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Layers className="size-3.5 text-primary" /> Backlog Stream
+                      </span>
+                    </Link>
+                  </div>
                 </div>
+
+                {/* GROUP 2 — WORK */}
+                <div className="rounded-xl border border-border bg-card/60 p-3 space-y-2">
+                  <div className="text-[0.7rem] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <CheckSquare className="size-3 text-emerald-500" /> Work
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Link
+                      href={`/projects/${project.id}/requirements`}
+                      className="flex items-center justify-between p-2 rounded-lg bg-background hover:bg-muted text-foreground text-xs font-medium border border-border transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <FileText className="size-3.5 text-emerald-500" /> Requirements & Review
+                      </span>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* GROUP 3 — COLLABORATE */}
+                <div className="rounded-xl border border-border bg-card/60 p-3 space-y-2">
+                  <div className="text-[0.7rem] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Users className="size-3 text-cyan-500" /> Collaborate
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Link
+                      href={`/projects/${project.id}/meetings`}
+                      className="flex items-center justify-between p-2 rounded-lg bg-background hover:bg-muted text-foreground text-xs font-medium border border-border transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Video className="size-3.5 text-cyan-500" /> Meetings & Notes
+                      </span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("members")}
+                      className="flex items-center justify-between p-2 rounded-lg bg-background hover:bg-muted text-foreground text-xs font-medium border border-border transition-colors w-full text-left cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Users className="size-3.5 text-cyan-500" /> Team & Members
+                      </span>
+                      <span className="text-[0.65rem] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-bold">{members.length}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* GROUP 4 — INTELLIGENCE */}
+                <div className="rounded-xl border border-border bg-card/60 p-3 space-y-2">
+                  <div className="text-[0.7rem] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Database className="size-3 text-purple-400" /> Intelligence
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Link
+                      href={`/projects/${project.id}/knowledge`}
+                      className="flex items-center justify-between p-2 rounded-lg bg-background hover:bg-muted text-foreground text-xs font-medium border border-border transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Database className="size-3.5 text-purple-400" /> Knowledge Base
+                      </span>
+                    </Link>
+                    <Link
+                      href={`/projects/${project.id}/traceability`}
+                      className="flex items-center justify-between p-2 rounded-lg bg-background hover:bg-muted text-foreground text-xs font-medium border border-border transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <GitFork className="size-3.5 text-amber-500" /> Traceability Matrix
+                      </span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
               </div>
 
               {/* Sub-nav Tabs */}

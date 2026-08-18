@@ -101,7 +101,8 @@ class ValidateInvitationResponse(BaseModel):
 
 
 class AcceptInvitationRequest(BaseModel):
-    token: str = Field(..., min_length=1, description="Raw invitation token string")
+    token: str | None = Field(default=None, description="Raw invitation token string")
+    invitation_id: UUID | None = Field(default=None, description="Optional invitation ID for authenticated user")
 
 
 class UpdateProjectMemberRoleRequest(BaseModel):

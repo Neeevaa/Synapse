@@ -177,6 +177,11 @@ export default function SprintBoardPage() {
   const [creatingSprint, setCreatingSprint] = useState(false);
   const [createSprintError, setCreateSprintError] = useState<string | null>(null);
 
+  // Delete Sprint Modal
+  const [deleteSprintModalOpen, setDeleteSprintModalOpen] = useState(false);
+  const [deletingSprint, setDeletingSprint] = useState(false);
+  const [deleteSprintError, setDeleteSprintError] = useState<string | null>(null);
+
   const fetchBoardData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -375,6 +380,21 @@ export default function SprintBoardPage() {
     }
   };
 
+  const handleDeleteActiveSprint = async () => {
+    if (!sprint) return;
+    setDeletingSprint(true);
+    setDeleteSprintError(null);
+    try {
+      await api.delete(`/sprints/${sprint.id}`);
+      setDeleteSprintModalOpen(false);
+      fetchBoardData();
+    } catch (err: any) {
+      setDeleteSprintError(err.response?.data?.message || "Failed to delete sprint.");
+    } finally {
+      setDeletingSprint(false);
+    }
+  };
+
   const doneCount = tasks.filter((t) => t.status === "DONE").length;
   const totalCount = tasks.length;
   const progressPercent = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
@@ -410,6 +430,16 @@ export default function SprintBoardPage() {
                 <span className="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                   {sprint?.status || "ACTIVE"}
                 </span>
+                {sprint && canCreateSprint && (
+                  <button
+                    type="button"
+                    onClick={() => setDeleteSprintModalOpen(true)}
+                    className="p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer ml-1"
+                    title="Delete Active Sprint"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                )}
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
                 {sprint?.goal || "Manage tasks across Kanban columns. Click any card to view details."}
@@ -846,6 +876,53 @@ export default function SprintBoardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Sprint Modal */}
+      {deleteSprintModalOpen && sprint && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl border border-destructive/20 bg-card p-6 shadow-xl space-y-4 dark:bg-card">
+            <div className="flex items-center gap-3 text-destructive">
+              <div className="size-10 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
+                <AlertTriangle className="size-6 text-destructive" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-foreground">Delete Sprint Confirmation</h3>
+                <p className="text-xs text-muted-foreground">Permanent action</p>
+              </div>
+            </div>
+
+            {deleteSprintError && (
+              <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-xs font-semibold flex items-center gap-2 border border-destructive/20">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{deleteSprintError}</span>
+              </div>
+            )}
+
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Are you sure you want to delete sprint <strong className="text-foreground font-bold">"{sprint.name}"</strong>? This will remove the sprint container and detach any associated tasks back to the backlog.
+            </p>
+
+            <div className="pt-3 border-t border-border flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteSprintModalOpen(false)}
+                className="px-4 py-2 rounded-lg border border-border text-xs font-semibold text-foreground hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deletingSprint}
+                onClick={handleDeleteActiveSprint}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-destructive text-xs font-semibold text-destructive-foreground hover:bg-destructive/90 shadow-xs"
+              >
+                {deletingSprint && <Loader2 className="size-3.5 animate-spin" />}
+                Delete Sprint
+              </button>
+            </div>
           </div>
         </div>
       )}

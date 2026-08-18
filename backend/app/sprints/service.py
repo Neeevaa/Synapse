@@ -70,19 +70,11 @@ class SprintService:
         responses = [self._build_sprint_response(s) for s in sprints]
         return SprintListResponse(sprints=responses, total=len(responses))
 
-    def get_active_sprint(self, project_id: UUID, current_user: User) -> SprintResponse:
+    def get_active_sprint(self, project_id: UUID, current_user: User) -> SprintResponse | None:
         project = check_project_role_or_company_admin(self.db, current_user, project_id)
         sprint = self.repo.get_active_sprint(project_id)
         if not sprint:
-            # Auto-create a default active sprint if none exists
-            sprint = Sprint(
-                project_id=project_id,
-                name="Sprint 1",
-                goal="Initial Project Sprint",
-                status=SprintStatus.ACTIVE,
-            )
-            self.repo.create_sprint(sprint)
-            self.db.commit()
+            return None
 
         return self._build_sprint_response(sprint)
 
@@ -132,7 +124,12 @@ class SprintService:
                 sprint.goal = data.goal
             if data.status is not None:
                 try:
-                    sprint.status = SprintStatus(data.status)
+                    new_status = SprintStatus(data.status)
+                    if new_status == SprintStatus.ACTIVE and sprint.status != SprintStatus.ACTIVE:
+                        current_active = self.repo.get_active_sprint(sprint.project_id)
+                        if current_active and current_active.id != sprint.id:
+                            current_active.status = SprintStatus.COMPLETED
+                    sprint.status = new_status
                 except ValueError:
                     raise BaseBusinessException("Invalid sprint status value.", status_code=400)
             if data.capacity is not None:
@@ -148,6 +145,22 @@ class SprintService:
 
             self.db.commit()
             return self._build_sprint_response(sprint)
+        except Exception as e:
+            self.db.rollback()
+            raise e
+
+    def delete_sprint(self, sprint_id: UUID, current_user: User) -> None:
+        sprint = self.repo.get_sprint_by_id(sprint_id)
+        if not sprint:
+            raise ResourceNotFound("Sprint not found.")
+
+        project = check_project_role_or_company_admin(
+            self.db, current_user, sprint.project_id, [ProjectRole.PROJECT_MANAGER]
+        )
+
+        try:
+            self.repo.delete_sprint(sprint)
+            self.db.commit()
         except Exception as e:
             self.db.rollback()
             raise e

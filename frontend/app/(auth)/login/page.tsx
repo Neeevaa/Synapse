@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { Loader2, AlertCircle } from "lucide-react";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
@@ -33,8 +33,11 @@ const customResolver = (schema: z.ZodSchema) => async (data: any) => {
   return { values: {}, errors };
 };
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const invitationToken = searchParams.get("invitation_token");
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -56,6 +59,12 @@ export default function LoginPage() {
       // Store tokens in local storage
       localStorage.setItem("synapse_access_token", access_token);
       localStorage.setItem("synapse_refresh_token", refresh_token);
+
+      // If logging in with a pending invitation token, redirect to /join?token=... to allow explicit acceptance
+      if (invitationToken) {
+        router.push(`/join?token=${encodeURIComponent(invitationToken)}`);
+        return;
+      }
 
       // Super Admin priority redirect -> /admin
       if (is_super_admin) {
@@ -88,9 +97,11 @@ export default function LoginPage() {
             </div>
             <span className="text-xl font-bold text-foreground">SYNAPSE</span>
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Welcome back</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Sign in to access your organization dashboard.
+          <h2 className="text-2xl font-bold text-foreground">
+            Sign in to your account
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground text-center">
+            Enter your credentials to access your projects and dashboard.
           </p>
         </div>
 
@@ -105,7 +116,7 @@ export default function LoginPage() {
             <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">or sign in with email</span>
+            <span className="bg-card px-2 text-muted-foreground">or email sign in</span>
           </div>
         </div>
 
@@ -124,8 +135,7 @@ export default function LoginPage() {
             <input
               type="email"
               {...register("email")}
-              placeholder="you@example.com"
-              suppressHydrationWarning
+              placeholder="jane.doe@acme.com"
               className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:bg-background"
             />
             {errors.email && (
@@ -136,7 +146,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-1">
+            <div className="flex items-center justify-between mb-1">
               <label className="block text-sm font-medium text-foreground">
                 Password
               </label>
@@ -144,14 +154,13 @@ export default function LoginPage() {
                 href="/forgot-password"
                 className="text-xs font-medium text-primary hover:underline"
               >
-                Forgot Password?
+                Forgot password?
               </Link>
             </div>
             <input
               type="password"
               {...register("password")}
               placeholder="••••••••"
-              suppressHydrationWarning
               className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:bg-background"
             />
             {errors.password && (
@@ -164,7 +173,6 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            suppressHydrationWarning
             className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/95 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:pointer-events-none disabled:opacity-50 cursor-pointer mt-6"
           >
             {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
@@ -173,9 +181,9 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          New to Synapse?{" "}
+          Don&apos;t have an account?{" "}
           <Link
-            href="/register"
+            href="/join"
             className="font-medium text-primary hover:underline"
           >
             Create an account
@@ -183,5 +191,17 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="size-8 text-primary animate-spin" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }
