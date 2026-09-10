@@ -241,203 +241,205 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border text-sidebar-foreground transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar/95 backdrop-blur-md border-r border-sidebar-border text-sidebar-foreground transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 flex flex-col justify-between select-none ${
           sidebarOpen ? "translate-x-0" : "-translate-x-100"
         }`}
       >
-        <div className="flex h-16 items-center justify-between px-6 border-b border-sidebar-border">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
-            <div className="size-8 rounded-lg bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold shadow-sm">
-              S
-            </div>
-            <span className="text-xl font-bold tracking-wider text-sidebar-foreground">
-              SYNAPSE
-            </span>
-          </Link>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-sidebar-foreground hover:opacity-80"
-          >
-            <X className="size-5" />
-          </button>
-        </div>
-
-        {/* Navigation Links */}
-        <nav className="p-4 space-y-1.5 overflow-y-auto max-h-[calc(100vh-140px)]">
-          <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/60">
-            Platform Workspaces
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex h-14 items-center justify-between px-5 border-b border-sidebar-border/80 shrink-0">
+            <Link href="/dashboard" className="flex items-center gap-2.5 group">
+              <div className="size-7 rounded-lg bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold shadow-xs text-xs">
+                S
+              </div>
+              <span className="text-base font-extrabold tracking-wider text-sidebar-foreground group-hover:text-primary transition-colors">
+                SYNAPSE
+              </span>
+            </Link>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden text-sidebar-foreground hover:opacity-80 p-1"
+            >
+              <X className="size-4" />
+            </button>
           </div>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isProjectsTab = item.href === "/projects";
-            const isActive = pathname === item.href || (isProjectsTab && pathname.startsWith("/projects/"));
-            return (
-              <div key={item.name} className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <Link
-                    href={item.href}
-                    onClick={() => setSidebarOpen(false)}
-                    className={`flex-1 flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-xs"
-                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                    }`}
-                  >
-                    <Icon className="size-4 shrink-0" />
-                    <span className="truncate">{item.name}</span>
-                  </Link>
-                  {isProjectsTab && currentProjectId && (
-                    <button
-                      type="button"
-                      onClick={() => setProjectsExpanded(!projectsExpanded)}
-                      className="p-2 text-sidebar-foreground/60 hover:text-sidebar-foreground cursor-pointer"
+
+          {/* Navigation Links */}
+          <nav className="p-3 space-y-1 overflow-y-auto flex-1">
+            <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
+              Platform Workspaces
+            </div>
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isProjectsTab = item.href === "/projects";
+              const isActive = pathname === item.href || (isProjectsTab && pathname.startsWith("/projects/"));
+              return (
+                <div key={item.name} className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Link
+                      href={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`flex-1 flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 ${
+                        isActive
+                          ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold ring-1 ring-primary/30 shadow-xs"
+                          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                      }`}
                     >
-                      {projectsExpanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
-                    </button>
+                      <Icon className="size-4 shrink-0" />
+                      <span className="truncate">{item.name}</span>
+                    </Link>
+                    {isProjectsTab && currentProjectId && (
+                      <button
+                        type="button"
+                        onClick={() => setProjectsExpanded(!projectsExpanded)}
+                        className="p-1.5 text-muted-foreground hover:text-sidebar-foreground cursor-pointer rounded-md hover:bg-sidebar-accent/50"
+                      >
+                        {projectsExpanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Grouped Project Workspace Sub-navigation */}
+                  {isProjectsTab && currentProjectId && projectsExpanded && (
+                    <div className="mt-1 ml-3 pl-3 border-l border-sidebar-border/70 space-y-2.5 py-1">
+                      {/* Active Project Context Badge */}
+                      <div className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5 truncate px-1">
+                        <FolderKanban className="size-3.5 shrink-0" />
+                        <span className="truncate">{activeProject?.name || "Active Project"}</span>
+                      </div>
+
+                      {/* PLAN */}
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 px-2 py-0.5">
+                          Plan
+                        </div>
+                        <Link
+                          href={`/projects/${currentProjectId}/board`}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                            pathname === `/projects/${currentProjectId}/board`
+                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
+                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2 truncate">
+                            <Kanban className="size-3.5 shrink-0 text-primary" />
+                            <span className="truncate">Sprint Board</span>
+                          </span>
+                          {hasActiveSprint && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/15 text-primary font-bold border border-primary/20 shrink-0">
+                              Active
+                            </span>
+                          )}
+                        </Link>
+                        <Link
+                          href={`/projects/${currentProjectId}/backlog`}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                            pathname === `/projects/${currentProjectId}/backlog`
+                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
+                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                          }`}
+                        >
+                          <Layers className="size-3.5 shrink-0 text-primary" />
+                          <span className="truncate">Backlog Stream</span>
+                        </Link>
+                      </div>
+
+                      {/* WORK */}
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 px-2 py-0.5">
+                          Work
+                        </div>
+                        <Link
+                          href={`/projects/${currentProjectId}/requirements`}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                            pathname === `/projects/${currentProjectId}/requirements`
+                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
+                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                          }`}
+                        >
+                          <FileText className="size-3.5 shrink-0 text-primary" />
+                          <span className="truncate">Requirements & Review</span>
+                        </Link>
+                      </div>
+
+                      {/* COLLABORATE */}
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 px-2 py-0.5">
+                          Collaborate
+                        </div>
+                        <Link
+                          href={`/projects/${currentProjectId}/meetings`}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                            pathname.startsWith(`/projects/${currentProjectId}/meetings`)
+                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
+                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                          }`}
+                        >
+                          <Video className="size-3.5 shrink-0 text-primary" />
+                          <span className="truncate">Meetings & Notes</span>
+                        </Link>
+                        <Link
+                          href={`/projects/${currentProjectId}?tab=members`}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                            pathname === `/projects/${currentProjectId}`
+                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
+                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                          }`}
+                        >
+                          <Users className="size-3.5 shrink-0 text-primary" />
+                          <span className="truncate">Team & Members</span>
+                        </Link>
+                      </div>
+
+                      {/* INTELLIGENCE */}
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 px-2 py-0.5">
+                          Intelligence
+                        </div>
+                        <Link
+                          href={`/projects/${currentProjectId}/knowledge`}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                            pathname === `/projects/${currentProjectId}/knowledge`
+                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
+                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                          }`}
+                        >
+                          <Database className="size-3.5 shrink-0 text-primary" />
+                          <span className="truncate">Knowledge Base</span>
+                        </Link>
+                        <Link
+                          href={`/projects/${currentProjectId}/traceability`}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                            pathname === `/projects/${currentProjectId}/traceability`
+                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
+                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                          }`}
+                        >
+                          <GitFork className="size-3.5 shrink-0 text-primary" />
+                          <span className="truncate">Traceability Matrix</span>
+                        </Link>
+                      </div>
+                    </div>
                   )}
                 </div>
-
-                {/* Grouped Project Workspace Sub-navigation */}
-                {isProjectsTab && currentProjectId && projectsExpanded && (
-                  <div className="mt-1 ml-3 pl-3 border-l border-sidebar-border/60 space-y-3 py-1">
-                    {/* Active Project Context Badge */}
-                    <div className="text-[0.7rem] font-bold uppercase tracking-wider text-primary flex items-center gap-1.5 truncate px-1">
-                      <FolderKanban className="size-3 shrink-0" />
-                      <span className="truncate">{activeProject?.name || "Active Project"}</span>
-                    </div>
-
-                    {/* PLAN */}
-                    <div className="space-y-1">
-                      <div className="text-[0.65rem] font-bold uppercase tracking-wider text-sidebar-foreground/50 px-2">
-                        Plan
-                      </div>
-                      <Link
-                        href={`/projects/${currentProjectId}/board`}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs transition-colors ${
-                          pathname === `/projects/${currentProjectId}/board`
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                        }`}
-                      >
-                        <span className="flex items-center gap-2 truncate">
-                          <Kanban className="size-3.5 shrink-0 text-primary" />
-                          <span className="truncate">Sprint Board</span>
-                        </span>
-                        {hasActiveSprint && (
-                          <span className="text-[0.6rem] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
-                            Active
-                          </span>
-                        )}
-                      </Link>
-                      <Link
-                        href={`/projects/${currentProjectId}/backlog`}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
-                          pathname === `/projects/${currentProjectId}/backlog`
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                        }`}
-                      >
-                        <Layers className="size-3.5 shrink-0 text-primary" />
-                        <span className="truncate">Backlog Stream</span>
-                      </Link>
-                    </div>
-
-                    {/* WORK */}
-                    <div className="space-y-1">
-                      <div className="text-[0.65rem] font-bold uppercase tracking-wider text-sidebar-foreground/50 px-2">
-                        Work
-                      </div>
-                      <Link
-                        href={`/projects/${currentProjectId}/requirements`}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
-                          pathname === `/projects/${currentProjectId}/requirements`
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                        }`}
-                      >
-                        <FileText className="size-3.5 shrink-0 text-emerald-500" />
-                        <span className="truncate">Requirements & Review</span>
-                      </Link>
-                    </div>
-
-                    {/* COLLABORATE */}
-                    <div className="space-y-1">
-                      <div className="text-[0.65rem] font-bold uppercase tracking-wider text-sidebar-foreground/50 px-2">
-                        Collaborate
-                      </div>
-                      <Link
-                        href={`/projects/${currentProjectId}/meetings`}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
-                          pathname.startsWith(`/projects/${currentProjectId}/meetings`)
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                        }`}
-                      >
-                        <Video className="size-3.5 shrink-0 text-cyan-500" />
-                        <span className="truncate">Meetings & Notes</span>
-                      </Link>
-                      <Link
-                        href={`/projects/${currentProjectId}?tab=members`}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
-                          pathname === `/projects/${currentProjectId}`
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                        }`}
-                      >
-                        <Users className="size-3.5 shrink-0 text-cyan-500" />
-                        <span className="truncate">Team & Members</span>
-                      </Link>
-                    </div>
-
-                    {/* INTELLIGENCE */}
-                    <div className="space-y-1">
-                      <div className="text-[0.65rem] font-bold uppercase tracking-wider text-sidebar-foreground/50 px-2">
-                        Intelligence
-                      </div>
-                      <Link
-                        href={`/projects/${currentProjectId}/knowledge`}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
-                          pathname === `/projects/${currentProjectId}/knowledge`
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                        }`}
-                      >
-                        <Database className="size-3.5 shrink-0 text-purple-400" />
-                        <span className="truncate">Knowledge Base</span>
-                      </Link>
-                      <Link
-                        href={`/projects/${currentProjectId}/traceability`}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
-                          pathname === `/projects/${currentProjectId}/traceability`
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                        }`}
-                      >
-                        <GitFork className="size-3.5 shrink-0 text-amber-500" />
-                        <span className="truncate">Traceability Matrix</span>
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </nav>
+              );
+            })}
+          </nav>
+        </div>
 
         {/* Sidebar Footer AI Info */}
-        <div className="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-sidebar-accent/40 border border-sidebar-border">
-          <div className="flex items-center gap-2 text-xs font-semibold text-sidebar-foreground">
-            <Bot className="size-4 text-sidebar-primary" />
+        <div className="p-3 m-3 rounded-xl bg-sidebar-accent/50 border border-sidebar-border/80 shrink-0">
+          <div className="flex items-center gap-2 text-xs font-bold text-sidebar-foreground">
+            <Bot className="size-3.5 text-primary" />
             AI Agents Active
           </div>
-          <p className="mt-1 text-[0.75rem] text-sidebar-foreground/70">
+          <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
             Synapse AI Copilot is monitoring project dependencies.
           </p>
         </div>
@@ -446,7 +448,7 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
       {/* Main Content Container */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}
-        <header className="h-16 border-b border-border bg-card px-4 sm:px-6 lg:px-8 flex items-center justify-between shadow-2xs">
+        <header className="h-14 border-b border-border/80 bg-card/85 backdrop-blur-md px-4 sm:px-6 lg:px-8 flex items-center justify-between shadow-2xs sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -466,26 +468,26 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
             <Link
               href="/profile"
               title="View & Edit My Profile"
-              className="flex items-center gap-3 group p-1.5 rounded-xl transition-colors hover:bg-muted/60"
+              className="flex items-center gap-2.5 p-1 rounded-xl transition-all hover:bg-muted/70 border border-transparent hover:border-border/60 group"
             >
               {user?.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={user.avatar_url}
                   alt="Avatar"
-                  className="size-9 rounded-full object-cover border border-primary/40 group-hover:border-primary"
+                  className="size-7 rounded-full object-cover border border-primary/40 group-hover:border-primary ring-1 ring-border/40"
                 />
               ) : (
-                <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs border border-primary/20 group-hover:border-primary">
+                <div className="size-7 rounded-full bg-primary/15 flex items-center justify-center text-primary font-bold text-xs border border-primary/25 group-hover:border-primary">
                   {user?.first_name?.[0]}
                   {user?.last_name?.[0]}
                 </div>
               )}
-              <div className="hidden sm:block text-left">
-                <div className="text-sm font-semibold text-foreground leading-tight group-hover:text-primary transition-colors">
+              <div className="hidden sm:block text-left pr-1">
+                <div className="text-xs font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
                   {user?.first_name} {user?.last_name}
                 </div>
-                <div className="text-xs text-muted-foreground uppercase font-medium">
+                <div className="text-xs text-muted-foreground uppercase font-semibold">
                   {formatRoleLabel(user?.role)}
                 </div>
               </div>
@@ -495,12 +497,12 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
             <button
               onClick={toggleDarkMode}
               title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-              className="inline-flex items-center justify-center size-9 rounded-lg border border-border bg-background text-foreground transition-colors hover:bg-muted cursor-pointer"
+              className="inline-flex items-center justify-center size-8 rounded-lg border border-border/80 bg-card text-foreground transition-all hover:bg-muted cursor-pointer shadow-2xs"
             >
               {isDark ? (
-                <Sun className="size-4 text-amber-400" />
+                <Sun className="size-3.5 text-amber-400" />
               ) : (
-                <Moon className="size-4 text-muted-foreground" />
+                <Moon className="size-3.5 text-muted-foreground" />
               )}
             </button>
 
@@ -508,12 +510,12 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
               onClick={handleLogout}
               disabled={logoutLoading}
               title="Sign Out"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border/80 bg-card px-2.5 py-1.5 text-xs font-semibold text-foreground transition-all hover:bg-muted hover:text-foreground disabled:opacity-50 cursor-pointer shadow-2xs"
             >
               {logoutLoading ? (
-                <Loader2 className="size-4 animate-spin" />
+                <Loader2 className="size-3.5 animate-spin" />
               ) : (
-                <LogOut className="size-4 text-muted-foreground" />
+                <LogOut className="size-3.5 text-muted-foreground" />
               )}
               <span className="hidden sm:inline">Logout</span>
             </button>

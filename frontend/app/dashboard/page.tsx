@@ -150,7 +150,7 @@ export default function UnifiedDashboardPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded text-[0.7rem] font-bold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
+                  <span className="px-2.5 py-0.5 rounded-lg text-xs font-semibold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
                     Pending Invitation
                   </span>
                   <span className="text-xs text-muted-foreground">

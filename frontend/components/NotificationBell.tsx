@@ -99,7 +99,7 @@ function getNotificationIcon(type: string) {
     case "REQUIREMENT_STATUS_CHANGED":
       return <FileText className="size-4 text-blue-500 shrink-0" />;
     case "AI_REVIEW_COMPLETED":
-      return <Sparkles className="size-4 text-purple-400 shrink-0" />;
+      return <Sparkles className="size-4 text-primary shrink-0" />;
     case "PROJECT_MEMBER_ADDED":
       return <UserPlus className="size-4 text-emerald-500 shrink-0" />;
     default:
@@ -317,7 +317,7 @@ export default function NotificationBell() {
       >
         <Bell className="size-4.5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-rose-500 text-white text-[0.65rem] font-bold shadow-md ring-2 ring-card animate-in zoom-in">
+          <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-rose-500 text-white text-xs font-bold shadow-md ring-2 ring-card animate-in zoom-in">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -325,13 +325,13 @@ export default function NotificationBell() {
 
       {/* 📋 Popover Dropdown Card */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-border bg-card text-card-foreground shadow-2xl z-50 overflow-hidden flex flex-col max-h-[540px] animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-border/80 bg-card/95 text-card-foreground shadow-2xl z-50 overflow-hidden flex flex-col max-h-[540px] backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
           {/* Header */}
           <div className="p-3.5 border-b border-border/80 bg-card/90 backdrop-blur-md flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-sm text-foreground">Notifications</span>
               {unreadCount > 0 && (
-                <span className="text-[0.7rem] font-medium px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/20">
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/20">
                   {unreadCount} new
                 </span>
               )}
@@ -443,7 +443,7 @@ export default function NotificationBell() {
                 return (
                   <div key={group.project_id || "general"} className="py-1">
                     {/* Project Header */}
-                    <div className="px-3.5 py-1.5 bg-muted/40 flex items-center justify-between text-[0.7rem] font-bold uppercase tracking-wider text-muted-foreground">
+                    <div className="px-3.5 py-1.5 bg-muted/40 flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       <div className="flex items-center gap-1.5 truncate">
                         <Layers className="size-3 text-primary/70 shrink-0" />
                         <span className="truncate">{group.project_name}</span>

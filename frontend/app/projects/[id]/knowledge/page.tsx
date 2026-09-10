@@ -198,7 +198,7 @@ export default function KnowledgeBasePage() {
               <span className="text-foreground">Knowledge Base & Vector Store</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="size-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+              <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                 <Database className="size-5" />
               </div>
               <div>
@@ -222,7 +222,7 @@ export default function KnowledgeBasePage() {
             <button
               onClick={handleIndexArtifacts}
               disabled={indexing}
-              className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-xs font-semibold text-white hover:bg-purple-500 disabled:opacity-50 transition-colors shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-xs cursor-pointer"
             >
               {indexing ? (
                 <>
@@ -258,7 +258,7 @@ export default function KnowledgeBasePage() {
 
         {/* Knowledge Status Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-xl border border-border bg-card shadow-xs space-y-2">
+          <div className="p-5 rounded-2xl border border-border/80 bg-card shadow-2xs hover:shadow-xs transition-shadow space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
               <span>Indexed Artifacts</span>
               <FileText className="size-4 text-purple-400" />
@@ -266,10 +266,10 @@ export default function KnowledgeBasePage() {
             <div className="text-2xl font-extrabold text-foreground">
               {indexStatus?.total_documents_indexed ?? "—"}
             </div>
-            <p className="text-[0.7rem] text-muted-foreground">Requirements, Notes, Transcripts, Tasks</p>
+            <p className="text-xs text-muted-foreground">Requirements, Notes, Transcripts, Tasks</p>
           </div>
 
-          <div className="p-5 rounded-xl border border-border bg-card shadow-xs space-y-2">
+          <div className="p-5 rounded-2xl border border-border/80 bg-card shadow-2xs hover:shadow-xs transition-shadow space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
               <span>Knowledge Coverage</span>
               <Layers className="size-4 text-cyan-400" />
@@ -277,10 +277,10 @@ export default function KnowledgeBasePage() {
             <div className="text-2xl font-extrabold text-foreground">
               {indexStatus?.total_chunks_created ?? "—"}
             </div>
-            <p className="text-[0.7rem] text-muted-foreground">Searchable vector segments ready for retrieval</p>
+            <p className="text-xs text-muted-foreground">Searchable vector segments ready for retrieval</p>
           </div>
 
-          <div className="p-5 rounded-xl border border-border bg-card shadow-xs space-y-2">
+          <div className="p-5 rounded-2xl border border-border/80 bg-card shadow-2xs hover:shadow-xs transition-shadow space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
               <span>Index Freshness</span>
               <CheckCircle2 className="size-4 text-emerald-400" />
@@ -288,12 +288,12 @@ export default function KnowledgeBasePage() {
             <div className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">
               {indexStatus ? "Up to Date" : "Sync Ready"}
             </div>
-            <p className="text-[0.7rem] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {indexStatus ? `${indexStatus.documents_skipped_hash_match} unchanged artifacts skipped` : "Artifacts ready for indexing"}
             </p>
           </div>
 
-          <div className="p-5 rounded-xl border border-border bg-card shadow-xs space-y-2">
+          <div className="p-5 rounded-2xl border border-border/80 bg-card shadow-2xs hover:shadow-xs transition-shadow space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
               <span>Retrieval Engine</span>
               <Cpu className="size-4 text-amber-400" />
@@ -301,7 +301,7 @@ export default function KnowledgeBasePage() {
             <div className="text-sm font-bold text-foreground truncate">
               {indexStatus?.embedding_model ?? "mock-deterministic-v1"}
             </div>
-            <p className="text-[0.7rem] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Semantic Search Active ({indexStatus?.embedding_dimension ?? 1536} dim)
             </p>
           </div>
@@ -313,7 +313,7 @@ export default function KnowledgeBasePage() {
             onClick={() => setActiveTab("search")}
             className={`pb-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-colors cursor-pointer ${
               activeTab === "search"
-                ? "border-purple-500 text-purple-400"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -323,7 +323,7 @@ export default function KnowledgeBasePage() {
             onClick={() => setActiveTab("rag")}
             className={`pb-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-colors cursor-pointer ${
               activeTab === "rag"
-                ? "border-purple-500 text-purple-400"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -333,7 +333,7 @@ export default function KnowledgeBasePage() {
             onClick={() => setActiveTab("telemetry")}
             className={`pb-3 text-xs font-semibold flex items-center gap-2 border-b-2 transition-colors cursor-pointer ${
               activeTab === "telemetry"
-                ? "border-purple-500 text-purple-400"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -353,14 +353,14 @@ export default function KnowledgeBasePage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Enter natural language query (e.g. OAuth2 token security specifications)..."
-                    className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
                 <select
                   value={selectedSourceType}
                   onChange={(e) => setSelectedSourceType(e.target.value)}
-                  className="px-3 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="px-3 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">All Source Types</option>
                   <option value="REQUIREMENT">Requirements</option>
@@ -375,7 +375,7 @@ export default function KnowledgeBasePage() {
                 <select
                   value={topK}
                   onChange={(e) => setTopK(Number(e.target.value))}
-                  className="px-3 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="px-3 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value={3}>Top 3</option>
                   <option value={5}>Top 5</option>
@@ -386,7 +386,7 @@ export default function KnowledgeBasePage() {
                 <button
                   type="submit"
                   disabled={searching || !searchQuery.trim()}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-purple-600 text-xs font-semibold text-white hover:bg-purple-500 disabled:opacity-50 transition-colors cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-primary text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   {searching ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
                   Search Vectors
@@ -407,27 +407,27 @@ export default function KnowledgeBasePage() {
                   <span>
                     Found <strong className="text-foreground">{searchResults.total_results}</strong> relevant vector chunks
                   </span>
-                  <span>Latency: <strong className="text-purple-400">{searchResults.query_latency_ms} ms</strong></span>
+                  <span>Latency: <strong className="text-primary">{searchResults.query_latency_ms} ms</strong></span>
                 </div>
 
                 <div className="space-y-4">
                   {searchResults.results.map((res) => (
                     <div
                       key={res.chunk_id}
-                      className="p-5 rounded-xl border border-border bg-card shadow-xs hover:border-purple-500/40 transition-colors space-y-3"
+                      className="p-5 rounded-xl border border-border bg-card shadow-xs hover:border-primary/40 transition-colors space-y-3"
                     >
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[0.7rem] font-bold uppercase tracking-wider">
+                          <span className="px-2.5 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 text-xs font-semibold uppercase tracking-wider">
                             {res.source_type}
                           </span>
                           {res.source_key && (
-                            <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[0.7rem] font-mono font-semibold">
+                            <span className="px-2.5 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs font-mono font-semibold">
                               {res.source_key}
                             </span>
                           )}
                           {res.source_version && (
-                            <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[0.7rem] font-medium">
+                            <span className="px-2.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold">
                               v{res.source_version}
                             </span>
                           )}
@@ -440,7 +440,7 @@ export default function KnowledgeBasePage() {
                           </span>
                           <Link
                             href={res.deep_link_url}
-                            className="inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 font-semibold"
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-semibold"
                           >
                             Source Artifact <ExternalLink className="size-3" />
                           </Link>
@@ -468,12 +468,12 @@ export default function KnowledgeBasePage() {
                   value={ragQuery}
                   onChange={(e) => setRagQuery(e.target.value)}
                   placeholder="Enter RAG query string to construct grounded LLM prompt context..."
-                  className="flex-1 px-4 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="flex-1 px-4 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <button
                   type="submit"
                   disabled={constructingRAG || !ragQuery.trim()}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-purple-600 text-xs font-semibold text-white hover:bg-purple-500 disabled:opacity-50 transition-colors cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-primary text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   {constructingRAG ? <Loader2 className="size-4 animate-spin" /> : <Code2 className="size-4" />}
                   Construct RAG Context
@@ -496,7 +496,7 @@ export default function KnowledgeBasePage() {
                       Structured grounding citations for LLM requirements review & analysis
                     </p>
                   </div>
-                  <div className="px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold">
+                  <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold">
                     Total Context Tokens: ~{ragData.total_tokens}
                   </div>
                 </div>
@@ -548,14 +548,14 @@ export default function KnowledgeBasePage() {
                     ) : (
                       telemetryLogs.map((log) => (
                         <tr key={log.id} className="hover:bg-muted/30 transition-colors">
-                          <td className="px-4 py-3 font-mono text-[0.75rem] text-muted-foreground">
+                          <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                             {new Date(log.created_at).toLocaleString()}
                           </td>
                           <td className="px-4 py-3 font-semibold text-foreground max-w-xs truncate">
                             {log.query}
                           </td>
                           <td className="px-4 py-3 text-muted-foreground">{log.top_k}</td>
-                          <td className="px-4 py-3 font-semibold text-purple-400">
+                          <td className="px-4 py-3 font-semibold text-primary">
                             {log.retrieved_chunk_ids?.length || 0}
                           </td>
                           <td className="px-4 py-3 font-mono text-emerald-400">
@@ -566,7 +566,7 @@ export default function KnowledgeBasePage() {
                           <td className="px-4 py-3 font-semibold text-amber-400">
                             {log.retrieval_latency_ms} ms
                           </td>
-                          <td className="px-4 py-3 font-mono text-[0.75rem] text-muted-foreground">
+                          <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                             {log.embedding_model}
                           </td>
                         </tr>

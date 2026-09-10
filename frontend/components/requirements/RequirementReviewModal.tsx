@@ -190,7 +190,7 @@ export default function RequirementReviewModal({
         {/* Modal Header */}
         <div className="p-6 border-b border-border bg-muted/40 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+            <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
               <Sparkles className="size-5" />
             </div>
             <div>
@@ -221,7 +221,7 @@ export default function RequirementReviewModal({
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
           {loading && (
             <div className="py-16 text-center space-y-3">
-              <Loader2 className="size-8 animate-spin text-purple-500 mx-auto" />
+              <Loader2 className="size-8 animate-spin text-primary mx-auto" />
               <p className="text-xs font-semibold text-muted-foreground">
                 Analyzing requirement against project knowledge base & RAG context...
               </p>
@@ -238,29 +238,29 @@ export default function RequirementReviewModal({
             <>
               {/* Summary Stats Header */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3.5 rounded-xl border border-border bg-card shadow-2xs space-y-1">
-                  <span className="text-[0.7rem] font-semibold text-muted-foreground uppercase tracking-wider">
+                <div className="p-3.5 rounded-2xl border border-border bg-card shadow-2xs space-y-1">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Total Findings
                   </span>
                   <div className="text-xl font-extrabold text-foreground">{findings.length}</div>
                 </div>
 
-                <div className="p-3.5 rounded-xl border border-rose-500/20 bg-rose-500/5 shadow-2xs space-y-1">
-                  <span className="text-[0.7rem] font-semibold text-rose-500 uppercase tracking-wider">
+                <div className="p-3.5 rounded-2xl border border-rose-500/20 bg-rose-500/5 shadow-2xs space-y-1">
+                  <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider">
                     Critical / High
                   </span>
                   <div className="text-xl font-extrabold text-rose-500">{criticalHighCount}</div>
                 </div>
 
-                <div className="p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/5 shadow-2xs space-y-1">
-                  <span className="text-[0.7rem] font-semibold text-blue-400 uppercase tracking-wider">
+                <div className="p-3.5 rounded-2xl border border-blue-500/20 bg-blue-500/5 shadow-2xs space-y-1">
+                  <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">
                     Medium
                   </span>
                   <div className="text-xl font-extrabold text-blue-400">{mediumCount}</div>
                 </div>
 
-                <div className="p-3.5 rounded-xl border border-border bg-card shadow-2xs space-y-1">
-                  <span className="text-[0.7rem] font-semibold text-muted-foreground uppercase tracking-wider">
+                <div className="p-3.5 rounded-2xl border border-border bg-card shadow-2xs space-y-1">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Low
                   </span>
                   <div className="text-xl font-extrabold text-muted-foreground">{lowCount}</div>
@@ -269,7 +269,7 @@ export default function RequirementReviewModal({
 
               {/* Overall Assessment Banner */}
               <div
-                className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                   criticalHighCount > 0
                     ? "bg-rose-500/10 border-rose-500/20 text-rose-300"
                     : mediumCount > 0
@@ -282,7 +282,7 @@ export default function RequirementReviewModal({
                     <span className="text-xs font-bold uppercase tracking-wider text-foreground">
                       Overall Assessment
                     </span>
-                    <span className="text-[0.7rem] font-semibold px-2 py-0.5 rounded-md bg-card/70 border border-border/40 text-foreground">
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-card/70 border border-border/40 text-foreground">
                       Status: {review.status}
                     </span>
                   </div>
@@ -308,35 +308,35 @@ export default function RequirementReviewModal({
                   findings.map((f) => (
                     <div
                       key={f.id}
-                      className="p-5 rounded-xl border border-border bg-card shadow-xs space-y-3 hover:border-purple-500/30 transition-colors"
+                      className="p-5 rounded-xl border border-border bg-card shadow-xs space-y-3 hover:border-primary/40 transition-colors"
                     >
                       {/* Finding Card Top Bar */}
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`px-2.5 py-0.5 rounded-md border text-[0.7rem] font-bold uppercase tracking-wider ${severityBadgeClass(
+                            className={`px-2.5 py-0.5 rounded-md border text-xs font-semibold uppercase tracking-wider ${severityBadgeClass(
                               f.severity
                             )}`}
                           >
                             {f.severity}
                           </span>
-                          <span className="px-2 py-0.5 rounded-md bg-muted border border-border text-[0.7rem] font-mono text-muted-foreground">
+                          <span className="px-2 py-0.5 rounded-md bg-muted border border-border text-xs font-mono text-muted-foreground">
                             {f.issue_type}
                           </span>
 
                           {/* Evidence Status Badge */}
                           {f.evidence_status === "GROUNDED" ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[0.7rem] font-bold">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
                               ✓ Grounded in Project Context
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[0.7rem] font-bold">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-semibold">
                               <HelpCircle className="size-3" /> Insufficient Context (Observation)
                             </span>
                           )}
 
                           {f.human_decision === "MODIFIED" && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[0.7rem] font-semibold">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 text-xs font-semibold">
                               <UserCheck className="size-3" /> Human Modified
                             </span>
                           )}
@@ -355,7 +355,7 @@ export default function RequirementReviewModal({
                             </span>
                           )}
                           {f.human_decision === "MODIFIED" && (
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
                               <Edit3 className="size-3.5" /> Modified
                             </span>
                           )}
@@ -368,12 +368,12 @@ export default function RequirementReviewModal({
                         <p className="text-xs text-muted-foreground leading-relaxed">{f.description}</p>
                       </div>
 
-                      {/* AI RECOMMENDATION CARD (Purple) */}
-                      <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-800/40 space-y-1">
-                        <div className="flex items-center gap-1.5 text-[0.75rem] font-bold text-purple-300">
-                          <Sparkles className="size-3.5 text-purple-400" /> AI Recommendation:
+                      {/* AI RECOMMENDATION CARD */}
+                      <div className="p-3.5 rounded-xl bg-primary/10 border border-primary/20 space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                          <Sparkles className="size-3.5 text-primary" /> AI Recommendation:
                         </div>
-                        <p className="text-xs text-purple-200 leading-relaxed font-medium">
+                        <p className="text-xs text-foreground leading-relaxed font-medium">
                           {f.recommendation}
                         </p>
                       </div>
@@ -400,7 +400,7 @@ export default function RequirementReviewModal({
                           <div className="space-y-3 pt-2">
                             {/* GROUNDED EVIDENCE CARD (Cyan/Slate) */}
                             <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/60 space-y-1.5">
-                              <div className="flex items-center gap-1.5 text-[0.75rem] font-bold text-cyan-400">
+                              <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-400">
                                 <Layers className="size-3.5" /> Project Evidence:
                               </div>
                               <p className="text-xs font-mono text-slate-300 leading-relaxed whitespace-pre-wrap">
@@ -415,7 +415,7 @@ export default function RequirementReviewModal({
                                 {f.source_references.map((ref, idx) => (
                                   <span
                                     key={idx}
-                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted border border-border text-[0.7rem] font-mono text-cyan-400"
+                                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-muted border border-border text-xs font-mono text-cyan-400"
                                   >
                                     <FileText className="size-3" /> {ref}
                                   </span>
@@ -468,8 +468,8 @@ export default function RequirementReviewModal({
                           disabled={submittingDecision === f.id}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                             f.human_decision === "MODIFIED"
-                              ? "bg-purple-600 text-white"
-                              : "bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
                           }`}
                         >
                           <Edit3 className="size-3.5" /> Modify
@@ -478,9 +478,9 @@ export default function RequirementReviewModal({
 
                       {/* Modify Form Panel */}
                       {modifyingFinding?.id === f.id && (
-                        <div className="mt-3 p-4 rounded-xl border border-purple-500/30 bg-purple-500/5 space-y-3">
+                        <div className="mt-3 p-4 rounded-xl border border-primary/30 bg-primary/5 space-y-3">
                           <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                            <Edit3 className="size-3.5 text-purple-400" /> Modify Recommendation & Feedback
+                            <Edit3 className="size-3.5 text-primary" /> Modify Recommendation & Feedback
                           </h4>
                           <div>
                             <label className="text-[0.7rem] font-semibold text-muted-foreground">
@@ -490,7 +490,7 @@ export default function RequirementReviewModal({
                               rows={3}
                               value={editRecommendation}
                               onChange={(e) => setEditRecommendation(e.target.value)}
-                              className="w-full mt-1 p-2.5 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500"
+                              className="w-full mt-1 p-2.5 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                           </div>
 
@@ -503,7 +503,7 @@ export default function RequirementReviewModal({
                               value={editComment}
                               onChange={(e) => setEditComment(e.target.value)}
                               placeholder="Reason for modification..."
-                              className="w-full mt-1 px-3 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500"
+                              className="w-full mt-1 px-3 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                           </div>
 
@@ -525,7 +525,7 @@ export default function RequirementReviewModal({
                                   editRecommendation
                                 )
                               }
-                              className="px-4 py-1.5 rounded-lg bg-purple-600 text-xs font-semibold text-white hover:bg-purple-500 cursor-pointer"
+                              className="px-4 py-1.5 rounded-lg bg-primary text-xs font-semibold text-primary-foreground hover:bg-primary/90 cursor-pointer"
                             >
                               Save Modification
                             </button>

@@ -123,7 +123,7 @@ function WorkstreamBadge({ workstream }: { workstream?: string | null }) {
   const ws = workstream || "GENERAL";
   const badge = WORKSTREAM_BADGES[ws] || WORKSTREAM_BADGES.GENERAL;
   return (
-    <span className={`px-1.5 py-0.5 rounded text-[0.65rem] border font-semibold uppercase tracking-wider ${badge.style}`}>
+    <span className={`px-2 py-0.5 rounded-md text-xs border font-semibold uppercase tracking-wider ${badge.style}`}>
       {badge.label}
     </span>
   );
@@ -137,7 +137,7 @@ function PriorityBadge({ priority }: { priority: string }) {
     URGENT: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 font-bold",
   };
   return (
-    <span className={`px-1.5 py-0.5 rounded text-[0.65rem] border font-semibold uppercase tracking-wider ${colors[priority] || colors.MEDIUM}`}>
+    <span className={`px-2 py-0.5 rounded-md text-xs border font-semibold uppercase tracking-wider ${colors[priority] || colors.MEDIUM}`}>
       {priority}
     </span>
   );
@@ -545,14 +545,14 @@ export default function SprintBoardPage() {
               return (
                 <div
                   key={col.key}
-                  className="rounded-xl border border-border bg-card/60 p-4 flex flex-col min-h-[500px] shadow-2xs dark:bg-card/40"
+                  className="rounded-2xl border border-border/70 bg-card/60 dark:bg-card/40 backdrop-blur-xs p-3.5 flex flex-col min-h-[520px] shadow-2xs"
                 >
                   {/* Column Header */}
-                  <div className="flex items-center justify-between pb-3 border-b border-border mb-3">
-                    <span className={`text-xs font-bold uppercase tracking-wider ${col.color}`}>
+                  <div className="flex items-center justify-between pb-2.5 border-b border-border/70 mb-3">
+                    <span className={`text-xs font-extrabold uppercase tracking-wider ${col.color}`}>
                       {col.label}
                     </span>
-                    <span className="size-5 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-foreground">
+                    <span className="px-2 py-0.5 rounded-full bg-muted/80 flex items-center justify-center text-xs font-bold text-foreground border border-border/50">
                       {colTasks.length}
                     </span>
                   </div>
@@ -560,14 +560,14 @@ export default function SprintBoardPage() {
                   {/* Task Cards */}
                   <div className="space-y-2.5 flex-1 overflow-y-auto">
                     {colTasks.length === 0 ? (
-                      <div className="h-24 rounded-lg border border-dashed border-border/60 flex items-center justify-center text-xs text-muted-foreground/60 italic">
+                      <div className="h-24 rounded-xl border border-dashed border-border/60 flex items-center justify-center text-xs text-muted-foreground/60 italic">
                         No tasks
                       </div>
                     ) : (
                       colTasks.map((task) => (
                         <div
                           key={task.id}
-                          className="group rounded-xl border border-border bg-card p-3 shadow-2xs space-y-2.5 transition-all hover:border-primary/50 hover:shadow-xs dark:bg-card cursor-pointer relative"
+                          className="group rounded-xl border border-border/80 bg-card p-3 shadow-2xs space-y-2 transition-all duration-150 hover:border-primary/50 hover:shadow-xs hover:-translate-y-0.5 cursor-pointer relative"
                           onClick={() => setSelectedTaskId(task.id)}
                         >
                           {/* Top Row: Badges (Workstream, Priority, Points) & Actions */}
@@ -576,7 +576,7 @@ export default function SprintBoardPage() {
                               <WorkstreamBadge workstream={task.workstream} />
                               <PriorityBadge priority={task.priority} />
                               {task.story_points !== null && task.story_points !== undefined && (
-                                <span className="px-1.5 py-0.5 rounded text-[0.62rem] font-semibold border border-border/60 bg-muted/50 text-muted-foreground shrink-0">
+                                <span className="px-1.5 py-0.5 rounded-md text-xs font-bold border border-border/80 bg-muted/50 text-muted-foreground shrink-0">
                                   {task.story_points} pts
                                 </span>
                               )}
@@ -593,14 +593,14 @@ export default function SprintBoardPage() {
                                   title="Delete Task"
                                   className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                 >
-                                  <Trash2 className="size-3" />
+                                  <Trash2 className="size-3.5" />
                                 </button>
                               )}
                             </div>
                           </div>
 
                           {/* Task Title (wraps up to 2 lines cleanly) */}
-                          <h4 className="text-xs font-medium text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                          <h4 className="text-xs font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
                             {task.title}
                           </h4>
 
@@ -612,16 +612,16 @@ export default function SprintBoardPage() {
                             <div className="flex items-center gap-1.5 min-w-0 flex-1">
                               {task.assignee_name ? (
                                 <div className="flex items-center gap-1.5 min-w-0">
-                                  <div className="size-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[0.6rem] font-bold shrink-0">
+                                  <div className="size-4.5 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-bold shrink-0 border border-primary/20">
                                     {task.assignee_name[0].toUpperCase()}
                                   </div>
-                                  <span className="text-[0.7rem] text-muted-foreground font-medium truncate" title={task.assignee_name}>
+                                  <span className="text-xs text-muted-foreground font-medium truncate" title={task.assignee_name}>
                                     {task.assignee_name}
                                   </span>
                                 </div>
                               ) : (
-                                <div className="flex items-center gap-1 text-muted-foreground/60 text-[0.7rem] italic">
-                                  <User className="size-3 shrink-0" />
+                                <div className="flex items-center gap-1 text-muted-foreground/70 text-xs italic">
+                                  <User className="size-3.5 shrink-0" />
                                   <span>Unassigned</span>
                                 </div>
                               )}
@@ -632,7 +632,7 @@ export default function SprintBoardPage() {
                                 <select
                                   value={task.status}
                                   onChange={(e) => handleStatusChange(task.id, e.target.value)}
-                                  className="w-[82px] text-[0.65rem] bg-muted/60 hover:bg-muted text-foreground border border-border/80 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer font-medium truncate"
+                                  className="text-xs bg-muted/60 hover:bg-muted text-foreground border border-border/80 rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer font-medium truncate"
                                 >
                                   <option value="TODO">To Do</option>
                                   <option value="IN_PROGRESS">In Progress</option>
@@ -641,7 +641,7 @@ export default function SprintBoardPage() {
                                   <option value="CANCELLED">Cancelled</option>
                                 </select>
                               ) : (
-                                <span className="text-[0.62rem] font-medium text-muted-foreground bg-muted/40 px-1 py-0.5 rounded border border-border/40">
+                                <span className="text-xs font-medium text-muted-foreground bg-muted/40 px-1.5 py-0.5 rounded-md border border-border/40">
                                   {BOARD_COLUMNS.find((c) => c.key === task.status)?.label || task.status}
                                 </span>
                               )}

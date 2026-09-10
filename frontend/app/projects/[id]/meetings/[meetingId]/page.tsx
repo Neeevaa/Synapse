@@ -396,7 +396,7 @@ export default function MeetingDetailPage() {
             {(meeting.status === "SCHEDULED" || meeting.status === "IN_PROGRESS") && (
               <button
                 onClick={() => handleStatusTransition("COMPLETED")}
-                className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-purple-500 cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 cursor-pointer"
               >
                 <CheckCircle2 className="size-3.5" /> Complete Meeting
               </button>
@@ -517,7 +517,7 @@ export default function MeetingDetailPage() {
 
               {/* Key Decisions */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-purple-400">Key Decisions Made</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-primary">Key Decisions Made</label>
                 <textarea
                   rows={4}
                   placeholder="1. Approved architecture for OAuth2&#10;2. Deferred GraphQL migration to Q4"
@@ -747,7 +747,7 @@ export default function MeetingDetailPage() {
                           </td>
                           <td className="py-3.5 px-4">
                             {ai.task_title ? (
-                              <span className="inline-flex items-center gap-1 text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20 max-w-[150px] truncate">
+                              <span className="inline-flex items-center gap-1 text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20 max-w-[150px] truncate">
                                 <Layers className="size-3" /> {ai.task_title}
                               </span>
                             ) : (

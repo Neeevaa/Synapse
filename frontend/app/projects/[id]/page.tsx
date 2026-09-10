@@ -118,7 +118,7 @@ function StatusBadge({ status }: { status: string }) {
   };
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-md border text-[0.7rem] font-semibold uppercase tracking-wider ${
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-lg border text-xs font-semibold uppercase tracking-wider ${
         colors[status] || colors.ACTIVE
       }`}
     >
@@ -641,18 +641,18 @@ export default function ProjectDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                   {/* 1. SPRINT OVERVIEW */}
-                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                  <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs hover:shadow-xs transition-shadow space-y-4 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
                           <Zap className="size-4" /> Sprint Overview
                         </span>
                         {activeSprint ? (
-                          <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                             Active
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wider bg-muted text-muted-foreground border border-border">
+                          <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider bg-muted text-muted-foreground border border-border">
                             Planned
                           </span>
                         )}
@@ -664,20 +664,20 @@ export default function ProjectDetailPage() {
                           <p className="text-xs text-muted-foreground line-clamp-2">{activeSprint.goal || "Focusing on key deliverables."}</p>
 
                           <div className="pt-2 grid grid-cols-2 gap-3 text-xs">
-                            <div className="rounded-lg bg-background p-2.5 border border-border">
-                              <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Story Points</span>
-                              <span className="text-sm font-bold text-foreground">{activeSprint.allocated_points || activeSprint.story_points || 0} Points</span>
+                            <div className="rounded-xl bg-background/60 p-3 border border-border/60">
+                              <span className="text-xs text-muted-foreground uppercase font-semibold block">Story Points</span>
+                              <span className="text-sm font-bold text-foreground mt-0.5 block">{activeSprint.allocated_points || activeSprint.story_points || 0} Points</span>
                             </div>
-                            <div className="rounded-lg bg-background p-2.5 border border-border">
-                              <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Total Tasks</span>
-                              <span className="text-sm font-bold text-foreground">{activeSprint.task_count || activeSprint.tasks?.length || 0} Tasks</span>
+                            <div className="rounded-xl bg-background/60 p-3 border border-border/60">
+                              <span className="text-xs text-muted-foreground uppercase font-semibold block">Total Tasks</span>
+                              <span className="text-sm font-bold text-foreground mt-0.5 block">{activeSprint.task_count || activeSprint.tasks?.length || 0} Tasks</span>
                             </div>
                           </div>
                         </div>
                       ) : (
                         <div className="mt-4 p-4 rounded-xl border border-dashed border-border bg-muted/20 text-center">
                           <p className="text-xs font-semibold text-foreground">No Active Sprint</p>
-                          <p className="text-[0.75rem] text-muted-foreground mt-1">There is currently no active sprint running for this project.</p>
+                          <p className="text-xs text-muted-foreground mt-1">There is currently no active sprint running for this project.</p>
                         </div>
                       )}
                     </div>
@@ -694,27 +694,27 @@ export default function ProjectDetailPage() {
                   </div>
 
                   {/* 2. BACKLOG STREAM OVERVIEW */}
-                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                  <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs hover:shadow-xs transition-shadow space-y-4 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
                           <Layers className="size-4" /> Backlog Stream
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-primary/10 text-primary border border-primary/20">
+                        <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
                           {backlogTasks.length} Items
                         </span>
                       </div>
 
                       <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                        <div className="rounded-lg bg-background p-2.5 border border-border">
-                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">High / Urgent</span>
-                          <span className="text-sm font-bold text-destructive">
+                        <div className="rounded-xl bg-background/60 p-3 border border-border/60">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold block">High / Urgent</span>
+                          <span className="text-sm font-bold text-destructive mt-0.5 block">
                             {backlogTasks.filter((t) => t.priority === "HIGH" || t.priority === "URGENT").length} Items
                           </span>
                         </div>
-                        <div className="rounded-lg bg-background p-2.5 border border-border">
-                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Unassigned</span>
-                          <span className="text-sm font-bold text-foreground">
+                        <div className="rounded-xl bg-background/60 p-3 border border-border/60">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold block">Unassigned</span>
+                          <span className="text-sm font-bold text-foreground mt-0.5 block">
                             {backlogTasks.filter((t) => !t.assignee_id).length} Items
                           </span>
                         </div>
@@ -733,27 +733,27 @@ export default function ProjectDetailPage() {
                   </div>
 
                   {/* 3. REQUIREMENTS & REVIEW OVERVIEW */}
-                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                  <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs hover:shadow-xs transition-shadow space-y-4 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-500 flex items-center gap-1.5">
                           <FileText className="size-4" /> Requirements & Review
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                        <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                           {requirements.length} Requirements
                         </span>
                       </div>
 
                       <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                        <div className="rounded-lg bg-background p-2.5 border border-border">
-                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Approved</span>
-                          <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                        <div className="rounded-xl bg-background/60 p-3 border border-border/60">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold block">Approved</span>
+                          <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">
                             {requirements.filter((r) => r.status === "APPROVED" || r.status === "VALIDATED").length} Docs
                           </span>
                         </div>
-                        <div className="rounded-lg bg-background p-2.5 border border-border">
-                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">In Review / Draft</span>
-                          <span className="text-sm font-bold text-amber-500">
+                        <div className="rounded-xl bg-background/60 p-3 border border-border/60">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold block">In Review / Draft</span>
+                          <span className="text-sm font-bold text-amber-500 mt-0.5 block">
                             {requirements.filter((r) => r.status === "IN_REVIEW" || r.status === "DRAFT" || !r.status).length} Docs
                           </span>
                         </div>
@@ -772,27 +772,27 @@ export default function ProjectDetailPage() {
                   </div>
 
                   {/* 4. MEETINGS OVERVIEW */}
-                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                  <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs hover:shadow-xs transition-shadow space-y-4 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-extrabold uppercase tracking-wider text-cyan-500 flex items-center gap-1.5">
                           <Video className="size-4" /> Meetings & Notes
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-cyan-500/10 text-cyan-600 border border-cyan-500/20">
+                        <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
                           {meetings.length} Meetings
                         </span>
                       </div>
 
                       <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                        <div className="rounded-lg bg-background p-2.5 border border-border">
-                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Scheduled</span>
-                          <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400">
+                        <div className="rounded-xl bg-background/60 p-3 border border-border/60">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold block">Scheduled</span>
+                          <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400 mt-0.5 block">
                             {meetings.filter((m) => m.status === "SCHEDULED").length} Upcoming
                           </span>
                         </div>
-                        <div className="rounded-lg bg-background p-2.5 border border-border">
-                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Completed</span>
-                          <span className="text-sm font-bold text-foreground">
+                        <div className="rounded-xl bg-background/60 p-3 border border-border/60">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold block">Completed</span>
+                          <span className="text-sm font-bold text-foreground mt-0.5 block">
                             {meetings.filter((m) => m.status === "COMPLETED").length} Held
                           </span>
                         </div>
@@ -811,20 +811,20 @@ export default function ProjectDetailPage() {
                   </div>
 
                   {/* 5. TEAM OVERVIEW */}
-                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                  <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs hover:shadow-xs transition-shadow space-y-4 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-extrabold uppercase tracking-wider text-cyan-500 flex items-center gap-1.5">
                           <Users className="size-4" /> Team Breakdown
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-muted text-foreground border border-border">
+                        <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-muted text-foreground border border-border">
                           {members.length} Members
                         </span>
                       </div>
 
-                      <div className="mt-3 flex flex-wrap gap-1.5 text-[0.7rem]">
+                      <div className="mt-3 flex flex-wrap gap-1.5 text-xs">
                         {Array.from(new Set(members.map((m) => m.specialization || m.role))).map((spec) => (
-                          <span key={spec} className="px-2 py-1 rounded bg-background border border-border font-medium text-foreground">
+                          <span key={spec} className="px-2.5 py-1 rounded-lg bg-background/70 border border-border/70 font-medium text-foreground">
                             {formatSpecializationLabel(spec) || formatRoleLabel(spec)}: {members.filter((m) => (m.specialization || m.role) === spec).length}
                           </span>
                         ))}
@@ -844,27 +844,27 @@ export default function ProjectDetailPage() {
                   </div>
 
                   {/* 6. PROJECT INTELLIGENCE OVERVIEW */}
-                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                  <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs hover:shadow-xs transition-shadow space-y-4 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-extrabold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+                        <span className="text-xs font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
                           <Database className="size-4" /> Project Intelligence
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                        <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
                           Active RAG
                         </span>
                       </div>
 
                       <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-                        <div className="rounded-lg bg-background p-2.5 border border-border">
-                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Knowledge Base</span>
-                          <span className="text-sm font-bold text-purple-400">
+                        <div className="rounded-xl bg-background/60 p-3 border border-border/60">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold block">Knowledge Base</span>
+                          <span className="text-sm font-bold text-primary mt-0.5 block">
                             {knowledgeInfo?.documents_count || knowledgeInfo?.total_documents || knowledgeInfo?.documents?.length || 0} Docs
                           </span>
                         </div>
-                        <div className="rounded-lg bg-background p-2.5 border border-border">
-                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Traceability Matrix</span>
-                          <span className="text-sm font-bold text-amber-500">Configured</span>
+                        <div className="rounded-xl bg-background/60 p-3 border border-border/60">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold block">Traceability Matrix</span>
+                          <span className="text-sm font-bold text-amber-500 mt-0.5 block">Configured</span>
                         </div>
                       </div>
                     </div>
@@ -872,7 +872,7 @@ export default function ProjectDetailPage() {
                     <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
                       <Link
                         href={`/projects/${project.id}/knowledge`}
-                        className="font-bold text-purple-400 hover:underline inline-flex items-center gap-1"
+                        className="font-bold text-primary hover:underline inline-flex items-center gap-1"
                       >
                         Knowledge Base <ArrowRight className="size-3" />
                       </Link>

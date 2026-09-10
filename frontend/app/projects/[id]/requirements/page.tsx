@@ -403,33 +403,33 @@ export default function RequirementsPage() {
 
         {/* Requirements Status Overview Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-1">
-            <span className="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wider">
+          <div className="rounded-2xl border border-border/80 bg-card p-4 shadow-2xs space-y-1">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Total Catalog
             </span>
-            <div className="text-xl font-extrabold text-white">{totalCount}</div>
+            <div className="text-xl font-extrabold text-foreground">{totalCount}</div>
           </div>
-          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3.5 space-y-1">
-            <span className="text-[0.7rem] font-semibold text-emerald-400 uppercase tracking-wider">
+          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 shadow-2xs space-y-1">
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
               Approved
             </span>
-            <div className="text-xl font-extrabold text-emerald-400">
+            <div className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">
               {requirements.filter((r) => r.status === "APPROVED").length}
             </div>
           </div>
-          <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-3.5 space-y-1">
-            <span className="text-[0.7rem] font-semibold text-purple-400 uppercase tracking-wider">
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 shadow-2xs space-y-1">
+            <span className="text-xs font-semibold text-primary uppercase tracking-wider">
               In Review
             </span>
-            <div className="text-xl font-extrabold text-purple-400">
+            <div className="text-xl font-extrabold text-primary">
               {requirements.filter((r) => r.status === "REVIEW").length}
             </div>
           </div>
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3.5 space-y-1">
-            <span className="text-[0.7rem] font-semibold text-amber-400 uppercase tracking-wider">
+          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 shadow-2xs space-y-1">
+            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
               Draft / Other
             </span>
-            <div className="text-xl font-extrabold text-amber-400">
+            <div className="text-xl font-extrabold text-amber-600 dark:text-amber-400">
               {requirements.filter((r) => r.status !== "APPROVED" && r.status !== "REVIEW").length}
             </div>
           </div>
@@ -557,7 +557,7 @@ export default function RequirementsPage() {
                       onClick={() => handleOpenDetail(req)}
                       className="hover:bg-slate-800/40 transition-colors cursor-pointer group"
                     >
-                      <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">{req.requirement_key}</td>
+                      <td className="py-3.5 px-4 font-mono font-bold text-emerald-400 whitespace-nowrap">{req.requirement_key}</td>
                       <td className="py-3.5 px-4 font-semibold text-slate-100 group-hover:text-emerald-300 transition-colors max-w-md truncate">
                         {req.title}
                       </td>
@@ -585,9 +585,9 @@ export default function RequirementsPage() {
                       <td className="py-3.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => setReviewModalReq(req)}
-                          className="inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 font-semibold px-2.5 py-1 rounded bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-colors mr-2 cursor-pointer"
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-semibold px-2.5 py-1 rounded bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors mr-2 cursor-pointer"
                         >
-                          <Sparkles className="size-3 text-purple-400" /> Review with AI
+                          <Sparkles className="size-3 text-primary" /> Review with AI
                         </button>
                         <button
                           onClick={() => handleOpenDetail(req)}

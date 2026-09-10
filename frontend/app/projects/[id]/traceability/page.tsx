@@ -236,7 +236,7 @@ export default function TraceabilityMatrixPage({
                     }`}>
                       {coverageGaps > 0 ? `${coverageGaps} Uncovered` : "100% Linked"}
                     </span>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       {coverageGaps > 0 ? "Requirements with 0 execution tasks" : "All requirements have linked tasks"}
                     </p>
                   </div>
@@ -276,11 +276,11 @@ export default function TraceabilityMatrixPage({
                             </span>
                             <div className="flex items-center gap-1.5">
                               {node.tasks_count === 0 && (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/20">
                                   No Tasks
                                 </span>
                               )}
-                              <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
+                              <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
                                 {node.action_items_count} Action Items
                               </span>
                             </div>
@@ -288,7 +288,7 @@ export default function TraceabilityMatrixPage({
 
                           <h4 className="font-bold text-foreground truncate">{node.requirement_title}</h4>
 
-                          <div className="flex items-center gap-3 text-muted-foreground pt-1 text-[11px] font-semibold">
+                          <div className="flex items-center gap-3 text-muted-foreground pt-1 text-xs font-medium">
                             <span className="flex items-center gap-1">
                               <Video className="size-3 text-cyan-500" /> {node.meetings_count} Meetings
                             </span>
