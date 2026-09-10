@@ -16,8 +16,10 @@ from app.models.enums import (
     FindingEvidenceStatus,
     FindingHumanDecision,
     KnowledgeSourceType,
+    NotificationType,
 )
 from app.models.requirement_review import RequirementReview, RequirementReviewFinding
+from app.notifications.service import NotificationService
 from app.requirements.review_schemas import (
     ReviewOutputSchema,
     UpdateFindingDecisionRequest,
@@ -262,6 +264,21 @@ Return structured JSON output with findings according to the required schema.
 
             self.repo.update_review(company_id, project_id, review)
             self.db.commit()
+
+            # Notify user of completed AI review
+            notif_service = NotificationService(self.db)
+            notif_service.notify_users(
+                recipient_ids=[current_user.id],
+                sender_id=None,  # Asynchronous job completion delivered to requester
+                company_id=company_id,
+                type=NotificationType.AI_REVIEW_COMPLETED,
+                title="AI Review Completed",
+                message=f"AI requirement review completed for {req.requirement_key} ({len(db_findings)} findings).",
+                project_id=project_id,
+                source_type="AI_REVIEW",
+                source_id=review.id,
+                deep_link=f"/projects/{project_id}/requirements",
+            )
 
             return self.repo.get_review_by_id(company_id, project_id, review.id)
 

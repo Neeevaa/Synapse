@@ -11,6 +11,7 @@ from app.models.enums import (
     RequirementSource,
     ProjectRole,
     CompanyRole,
+    NotificationType,
 )
 from app.requirements.schemas import (
     RequirementCreate,
@@ -23,6 +24,7 @@ from app.requirements.schemas import (
 from app.requirements.repository import RequirementRepository
 from app.permissions.dependencies import check_project_role_or_company_admin
 from app.common.exceptions import ResourceNotFound, Forbidden, BaseBusinessException
+from app.notifications.service import NotificationService
 
 
 class RequirementService:
@@ -253,6 +255,22 @@ class RequirementService:
         )
         self.repo.create_version(new_version)
 
+        # Notify project members of requirement update
+        notif_service = NotificationService(self.db)
+        member_ids = notif_service.get_project_all_member_ids(project_id)
+        notif_service.notify_users(
+            recipient_ids=member_ids,
+            sender_id=current_user.id,
+            company_id=project.company_id,
+            type=NotificationType.REQUIREMENT_UPDATED,
+            title="Requirement Updated",
+            message=f"{current_user.first_name} updated requirement {req.requirement_key}: {req.title}",
+            project_id=project_id,
+            source_type="REQUIREMENT",
+            source_id=req.id,
+            deep_link=f"/projects/{project_id}/requirements",
+        )
+
         full_req = self.repo.get_requirement(req.id, project_id)
         return self._to_requirement_response(full_req)
 
@@ -306,6 +324,22 @@ class RequirementService:
             created_by=current_user.id,
         )
         self.repo.create_version(status_version)
+
+        # Notify project members of requirement status transition
+        notif_service = NotificationService(self.db)
+        member_ids = notif_service.get_project_all_member_ids(project_id)
+        notif_service.notify_users(
+            recipient_ids=member_ids,
+            sender_id=current_user.id,
+            company_id=project.company_id,
+            type=NotificationType.REQUIREMENT_STATUS_CHANGED,
+            title="Requirement Status Changed",
+            message=f"Requirement {req.requirement_key} status changed to {req.status.value}",
+            project_id=project_id,
+            source_type="REQUIREMENT",
+            source_id=req.id,
+            deep_link=f"/projects/{project_id}/requirements",
+        )
 
         full_req = self.repo.get_requirement(req.id, project_id)
         return self._to_requirement_response(full_req)

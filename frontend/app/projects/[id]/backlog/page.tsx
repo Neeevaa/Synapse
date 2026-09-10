@@ -299,9 +299,12 @@ export default function ProjectBacklogPage() {
     }
 
     setCreatingTask(true);
-    setCreateTaskError(null);
-
     const points = newStoryPoints.trim() === "" ? null : parseInt(newStoryPoints.trim(), 10);
+    if (points !== null && (isNaN(points) || points < 0 || points > 100)) {
+      setCreateTaskError("Story points must be a valid non-negative number between 0 and 100.");
+      setCreatingTask(false);
+      return;
+    }
 
     try {
       await api.post(`/projects/${projectId}/tasks`, {

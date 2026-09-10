@@ -4,6 +4,7 @@ from uuid import UUID
 from app.models.enums import SubscriptionPlan
 
 EMAIL_REGEX = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+NAME_REGEX = r"^[a-zA-Z\s'\-\.]+$"
 
 
 class UserRegisterRequest(BaseModel):
@@ -29,6 +30,14 @@ class UserRegisterRequest(BaseModel):
         default=SubscriptionPlan.FREE, description="Company subscription plan selection"
     )
 
+    @field_validator("first_name", "last_name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        v_stripped = v.strip()
+        if not re.match(NAME_REGEX, v_stripped):
+            raise ValueError("Name can only contain letters, spaces, hyphens, and apostrophes")
+        return v_stripped
+
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
@@ -44,6 +53,14 @@ class TeamMemberRegisterRequest(BaseModel):
     email: str = Field(..., min_length=3, max_length=255)
     password: str = Field(..., min_length=8, max_length=100)
     invitation_token: str | None = Field(default=None, description="Optional raw invitation token")
+
+    @field_validator("first_name", "last_name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        v_stripped = v.strip()
+        if not re.match(NAME_REGEX, v_stripped):
+            raise ValueError("Name can only contain letters, spaces, hyphens, and apostrophes")
+        return v_stripped
 
     @field_validator("email")
     @classmethod

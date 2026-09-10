@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.task import Task
 from app.models.project import Project
 from app.models.user import User
-from app.models.enums import TaskStatus, TaskPriority, TaskWorkstream, ProjectRole
+from app.models.enums import TaskStatus, TaskPriority, TaskWorkstream, ProjectRole, NotificationType
 from app.tasks.repository import TaskRepository
 from app.tasks.schemas import (
     CreateTaskRequest,
@@ -16,6 +16,7 @@ from app.tasks.schemas import (
 )
 from app.common.exceptions import ResourceNotFound, Forbidden, BaseBusinessException
 from app.permissions.dependencies import check_project_role_or_company_admin
+from app.notifications.service import NotificationService
 
 
 class TaskService:
@@ -176,6 +177,22 @@ class TaskService:
             self.repo.create_task(task)
             self.db.commit()
 
+            if task.assignee_id:
+                notif_service = NotificationService(self.db)
+                link = f"/projects/{project_id}/board" if task.sprint_id else f"/projects/{project_id}/backlog"
+                notif_service.notify_users(
+                    recipient_ids=[task.assignee_id],
+                    sender_id=current_user.id,
+                    company_id=current_user.company_id,
+                    type=NotificationType.TASK_ASSIGNED,
+                    title="New Task Assigned",
+                    message=f"You were assigned task: {task.title}",
+                    project_id=project_id,
+                    source_type="TASK",
+                    source_id=task.id,
+                    deep_link=link,
+                )
+
             return self._build_task_response(task)
         except Exception as e:
             self.db.rollback()
@@ -206,9 +223,44 @@ class TaskService:
         except ValueError:
             raise BaseBusinessException("Invalid task status value.", status_code=400)
 
+        old_status = task.status
         try:
             task.status = status_enum
             self.db.commit()
+
+            if old_status != status_enum:
+                notif_service = NotificationService(self.db)
+                link = f"/projects/{task.project_id}/board" if task.sprint_id else f"/projects/{task.project_id}/backlog"
+                if status_enum == TaskStatus.DONE:
+                    # Developer completed task -> notify PMs and Team Leads
+                    lead_ids = notif_service.get_project_pm_and_lead_ids(task.project_id)
+                    notif_service.notify_users(
+                        recipient_ids=lead_ids,
+                        sender_id=current_user.id,
+                        company_id=current_user.company_id,
+                        type=NotificationType.TASK_STATUS_CHANGED,
+                        title="Task Completed",
+                        message=f"{current_user.first_name} completed task: {task.title}",
+                        project_id=task.project_id,
+                        source_type="TASK",
+                        source_id=task.id,
+                        deep_link=link,
+                    )
+                elif task.assignee_id:
+                    # PM/TL or other updated status -> notify assigned developer
+                    notif_service.notify_users(
+                        recipient_ids=[task.assignee_id],
+                        sender_id=current_user.id,
+                        company_id=current_user.company_id,
+                        type=NotificationType.TASK_STATUS_CHANGED,
+                        title="Task Status Updated",
+                        message=f"{current_user.first_name} updated your task '{task.title}' to {status_enum.value}",
+                        project_id=task.project_id,
+                        source_type="TASK",
+                        source_id=task.id,
+                        deep_link=link,
+                    )
+
             return self._build_task_response(task)
         except Exception as e:
             self.db.rollback()
@@ -240,6 +292,10 @@ class TaskService:
         check_project_role_or_company_admin(
             self.db, current_user, task.project_id, [ProjectRole.PROJECT_MANAGER, ProjectRole.TEAM_LEAD]
         )
+
+        old_assignee_id = task.assignee_id
+        old_status = task.status
+        old_priority = task.priority
 
         try:
             if data.title is not None:
@@ -281,6 +337,70 @@ class TaskService:
                 task.sprint_id = data.sprint_id
 
             self.db.commit()
+
+            notif_service = NotificationService(self.db)
+            link = f"/projects/{task.project_id}/board" if task.sprint_id else f"/projects/{task.project_id}/backlog"
+
+            # 1. Assignee reassigned/updated
+            if data.assignee_id is not None and data.assignee_id != old_assignee_id:
+                notif_service.notify_users(
+                    recipient_ids=[data.assignee_id],
+                    sender_id=current_user.id,
+                    company_id=current_user.company_id,
+                    type=NotificationType.TASK_ASSIGNED,
+                    title="Task Assigned",
+                    message=f"You were assigned task: {task.title}",
+                    project_id=task.project_id,
+                    source_type="TASK",
+                    source_id=task.id,
+                    deep_link=link,
+                )
+
+            # 2. Priority changed
+            if data.priority is not None and task.priority != old_priority and task.assignee_id:
+                notif_service.notify_users(
+                    recipient_ids=[task.assignee_id],
+                    sender_id=current_user.id,
+                    company_id=current_user.company_id,
+                    type=NotificationType.TASK_PRIORITY_CHANGED,
+                    title="Task Priority Updated",
+                    message=f"{current_user.first_name} updated priority of '{task.title}' to {task.priority.value}",
+                    project_id=task.project_id,
+                    source_type="TASK",
+                    source_id=task.id,
+                    deep_link=link,
+                )
+
+            # 3. Status changed
+            if data.status is not None and task.status != old_status:
+                if task.status == TaskStatus.DONE:
+                    lead_ids = notif_service.get_project_pm_and_lead_ids(task.project_id)
+                    notif_service.notify_users(
+                        recipient_ids=lead_ids,
+                        sender_id=current_user.id,
+                        company_id=current_user.company_id,
+                        type=NotificationType.TASK_STATUS_CHANGED,
+                        title="Task Completed",
+                        message=f"{current_user.first_name} marked task '{task.title}' as DONE",
+                        project_id=task.project_id,
+                        source_type="TASK",
+                        source_id=task.id,
+                        deep_link=link,
+                    )
+                elif task.assignee_id:
+                    notif_service.notify_users(
+                        recipient_ids=[task.assignee_id],
+                        sender_id=current_user.id,
+                        company_id=current_user.company_id,
+                        type=NotificationType.TASK_STATUS_CHANGED,
+                        title="Task Status Updated",
+                        message=f"{current_user.first_name} updated your task '{task.title}' to {task.status.value}",
+                        project_id=task.project_id,
+                        source_type="TASK",
+                        source_id=task.id,
+                        deep_link=link,
+                    )
+
             return self._build_task_response(task)
         except Exception as e:
             self.db.rollback()

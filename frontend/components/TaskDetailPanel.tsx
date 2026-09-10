@@ -16,6 +16,8 @@ import {
   Clock,
   Send,
   Trash2,
+  Zap,
+  Layers,
 } from "lucide-react";
 
 /* ─── Types ─── */
@@ -27,6 +29,8 @@ interface TaskDetail {
   description: string | null;
   status: string;
   priority: string;
+  workstream?: string | null;
+  story_points?: number | null;
   assignee_id: string | null;
   assignee_name: string | null;
   created_by: string | null;
@@ -83,6 +87,26 @@ const STATUS_COLORS: Record<string, string> = {
   IN_REVIEW: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
   DONE: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
   CANCELLED: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
+};
+
+const WORKSTREAM_OPTIONS = [
+  { value: "GENERAL", label: "General" },
+  { value: "UI_UX", label: "UI/UX" },
+  { value: "FRONTEND", label: "Frontend" },
+  { value: "BACKEND", label: "Backend" },
+  { value: "QA", label: "QA" },
+  { value: "DEVOPS", label: "DevOps" },
+  { value: "AI_ML", label: "AI/ML" },
+];
+
+const WORKSTREAM_COLORS: Record<string, string> = {
+  GENERAL: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20",
+  UI_UX: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20",
+  FRONTEND: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+  BACKEND: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
+  QA: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+  DEVOPS: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
+  AI_ML: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
 };
 
 /* ─── Inline Edit Field ─── */
@@ -444,6 +468,57 @@ export default function TaskDetailPanel({
                   ) : (
                     <span className={`inline-block w-full px-3 py-1.5 rounded-lg text-xs font-semibold border ${PRIORITY_COLORS[task.priority] || ""}`}>
                       {PRIORITY_OPTIONS.find((o) => o.value === task.priority)?.label || task.priority}
+                    </span>
+                  )}
+                </div>
+
+                {/* Workstream */}
+                <div className="space-y-1">
+                  <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <Layers className="size-3" /> Workstream
+                  </label>
+                  {canEditTaskFull ? (
+                    <select
+                      value={task.workstream || "GENERAL"}
+                      onChange={(e) => patchTask({ workstream: e.target.value })}
+                      className={`w-full rounded-lg border px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer ${
+                        WORKSTREAM_COLORS[task.workstream || "GENERAL"] || ""
+                      } bg-transparent`}
+                    >
+                      {WORKSTREAM_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className={`inline-block w-full px-3 py-1.5 rounded-lg text-xs font-semibold border ${WORKSTREAM_COLORS[task.workstream || "GENERAL"] || ""}`}>
+                      {WORKSTREAM_OPTIONS.find((o) => o.value === (task.workstream || "GENERAL"))?.label || task.workstream || "General"}
+                    </span>
+                  )}
+                </div>
+
+                {/* Story Points */}
+                <div className="space-y-1">
+                  <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <Zap className="size-3" /> Story Points
+                  </label>
+                  {canEditTaskFull ? (
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={task.story_points ?? ""}
+                      placeholder="Unestimated"
+                      onChange={(e) => {
+                        const val = e.target.value === "" ? null : Number(e.target.value);
+                        patchTask({ story_points: val });
+                      }}
+                      className="w-full rounded-lg border border-border bg-transparent px-3 py-1.5 text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  ) : (
+                    <span className="inline-block w-full px-3 py-1.5 rounded-lg text-xs font-semibold border border-border/60 bg-muted/40 text-foreground">
+                      {task.story_points !== null && task.story_points !== undefined ? `${task.story_points} points` : "Unestimated"}
                     </span>
                   )}
                 </div>

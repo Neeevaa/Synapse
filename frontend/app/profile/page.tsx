@@ -146,6 +146,13 @@ export default function MyProfilePage() {
     setProfileSuccess(false);
     setProfileError(null);
 
+    const nameRegex = /^[a-zA-Z\s'\-\.]+$/;
+    if (!nameRegex.test(firstName.trim()) || !nameRegex.test(lastName.trim())) {
+      setProfileError("First and last names can only contain letters, spaces, hyphens, and apostrophes.");
+      setSavingProfile(false);
+      return;
+    }
+
     try {
       const res = await api.patch("/auth/profile", {
         first_name: firstName.trim(),

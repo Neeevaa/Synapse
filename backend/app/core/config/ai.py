@@ -12,6 +12,7 @@ class AISettings(BaseSettings):
     GEMINI_MODEL: str = Field("gemini-2.5-flash", validation_alias="GEMINI_MODEL")
     EMBEDDING_PROVIDER: str = Field("mock", validation_alias="EMBEDDING_PROVIDER")
     EMBEDDING_DIMENSION: int = Field(1536, validation_alias="EMBEDDING_DIMENSION")
+    OLLAMA_EMBEDDING_MODEL: str = Field("nomic-embed-text", validation_alias="OLLAMA_EMBEDDING_MODEL")
 
     GOOGLE_API_KEY: str = Field("", validation_alias="GOOGLE_API_KEY")
     GROQ_API_KEY: str = Field("", validation_alias="GROQ_API_KEY")

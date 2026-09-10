@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 from app.models.enums import (
     MeetingType,
@@ -117,6 +117,20 @@ class MeetingCreate(BaseModel):
     duration_minutes: int = Field(default=60, ge=5, le=1440)
     participant_ids: list[UUID] = Field(default_factory=list)
     agenda_items: list[MeetingAgendaItemCreate] = Field(default_factory=list)
+
+    @field_validator("organizer_id", mode="before")
+    @classmethod
+    def sanitize_organizer_id(cls, v):
+        if v == "" or v is None:
+            return None
+        return v
+
+    @field_validator("participant_ids", mode="before")
+    @classmethod
+    def sanitize_participant_ids(cls, v):
+        if isinstance(v, list):
+            return [x for x in v if x is not None and str(x).strip() != ""]
+        return v
 
 
 class MeetingUpdate(BaseModel):

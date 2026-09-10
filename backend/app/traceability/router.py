@@ -86,3 +86,21 @@ def get_project_traceability_graph(
     service = TraceabilityService(db)
     result = service.get_project_traceability_graph(project_id, current_user)
     return success_response(message="Project traceability graph retrieved successfully.", data=result)
+
+
+@router.get(
+    "",
+    response_model=APIResponse[ProjectTraceabilityGraphResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get project traceability summary / graph",
+    description="Retrieves the project-wide traceability matrix overview.",
+)
+def get_traceability_root(
+    project_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = TraceabilityService(db)
+    result = service.get_project_traceability_graph(project_id, current_user)
+    return success_response(message="Project traceability overview retrieved successfully.", data=result)
+

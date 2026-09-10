@@ -20,9 +20,19 @@ import {
   Sun,
   Building2,
   ShieldAlert,
+  ChevronDown,
+  ChevronRight,
+  Kanban,
+  Layers,
+  FileText,
+  Video,
+  Users,
+  Database,
+  GitFork,
 } from "lucide-react";
 
 import CompleteProfileModal from "@/components/CompleteProfileModal";
+import NotificationBell from "@/components/NotificationBell";
 
 interface UserProfile {
   id: string;
@@ -53,6 +63,55 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
+
+  // Active Project Context State
+  const [activeProject, setActiveProject] = useState<{ id: string; name: string } | null>(null);
+  const [hasActiveSprint, setHasActiveSprint] = useState(false);
+  const [projectsExpanded, setProjectsExpanded] = useState(true);
+
+  // Extract projectId if on /projects/[id]...
+  const match = pathname ? pathname.match(/^\/projects\/([^\/]+)/) : null;
+  const currentProjectId = match && match[1] !== "new" ? match[1] : null;
+
+  useEffect(() => {
+    if (!currentProjectId) {
+      setActiveProject(null);
+      setHasActiveSprint(false);
+      return;
+    }
+
+    let isMounted = true;
+    const fetchActiveProjectContext = async () => {
+      try {
+        const [projRes, sprintRes] = await Promise.allSettled([
+          api.get(`/projects/${currentProjectId}`),
+          api.get(`/projects/${currentProjectId}/sprints/active`),
+        ]);
+
+        if (isMounted) {
+          if (projRes.status === "fulfilled" && projRes.value?.data?.data) {
+            setActiveProject({
+              id: currentProjectId,
+              name: projRes.value.data.data.name,
+            });
+          }
+          if (sprintRes.status === "fulfilled" && sprintRes.value?.data?.data) {
+            setHasActiveSprint(true);
+          } else {
+            setHasActiveSprint(false);
+          }
+        }
+      } catch {
+        // fallback
+      }
+    };
+
+    fetchActiveProjectContext();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentProjectId]);
 
   // Sync dark mode state from DOM on mount (set by layout.tsx inline script)
   useEffect(() => {
@@ -204,26 +263,170 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
         </div>
 
         {/* Navigation Links */}
-        <nav className="p-4 space-y-1.5">
+        <nav className="p-4 space-y-1.5 overflow-y-auto max-h-[calc(100vh-140px)]">
           <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/60">
             Platform Workspaces
           </div>
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isProjectsTab = item.href === "/projects";
+            const isActive = pathname === item.href || (isProjectsTab && pathname.startsWith("/projects/"));
             return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-xs"
-                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                }`}
-              >
-                <Icon className="size-4 shrink-0" />
-                {item.name}
-              </Link>
+              <div key={item.name} className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <Link
+                    href={item.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex-1 flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-xs"
+                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                    }`}
+                  >
+                    <Icon className="size-4 shrink-0" />
+                    <span className="truncate">{item.name}</span>
+                  </Link>
+                  {isProjectsTab && currentProjectId && (
+                    <button
+                      type="button"
+                      onClick={() => setProjectsExpanded(!projectsExpanded)}
+                      className="p-2 text-sidebar-foreground/60 hover:text-sidebar-foreground cursor-pointer"
+                    >
+                      {projectsExpanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+                    </button>
+                  )}
+                </div>
+
+                {/* Grouped Project Workspace Sub-navigation */}
+                {isProjectsTab && currentProjectId && projectsExpanded && (
+                  <div className="mt-1 ml-3 pl-3 border-l border-sidebar-border/60 space-y-3 py-1">
+                    {/* Active Project Context Badge */}
+                    <div className="text-[0.7rem] font-bold uppercase tracking-wider text-primary flex items-center gap-1.5 truncate px-1">
+                      <FolderKanban className="size-3 shrink-0" />
+                      <span className="truncate">{activeProject?.name || "Active Project"}</span>
+                    </div>
+
+                    {/* PLAN */}
+                    <div className="space-y-1">
+                      <div className="text-[0.65rem] font-bold uppercase tracking-wider text-sidebar-foreground/50 px-2">
+                        Plan
+                      </div>
+                      <Link
+                        href={`/projects/${currentProjectId}/board`}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs transition-colors ${
+                          pathname === `/projects/${currentProjectId}/board`
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 truncate">
+                          <Kanban className="size-3.5 shrink-0 text-primary" />
+                          <span className="truncate">Sprint Board</span>
+                        </span>
+                        {hasActiveSprint && (
+                          <span className="text-[0.6rem] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold shrink-0">
+                            Active
+                          </span>
+                        )}
+                      </Link>
+                      <Link
+                        href={`/projects/${currentProjectId}/backlog`}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
+                          pathname === `/projects/${currentProjectId}/backlog`
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        }`}
+                      >
+                        <Layers className="size-3.5 shrink-0 text-primary" />
+                        <span className="truncate">Backlog Stream</span>
+                      </Link>
+                    </div>
+
+                    {/* WORK */}
+                    <div className="space-y-1">
+                      <div className="text-[0.65rem] font-bold uppercase tracking-wider text-sidebar-foreground/50 px-2">
+                        Work
+                      </div>
+                      <Link
+                        href={`/projects/${currentProjectId}/requirements`}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
+                          pathname === `/projects/${currentProjectId}/requirements`
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        }`}
+                      >
+                        <FileText className="size-3.5 shrink-0 text-emerald-500" />
+                        <span className="truncate">Requirements & Review</span>
+                      </Link>
+                    </div>
+
+                    {/* COLLABORATE */}
+                    <div className="space-y-1">
+                      <div className="text-[0.65rem] font-bold uppercase tracking-wider text-sidebar-foreground/50 px-2">
+                        Collaborate
+                      </div>
+                      <Link
+                        href={`/projects/${currentProjectId}/meetings`}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
+                          pathname.startsWith(`/projects/${currentProjectId}/meetings`)
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        }`}
+                      >
+                        <Video className="size-3.5 shrink-0 text-cyan-500" />
+                        <span className="truncate">Meetings & Notes</span>
+                      </Link>
+                      <Link
+                        href={`/projects/${currentProjectId}?tab=members`}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
+                          pathname === `/projects/${currentProjectId}`
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        }`}
+                      >
+                        <Users className="size-3.5 shrink-0 text-cyan-500" />
+                        <span className="truncate">Team & Members</span>
+                      </Link>
+                    </div>
+
+                    {/* INTELLIGENCE */}
+                    <div className="space-y-1">
+                      <div className="text-[0.65rem] font-bold uppercase tracking-wider text-sidebar-foreground/50 px-2">
+                        Intelligence
+                      </div>
+                      <Link
+                        href={`/projects/${currentProjectId}/knowledge`}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
+                          pathname === `/projects/${currentProjectId}/knowledge`
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        }`}
+                      >
+                        <Database className="size-3.5 shrink-0 text-purple-400" />
+                        <span className="truncate">Knowledge Base</span>
+                      </Link>
+                      <Link
+                        href={`/projects/${currentProjectId}/traceability`}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors ${
+                          pathname === `/projects/${currentProjectId}/traceability`
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        }`}
+                      >
+                        <GitFork className="size-3.5 shrink-0 text-amber-500" />
+                        <span className="truncate">Traceability Matrix</span>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>
@@ -256,8 +459,10 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
             </h1>
           </div>
 
-          {/* User Profile & Logout */}
-          <div className="flex items-center gap-4">
+          {/* Header Controls: NotificationBell, Theme Toggle, Profile, Logout */}
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+
             <Link
               href="/profile"
               title="View & Edit My Profile"

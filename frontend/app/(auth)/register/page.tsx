@@ -9,10 +9,18 @@ import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { PLANS_LIST } from "@/lib/plans";
 
+const nameRegex = /^[a-zA-Z\s'\-\.]+$/;
+
 const registerSchema = z.object({
   company_name: z.string().min(2, "Company name must be at least 2 characters."),
-  first_name: z.string().min(1, "First name is required."),
-  last_name: z.string().min(1, "Last name is required."),
+  first_name: z
+    .string()
+    .min(1, "First name is required.")
+    .regex(nameRegex, "First name can only contain letters, spaces, hyphens, and apostrophes."),
+  last_name: z
+    .string()
+    .min(1, "Last name is required.")
+    .regex(nameRegex, "Last name can only contain letters, spaces, hyphens, and apostrophes."),
   email: z.string().email("Invalid email format."),
   password: z.string().min(8, "Password must be at least 8 characters."),
   designation: z.string().optional(),

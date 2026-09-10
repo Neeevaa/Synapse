@@ -1,12 +1,21 @@
 from abc import ABC, abstractmethod
 import math
 import hashlib
+import os
+import json
+import urllib.request
+import urllib.error
 from app.core.config import settings
 
 
 class ConfigurationError(Exception):
     """Raised when embedding provider or dimension configuration is invalid."""
     pass
+
+
+def _get_ai_setting(field: str, default=None):
+    ai_settings = getattr(settings, "ai", settings)
+    return getattr(ai_settings, field, getattr(settings, field, default))
 
 
 class BaseEmbeddingProvider(ABC):
@@ -23,7 +32,7 @@ class BaseEmbeddingProvider(ABC):
         pass
 
     def validate_dimension(self, vectors: list[list[float]]):
-        expected_dim = getattr(settings, "EMBEDDING_DIMENSION", 1536)
+        expected_dim = int(os.getenv("EMBEDDING_DIMENSION") or _get_ai_setting("EMBEDDING_DIMENSION", 1536))
         provider_dim = self.get_dimension()
 
         if provider_dim != expected_dim:
@@ -50,7 +59,7 @@ class MockEmbeddingProvider(BaseEmbeddingProvider):
         return "mock-deterministic-v1"
 
     def get_dimension(self) -> int:
-        return getattr(settings, "EMBEDDING_DIMENSION", 1536)
+        return int(os.getenv("EMBEDDING_DIMENSION") or _get_ai_setting("EMBEDDING_DIMENSION", 1536))
 
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
         dim = self.get_dimension()
@@ -87,7 +96,7 @@ class OpenAIEmbeddingProvider(BaseEmbeddingProvider):
         return 1536
 
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
-        api_key = getattr(settings, "OPENAI_API_KEY", "")
+        api_key = os.getenv("OPENAI_API_KEY") or _get_ai_setting("OPENAI_API_KEY", "")
         if not api_key:
             raise ConfigurationError("OPENAI_API_KEY is not configured.")
 
@@ -114,7 +123,7 @@ class GeminiEmbeddingProvider(BaseEmbeddingProvider):
         return 768
 
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
-        api_key = getattr(settings, "GEMINI_API_KEY", "")
+        api_key = os.getenv("GEMINI_API_KEY") or _get_ai_setting("GEMINI_API_KEY", "")
         if not api_key:
             raise ConfigurationError("GEMINI_API_KEY is not configured.")
 
@@ -133,16 +142,104 @@ class GeminiEmbeddingProvider(BaseEmbeddingProvider):
         return vectors
 
 
+class OllamaEmbeddingProvider(BaseEmbeddingProvider):
+    """
+    Local Ollama embedding provider using nomic-embed-text (768-dim) or configured model.
+    Communicates directly with local Ollama instance via HTTP API.
+    """
+
+    def get_model_name(self) -> str:
+        return os.getenv("OLLAMA_EMBEDDING_MODEL") or _get_ai_setting("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
+
+    def get_base_url(self) -> str:
+        url = os.getenv("OLLAMA_BASE_URL") or _get_ai_setting("OLLAMA_BASE_URL", "http://localhost:11434")
+        return url.rstrip("/")
+
+    def get_dimension(self) -> int:
+        model = self.get_model_name()
+        if "nomic-embed-text" in model:
+            return 768
+        return int(os.getenv("EMBEDDING_DIMENSION") or _get_ai_setting("EMBEDDING_DIMENSION", 768))
+
+    def embed_texts(self, texts: list[str]) -> list[list[float]]:
+        if not texts:
+            return []
+
+        base_url = self.get_base_url()
+        model_name = self.get_model_name()
+        endpoint = f"{base_url}/api/embed"
+
+        payload = {
+            "model": model_name,
+            "input": texts,
+        }
+
+        req_data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            endpoint,
+            data=req_data,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+
+        try:
+            with urllib.request.urlopen(req, timeout=60) as response:
+                resp_bytes = response.read()
+                resp_json = json.loads(resp_bytes.decode("utf-8"))
+                vectors = resp_json.get("embeddings", [])
+        except urllib.error.HTTPError as e:
+            # Fallback to /api/embeddings in a loop if /api/embed is not available
+            if e.code == 404:
+                vectors = []
+                for t in texts:
+                    single_req = urllib.request.Request(
+                        f"{base_url}/api/embeddings",
+                        data=json.dumps({"model": model_name, "prompt": t}).encode("utf-8"),
+                        headers={"Content-Type": "application/json"},
+                        method="POST",
+                    )
+                    with urllib.request.urlopen(single_req, timeout=60) as s_resp:
+                        s_json = json.loads(s_resp.read().decode("utf-8"))
+                        vectors.append(s_json.get("embedding", []))
+            else:
+                err_msg = ""
+                try:
+                    err_msg = e.read().decode("utf-8")
+                except Exception:
+                    pass
+                raise ConfigurationError(
+                    f"Ollama embedding request failed for model '{model_name}' (HTTP {e.code}): {err_msg or e.reason}"
+                ) from e
+        except Exception as e:
+            raise ConfigurationError(
+                f"Failed to connect to local Ollama at '{base_url}': {e}. "
+                "Ensure Ollama is running and model is available."
+            ) from e
+
+        # Ensure L2 normalization
+        normalized_vectors = []
+        for vec in vectors:
+            norm = math.sqrt(sum(x * x for x in vec)) or 1.0
+            normalized_vectors.append([x / norm for x in vec])
+
+        self.validate_dimension(normalized_vectors)
+        return normalized_vectors
+
+
 def get_embedding_provider() -> BaseEmbeddingProvider:
-    provider_type = getattr(settings, "EMBEDDING_PROVIDER", "mock").lower().strip()
+    provider_type = (os.getenv("EMBEDDING_PROVIDER") or _get_ai_setting("EMBEDDING_PROVIDER", "mock")).lower().strip()
     if provider_type == "openai":
         provider = OpenAIEmbeddingProvider()
     elif provider_type == "gemini":
         provider = GeminiEmbeddingProvider()
-    else:
+    elif provider_type in ("ollama", "local"):
+        provider = OllamaEmbeddingProvider()
+    elif provider_type == "mock":
         provider = MockEmbeddingProvider()
+    else:
+        raise ConfigurationError(f"Unsupported EMBEDDING_PROVIDER: '{provider_type}'. Must be 'ollama', 'openai', 'gemini', or 'mock'.")
 
-    expected_dim = getattr(settings, "EMBEDDING_DIMENSION", 1536)
+    expected_dim = int(os.getenv("EMBEDDING_DIMENSION") or _get_ai_setting("EMBEDDING_DIMENSION", 1536))
     if provider.get_dimension() != expected_dim:
         raise ConfigurationError(
             f"Active embedding provider '{provider.get_model_name()}' returns {provider.get_dimension()} dimensions, "
@@ -150,3 +247,4 @@ def get_embedding_provider() -> BaseEmbeddingProvider:
         )
 
     return provider
+

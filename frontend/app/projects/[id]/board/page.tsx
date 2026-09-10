@@ -123,7 +123,7 @@ function WorkstreamBadge({ workstream }: { workstream?: string | null }) {
   const ws = workstream || "GENERAL";
   const badge = WORKSTREAM_BADGES[ws] || WORKSTREAM_BADGES.GENERAL;
   return (
-    <span className={`px-2 py-0.5 rounded text-xs border font-bold uppercase tracking-wider ${badge.style}`}>
+    <span className={`px-1.5 py-0.5 rounded text-[0.65rem] border font-semibold uppercase tracking-wider ${badge.style}`}>
       {badge.label}
     </span>
   );
@@ -137,7 +137,7 @@ function PriorityBadge({ priority }: { priority: string }) {
     URGENT: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 font-bold",
   };
   return (
-    <span className={`px-2 py-0.5 rounded text-xs border font-bold uppercase tracking-wider ${colors[priority] || colors.MEDIUM}`}>
+    <span className={`px-1.5 py-0.5 rounded text-[0.65rem] border font-semibold uppercase tracking-wider ${colors[priority] || colors.MEDIUM}`}>
       {priority}
     </span>
   );
@@ -317,6 +317,8 @@ export default function SprintBoardPage() {
               description: updatedTask.description,
               status: updatedTask.status,
               priority: updatedTask.priority,
+              workstream: updatedTask.workstream !== undefined ? updatedTask.workstream : t.workstream,
+              story_points: updatedTask.story_points !== undefined ? updatedTask.story_points : t.story_points,
               assignee_id: updatedTask.assignee_id,
               assignee_name: updatedTask.assignee_name,
             }
@@ -556,7 +558,7 @@ export default function SprintBoardPage() {
                   </div>
 
                   {/* Task Cards */}
-                  <div className="space-y-3 flex-1 overflow-y-auto">
+                  <div className="space-y-2.5 flex-1 overflow-y-auto">
                     {colTasks.length === 0 ? (
                       <div className="h-24 rounded-lg border border-dashed border-border/60 flex items-center justify-center text-xs text-muted-foreground/60 italic">
                         No tasks
@@ -565,16 +567,22 @@ export default function SprintBoardPage() {
                       colTasks.map((task) => (
                         <div
                           key={task.id}
-                          className="group rounded-lg border border-border bg-card p-4 shadow-2xs space-y-3 transition-all hover:border-primary/50 hover:shadow-sm dark:bg-card cursor-pointer relative"
+                          className="group rounded-xl border border-border bg-card p-3 shadow-2xs space-y-2.5 transition-all hover:border-primary/50 hover:shadow-xs dark:bg-card cursor-pointer relative"
                           onClick={() => setSelectedTaskId(task.id)}
                         >
-                          <div className="flex items-start justify-between gap-2">
-                            <h4 className="text-sm font-semibold text-foreground leading-snug group-hover:text-primary transition-colors pr-4">
-                              {task.title}
-                            </h4>
-                            <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+                          {/* Top Row: Badges (Workstream, Priority, Points) & Actions */}
+                          <div className="flex items-center justify-between gap-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                               <WorkstreamBadge workstream={task.workstream} />
                               <PriorityBadge priority={task.priority} />
+                              {task.story_points !== null && task.story_points !== undefined && (
+                                <span className="px-1.5 py-0.5 rounded text-[0.62rem] font-semibold border border-border/60 bg-muted/50 text-muted-foreground shrink-0">
+                                  {task.story_points} pts
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-1 shrink-0">
                               {canDeleteTask && (
                                 <button
                                   type="button"
@@ -585,45 +593,59 @@ export default function SprintBoardPage() {
                                   title="Delete Task"
                                   className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                 >
-                                  <Trash2 className="size-3.5" />
+                                  <Trash2 className="size-3" />
                                 </button>
                               )}
-                              <ExternalLink className="size-3 text-muted-foreground opacity-0 group-hover:opacity-60 transition-opacity" />
                             </div>
                           </div>
 
-                          {task.description && (
-                            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                              {task.description}
-                            </p>
-                          )}
+                          {/* Task Title (wraps up to 2 lines cleanly) */}
+                          <h4 className="text-xs font-medium text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                            {task.title}
+                          </h4>
 
+                          {/* Bottom Row: Assignee (Developer Name) & Status Quick Switch */}
                           <div
-                            className="flex items-center justify-between pt-2 border-t border-border text-xs"
+                            className="flex items-center justify-between pt-2 border-t border-border/60 text-xs gap-1"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <span className="flex items-center gap-1 text-muted-foreground">
-                              <User className="size-3" />
-                              {task.assignee_name || "Unassigned"}
-                            </span>
+                            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                              {task.assignee_name ? (
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <div className="size-4 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[0.6rem] font-bold shrink-0">
+                                    {task.assignee_name[0].toUpperCase()}
+                                  </div>
+                                  <span className="text-[0.7rem] text-muted-foreground font-medium truncate" title={task.assignee_name}>
+                                    {task.assignee_name}
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1 text-muted-foreground/60 text-[0.7rem] italic">
+                                  <User className="size-3 shrink-0" />
+                                  <span>Unassigned</span>
+                                </div>
+                              )}
+                            </div>
 
-                            {canChangeTaskStatus(task) ? (
-                              <select
-                                value={task.status}
-                                onChange={(e) => handleStatusChange(task.id, e.target.value)}
-                                className="text-[0.7rem] bg-muted text-foreground border border-border rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary/50 cursor-pointer"
-                              >
-                                <option value="TODO">To Do</option>
-                                <option value="IN_PROGRESS">In Progress</option>
-                                <option value="IN_REVIEW">In Review</option>
-                                <option value="DONE">Done</option>
-                                <option value="CANCELLED">Cancelled</option>
-                              </select>
-                            ) : (
-                              <span className="text-[0.68rem] font-semibold text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded border border-border/50">
-                                {BOARD_COLUMNS.find((c) => c.key === task.status)?.label || task.status}
-                              </span>
-                            )}
+                            <div className="shrink-0">
+                              {canChangeTaskStatus(task) ? (
+                                <select
+                                  value={task.status}
+                                  onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                                  className="w-[82px] text-[0.65rem] bg-muted/60 hover:bg-muted text-foreground border border-border/80 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer font-medium truncate"
+                                >
+                                  <option value="TODO">To Do</option>
+                                  <option value="IN_PROGRESS">In Progress</option>
+                                  <option value="IN_REVIEW">In Review</option>
+                                  <option value="DONE">Done</option>
+                                  <option value="CANCELLED">Cancelled</option>
+                                </select>
+                              ) : (
+                                <span className="text-[0.62rem] font-medium text-muted-foreground bg-muted/40 px-1 py-0.5 rounded border border-border/40">
+                                  {BOARD_COLUMNS.find((c) => c.key === task.status)?.label || task.status}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))

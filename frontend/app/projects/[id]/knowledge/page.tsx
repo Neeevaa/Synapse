@@ -256,11 +256,11 @@ export default function KnowledgeBasePage() {
           </div>
         )}
 
-        {/* Index Status Metric Cards */}
+        {/* Knowledge Status Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-5 rounded-xl border border-border bg-card shadow-xs space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-              <span>Indexed Documents</span>
+              <span>Indexed Artifacts</span>
               <FileText className="size-4 text-purple-400" />
             </div>
             <div className="text-2xl font-extrabold text-foreground">
@@ -271,36 +271,38 @@ export default function KnowledgeBasePage() {
 
           <div className="p-5 rounded-xl border border-border bg-card shadow-xs space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-              <span>Vector Chunks</span>
+              <span>Knowledge Coverage</span>
               <Layers className="size-4 text-cyan-400" />
             </div>
             <div className="text-2xl font-extrabold text-foreground">
               {indexStatus?.total_chunks_created ?? "—"}
             </div>
-            <p className="text-[0.7rem] text-muted-foreground">512-token sliding window chunks</p>
+            <p className="text-[0.7rem] text-muted-foreground">Searchable vector segments ready for retrieval</p>
           </div>
 
           <div className="p-5 rounded-xl border border-border bg-card shadow-xs space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-              <span>Skipped (Hash Match)</span>
+              <span>Index Freshness</span>
               <CheckCircle2 className="size-4 text-emerald-400" />
             </div>
-            <div className="text-2xl font-extrabold text-foreground">
-              {indexStatus?.documents_skipped_hash_match ?? "—"}
+            <div className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">
+              {indexStatus ? "Up to Date" : "Sync Ready"}
             </div>
-            <p className="text-[0.7rem] text-muted-foreground">SHA-256 content deduplication</p>
+            <p className="text-[0.7rem] text-muted-foreground">
+              {indexStatus ? `${indexStatus.documents_skipped_hash_match} unchanged artifacts skipped` : "Artifacts ready for indexing"}
+            </p>
           </div>
 
           <div className="p-5 rounded-xl border border-border bg-card shadow-xs space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-              <span>Active Provider & Dim</span>
+              <span>Retrieval Engine</span>
               <Cpu className="size-4 text-amber-400" />
             </div>
             <div className="text-sm font-bold text-foreground truncate">
               {indexStatus?.embedding_model ?? "mock-deterministic-v1"}
             </div>
-            <p className="text-[0.7rem] text-emerald-500 dark:text-emerald-400 font-medium">
-              Dimension: {indexStatus?.embedding_dimension ?? 1536} (Pinned)
+            <p className="text-[0.7rem] text-muted-foreground">
+              Semantic Search Active ({indexStatus?.embedding_dimension ?? 1536} dim)
             </p>
           </div>
         </div>

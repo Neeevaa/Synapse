@@ -230,10 +230,10 @@ export default function MeetingsListPage() {
         title: title.trim(),
         description: description.trim() || undefined,
         meeting_type: meetingType,
-        organizer_id: organizerId || currentUserId,
-        scheduled_at: new Date(scheduledAt).toISOString(),
-        duration_minutes: durationMinutes,
-        participant_ids: selectedParticipantIds,
+        organizer_id: (organizerId && organizerId.trim()) ? organizerId.trim() : ((currentUserId && currentUserId.trim()) ? currentUserId.trim() : undefined),
+        scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : new Date().toISOString(),
+        duration_minutes: Number(durationMinutes) || 60,
+        participant_ids: selectedParticipantIds.filter((id) => id && id.trim() !== ""),
         agenda_items: validAgenda,
       };
 

@@ -7,7 +7,7 @@ from app.models.project import Project
 from app.models.project_member import ProjectMember
 from app.models.task import Task
 from app.models.user import User
-from app.models.enums import TaskStatus, SprintStatus, CompanyRole, ProjectRole
+from app.models.enums import TaskStatus, SprintStatus, CompanyRole, ProjectRole, NotificationType
 from app.sprints.repository import SprintRepository
 from app.sprints.schemas import (
     CreateSprintRequest,
@@ -17,6 +17,7 @@ from app.sprints.schemas import (
 )
 from app.common.exceptions import ResourceNotFound, Forbidden, BaseBusinessException
 from app.permissions.dependencies import check_project_role_or_company_admin
+from app.notifications.service import NotificationService
 
 
 class SprintService:
@@ -117,6 +118,7 @@ class SprintService:
             self.db, current_user, sprint.project_id, [ProjectRole.PROJECT_MANAGER]
         )
 
+        old_status = sprint.status
         try:
             if data.name is not None:
                 sprint.name = data.name
@@ -144,6 +146,39 @@ class SprintService:
                 raise BaseBusinessException("Sprint end_date must be strictly after start_date.", status_code=400)
 
             self.db.commit()
+
+            if data.status is not None and sprint.status != old_status:
+                notif_service = NotificationService(self.db)
+                member_ids = notif_service.get_project_all_member_ids(sprint.project_id)
+                link = f"/projects/{sprint.project_id}/board"
+
+                if sprint.status == SprintStatus.ACTIVE:
+                    notif_service.notify_users(
+                        recipient_ids=member_ids,
+                        sender_id=current_user.id,
+                        company_id=current_user.company_id,
+                        type=NotificationType.SPRINT_ACTIVATED,
+                        title="Sprint Activated",
+                        message=f"Sprint '{sprint.name}' was activated for this project.",
+                        project_id=sprint.project_id,
+                        source_type="SPRINT",
+                        source_id=sprint.id,
+                        deep_link=link,
+                    )
+                elif sprint.status == SprintStatus.COMPLETED:
+                    notif_service.notify_users(
+                        recipient_ids=member_ids,
+                        sender_id=current_user.id,
+                        company_id=current_user.company_id,
+                        type=NotificationType.SPRINT_COMPLETED,
+                        title="Sprint Completed",
+                        message=f"Sprint '{sprint.name}' has been completed.",
+                        project_id=sprint.project_id,
+                        source_type="SPRINT",
+                        source_id=sprint.id,
+                        deep_link=link,
+                    )
+
             return self._build_sprint_response(sprint)
         except Exception as e:
             self.db.rollback()

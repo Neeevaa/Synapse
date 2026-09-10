@@ -401,6 +401,40 @@ export default function RequirementsPage() {
           </div>
         )}
 
+        {/* Requirements Status Overview Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3.5 space-y-1">
+            <span className="text-[0.7rem] font-semibold text-slate-400 uppercase tracking-wider">
+              Total Catalog
+            </span>
+            <div className="text-xl font-extrabold text-white">{totalCount}</div>
+          </div>
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3.5 space-y-1">
+            <span className="text-[0.7rem] font-semibold text-emerald-400 uppercase tracking-wider">
+              Approved
+            </span>
+            <div className="text-xl font-extrabold text-emerald-400">
+              {requirements.filter((r) => r.status === "APPROVED").length}
+            </div>
+          </div>
+          <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-3.5 space-y-1">
+            <span className="text-[0.7rem] font-semibold text-purple-400 uppercase tracking-wider">
+              In Review
+            </span>
+            <div className="text-xl font-extrabold text-purple-400">
+              {requirements.filter((r) => r.status === "REVIEW").length}
+            </div>
+          </div>
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3.5 space-y-1">
+            <span className="text-[0.7rem] font-semibold text-amber-400 uppercase tracking-wider">
+              Draft / Other
+            </span>
+            <div className="text-xl font-extrabold text-amber-400">
+              {requirements.filter((r) => r.status !== "APPROVED" && r.status !== "REVIEW").length}
+            </div>
+          </div>
+        </div>
+
         {/* Filters and Search Bar */}
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">

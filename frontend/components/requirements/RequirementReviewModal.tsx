@@ -17,6 +17,8 @@ import {
   ShieldAlert,
   HelpCircle,
   UserCheck,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 interface FindingItem {
@@ -87,6 +89,11 @@ export default function RequirementReviewModal({
   const [editRecommendation, setEditRecommendation] = useState("");
   const [editComment, setEditComment] = useState("");
   const [submittingDecision, setSubmittingDecision] = useState<string | null>(null);
+  const [expandedEvidence, setExpandedEvidence] = useState<Record<string, boolean>>({});
+
+  const toggleEvidence = (findingId: string) => {
+    setExpandedEvidence((prev) => ({ ...prev, [findingId]: !prev[findingId] }));
+  };
 
   const fetchOrRunReview = async () => {
     setLoading(true);
@@ -260,8 +267,37 @@ export default function RequirementReviewModal({
                 </div>
               </div>
 
+              {/* Overall Assessment Banner */}
+              <div
+                className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                  criticalHighCount > 0
+                    ? "bg-rose-500/10 border-rose-500/20 text-rose-300"
+                    : mediumCount > 0
+                    ? "bg-amber-500/10 border-amber-500/20 text-amber-300"
+                    : "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
+                }`}
+              >
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+                      Overall Assessment
+                    </span>
+                    <span className="text-[0.7rem] font-semibold px-2 py-0.5 rounded-md bg-card/70 border border-border/40 text-foreground">
+                      Status: {review.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-foreground/80 font-medium pt-0.5">
+                    {criticalHighCount > 0
+                      ? `Action Required: ${criticalHighCount} critical or high-priority findings detected. Resolve or modify recommendations before marking approved.`
+                      : mediumCount > 0
+                      ? `Advisory: ${mediumCount} medium-priority findings identified. Review recommendations for specification clarity.`
+                      : "Specification Ready: No contradictions or inconsistencies detected with current project context."}
+                  </p>
+                </div>
+              </div>
+
               {/* Findings Cards List */}
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {findings.length === 0 ? (
                   <div className="py-12 text-center text-xs text-muted-foreground space-y-2">
                     <CheckCircle2 className="size-8 text-emerald-400 mx-auto" />
@@ -272,7 +308,7 @@ export default function RequirementReviewModal({
                   findings.map((f) => (
                     <div
                       key={f.id}
-                      className="p-5 rounded-xl border border-border bg-card shadow-xs space-y-4 hover:border-purple-500/30 transition-colors"
+                      className="p-5 rounded-xl border border-border bg-card shadow-xs space-y-3 hover:border-purple-500/30 transition-colors"
                     >
                       {/* Finding Card Top Bar */}
                       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -332,18 +368,8 @@ export default function RequirementReviewModal({
                         <p className="text-xs text-muted-foreground leading-relaxed">{f.description}</p>
                       </div>
 
-                      {/* GROUNDED EVIDENCE CARD (Cyan/Slate) */}
-                      <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-700/50 space-y-1.5">
-                        <div className="flex items-center gap-1.5 text-[0.75rem] font-bold text-cyan-400">
-                          <Layers className="size-3.5" /> Project Evidence:
-                        </div>
-                        <p className="text-xs font-mono text-slate-300 leading-relaxed">
-                          {f.evidence}
-                        </p>
-                      </div>
-
                       {/* AI RECOMMENDATION CARD (Purple) */}
-                      <div className="p-3.5 rounded-xl bg-purple-950/40 border border-purple-800/40 space-y-1.5">
+                      <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-800/40 space-y-1">
                         <div className="flex items-center gap-1.5 text-[0.75rem] font-bold text-purple-300">
                           <Sparkles className="size-3.5 text-purple-400" /> AI Recommendation:
                         </div>
@@ -352,20 +378,53 @@ export default function RequirementReviewModal({
                         </p>
                       </div>
 
-                      {/* Verified Source Citations */}
-                      {f.source_references && f.source_references.length > 0 && (
-                        <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground pt-1">
-                          <span className="font-semibold text-foreground">Verified Sources:</span>
-                          {f.source_references.map((ref, idx) => (
-                            <span
-                              key={idx}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted border border-border text-[0.7rem] font-mono text-cyan-400"
-                            >
-                              <FileText className="size-3" /> {ref}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      {/* Progressive Disclosure: Inspect Grounded Evidence & Sources */}
+                      <div className="pt-0.5">
+                        <button
+                          type="button"
+                          onClick={() => toggleEvidence(f.id)}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors py-1 cursor-pointer"
+                        >
+                          {expandedEvidence[f.id] ? (
+                            <>
+                              <ChevronUp className="size-3.5" /> Hide Grounded Evidence & Sources
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="size-3.5" /> Inspect Grounded Evidence & Sources ({f.source_references?.length || 0})
+                            </>
+                          )}
+                        </button>
+
+                        {expandedEvidence[f.id] && (
+                          <div className="space-y-3 pt-2">
+                            {/* GROUNDED EVIDENCE CARD (Cyan/Slate) */}
+                            <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/60 space-y-1.5">
+                              <div className="flex items-center gap-1.5 text-[0.75rem] font-bold text-cyan-400">
+                                <Layers className="size-3.5" /> Project Evidence:
+                              </div>
+                              <p className="text-xs font-mono text-slate-300 leading-relaxed whitespace-pre-wrap">
+                                {f.evidence}
+                              </p>
+                            </div>
+
+                            {/* Verified Source Citations */}
+                            {f.source_references && f.source_references.length > 0 && (
+                              <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground pt-1">
+                                <span className="font-semibold text-foreground">Verified Sources:</span>
+                                {f.source_references.map((ref, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted border border-border text-[0.7rem] font-mono text-cyan-400"
+                                  >
+                                    <FileText className="size-3" /> {ref}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
 
                       {/* Human Comment (If modified/accepted/rejected with feedback) */}
                       {f.human_comment && (

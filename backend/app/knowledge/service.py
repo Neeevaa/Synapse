@@ -40,10 +40,11 @@ class KnowledgeService:
         company_id: UUID,
         project_id: UUID,
         art: NormalizedArtifact,
+        force: bool = False,
     ) -> bool:
         """
         Indexes a single normalized artifact.
-        Returns True if newly indexed/re-indexed, False if skipped due to content_hash match.
+        Returns True if newly indexed/re-indexed, False if skipped due to content_hash match and matching dimension.
         """
         existing = self.repo.get_document_by_source(
             company_id=company_id,
@@ -53,10 +54,17 @@ class KnowledgeService:
             source_version=art.source_version,
         )
 
-        if existing and existing.content_hash == art.content_hash:
-            return False  # Skipped due to content_hash match
+        # Detect dimension mismatch between existing stored chunks and current active provider
+        dimension_mismatch = False
+        if existing and existing.chunks:
+            sample_chunk = existing.chunks[0]
+            if sample_chunk.embedding and len(sample_chunk.embedding) != self.provider.get_dimension():
+                dimension_mismatch = True
 
-        # Delete stale document if content changed
+        if existing and existing.content_hash == art.content_hash and not force and not dimension_mismatch:
+            return False  # Skipped due to content_hash match and matching dimension
+
+        # Delete stale document if content changed, forced, or dimension mismatched
         if existing:
             self.repo.delete_document(company_id, project_id, existing.id)
 
@@ -108,10 +116,11 @@ class KnowledgeService:
         self,
         project_id: UUID,
         current_user: User,
+        force: bool = False,
     ) -> IndexingStatusResponse:
         """
         Indexes or re-indexes all project artifacts (Requirements, Versions, Meetings, Action Items, Tasks, Sprints).
-        Skips documents whose SHA-256 content_hash is unchanged.
+        Skips documents whose SHA-256 content_hash is unchanged unless force=True or embedding dimension has changed.
         """
         project = check_project_role_or_company_admin(self.db, current_user, project_id)
         company_id = project.company_id
@@ -129,14 +138,14 @@ class KnowledgeService:
 
         for req in requirements:
             norm_req = ArtifactNormalizer.normalize_requirement(req)
-            if self._index_normalized_artifact(company_id, project_id, norm_req):
+            if self._index_normalized_artifact(company_id, project_id, norm_req, force=force):
                 indexed_count += 1
             else:
                 skipped_count += 1
 
             for ver in req.versions:
                 norm_ver = ArtifactNormalizer.normalize_requirement_version(ver, req.requirement_key, project_id, company_id)
-                if self._index_normalized_artifact(company_id, project_id, norm_ver):
+                if self._index_normalized_artifact(company_id, project_id, norm_ver, force=force):
                     indexed_count += 1
                 else:
                     skipped_count += 1
@@ -156,7 +165,7 @@ class KnowledgeService:
         for m in meetings:
             # Notes
             norm_notes = ArtifactNormalizer.normalize_meeting_notes(m)
-            if self._index_normalized_artifact(company_id, project_id, norm_notes):
+            if self._index_normalized_artifact(company_id, project_id, norm_notes, force=force):
                 indexed_count += 1
             else:
                 skipped_count += 1
@@ -164,7 +173,7 @@ class KnowledgeService:
             # Transcript
             if m.transcript and m.transcript.strip():
                 norm_trans = ArtifactNormalizer.normalize_meeting_transcript(m)
-                if self._index_normalized_artifact(company_id, project_id, norm_trans):
+                if self._index_normalized_artifact(company_id, project_id, norm_trans, force=force):
                     indexed_count += 1
                 else:
                     skipped_count += 1
@@ -172,7 +181,7 @@ class KnowledgeService:
             # Action Items
             for ai in m.action_items:
                 norm_ai = ArtifactNormalizer.normalize_meeting_action_item(ai, project_id, company_id)
-                if self._index_normalized_artifact(company_id, project_id, norm_ai):
+                if self._index_normalized_artifact(company_id, project_id, norm_ai, force=force):
                     indexed_count += 1
                 else:
                     skipped_count += 1
@@ -184,7 +193,7 @@ class KnowledgeService:
 
         for t in tasks:
             norm_task = ArtifactNormalizer.normalize_task(t, company_id)
-            if self._index_normalized_artifact(company_id, project_id, norm_task):
+            if self._index_normalized_artifact(company_id, project_id, norm_task, force=force):
                 indexed_count += 1
             else:
                 skipped_count += 1
@@ -196,7 +205,7 @@ class KnowledgeService:
 
         for s in sprints:
             norm_sprint = ArtifactNormalizer.normalize_sprint(s, company_id)
-            if self._index_normalized_artifact(company_id, project_id, norm_sprint):
+            if self._index_normalized_artifact(company_id, project_id, norm_sprint, force=force):
                 indexed_count += 1
             else:
                 skipped_count += 1
@@ -330,3 +339,19 @@ class KnowledgeService:
         project = check_project_role_or_company_admin(self.db, current_user, project_id)
         logs = self.repo.get_retrieval_logs(project.company_id, project_id, limit=limit)
         return [KnowledgeRetrievalLogResponse.model_validate(log) for log in logs]
+
+    def get_knowledge_summary(
+        self,
+        project_id: UUID,
+        current_user: User,
+    ) -> dict:
+        project = check_project_role_or_company_admin(self.db, current_user, project_id)
+        doc_count, chunk_count = self.repo.get_indexing_summary(project.company_id, project_id)
+        return {
+            "project_id": str(project_id),
+            "documents_count": doc_count,
+            "total_documents": doc_count,
+            "chunks_count": chunk_count,
+            "total_chunks": chunk_count,
+        }
+

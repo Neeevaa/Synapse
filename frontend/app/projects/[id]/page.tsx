@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -19,6 +19,7 @@ import {
   Loader2,
   AlertCircle,
   ArrowLeft,
+  ArrowRight,
   Calendar,
   User as UserIcon,
   FolderKanban,
@@ -129,7 +130,9 @@ function StatusBadge({ status }: { status: string }) {
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const projectId = params.id as string;
+  const tabParam = searchParams.get("tab");
 
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [members, setMembers] = useState<ProjectMemberItem[]>([]);
@@ -137,6 +140,25 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "members" | "settings">("overview");
+
+  // Summary Metrics State for Project Overview Dashboard
+  const [activeSprint, setActiveSprint] = useState<any | null>(null);
+  const [backlogTasks, setBacklogTasks] = useState<any[]>([]);
+  const [requirements, setRequirements] = useState<any[]>([]);
+  const [meetings, setMeetings] = useState<any[]>([]);
+  const [knowledgeInfo, setKnowledgeInfo] = useState<any | null>(null);
+  const [traceabilityInfo, setTraceabilityInfo] = useState<any | null>(null);
+
+  // Sync tab with URL search parameter
+  useEffect(() => {
+    if (tabParam === "members") {
+      setActiveTab("members");
+    } else if (tabParam === "settings") {
+      setActiveTab("settings");
+    } else {
+      setActiveTab("overview");
+    }
+  }, [tabParam]);
 
   // User & Permission State
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -213,6 +235,49 @@ export default function ProjectDetailPage() {
     }
   }, [projectId]);
 
+  const fetchOverviewSummaries = useCallback(async () => {
+    if (!projectId) return;
+    try {
+      const [sprintRes, backlogRes, reqRes, meetRes, knowRes, traceRes] = await Promise.allSettled([
+        api.get(`/projects/${projectId}/sprints/active`),
+        api.get(`/projects/${projectId}/backlog`),
+        api.get(`/projects/${projectId}/requirements`),
+        api.get(`/projects/${projectId}/meetings`),
+        api.get(`/projects/${projectId}/knowledge`),
+        api.get(`/projects/${projectId}/traceability`),
+      ]);
+
+      if (sprintRes.status === "fulfilled" && sprintRes.value?.data?.data) {
+        setActiveSprint(sprintRes.value.data.data);
+      } else {
+        setActiveSprint(null);
+      }
+
+      if (backlogRes.status === "fulfilled" && backlogRes.value?.data?.data?.tasks) {
+        setBacklogTasks(backlogRes.value.data.data.tasks);
+      }
+
+      if (reqRes.status === "fulfilled" && reqRes.value?.data?.data?.requirements) {
+        setRequirements(reqRes.value.data.data.requirements);
+      }
+
+      if (meetRes.status === "fulfilled" && meetRes.value?.data?.data) {
+        const list = Array.isArray(meetRes.value.data.data) ? meetRes.value.data.data : meetRes.value.data.data.meetings || [];
+        setMeetings(list);
+      }
+
+      if (knowRes.status === "fulfilled" && knowRes.value?.data?.data) {
+        setKnowledgeInfo(knowRes.value.data.data);
+      }
+
+      if (traceRes.status === "fulfilled" && traceRes.value?.data?.data) {
+        setTraceabilityInfo(traceRes.value.data.data);
+      }
+    } catch {
+      // safe fallback
+    }
+  }, [projectId]);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -229,8 +294,9 @@ export default function ProjectDetailPage() {
       fetchProjectDetail();
       fetchMembers();
       fetchTasks();
+      fetchOverviewSummaries();
     }
-  }, [projectId, fetchProjectDetail, fetchMembers, fetchTasks]);
+  }, [projectId, fetchProjectDetail, fetchMembers, fetchTasks, fetchOverviewSummaries]);
 
   // Compute Workload Map (Tasks count per user)
   const workloadMap = tasks.reduce<Record<string, { total: number; active: number; done: number }>>((acc, task) => {
@@ -529,104 +595,6 @@ export default function ProjectDetailPage() {
                     </div>
                   </div>
                 </div>
-
-              {/* Grouped Feature Navigation Grid */}
-              <div className="mt-6 pt-6 border-t border-border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {/* GROUP 1 — PLAN */}
-                <div className="rounded-xl border border-border bg-card/60 p-3 space-y-2">
-                  <div className="text-[0.7rem] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                    <Zap className="size-3 text-primary" /> Plan
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Link
-                      href={`/projects/${project.id}/board`}
-                      className="flex items-center justify-between p-2 rounded-lg bg-primary/10 hover:bg-primary/15 text-primary text-xs font-semibold transition-colors"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Kanban className="size-3.5" /> Sprint Board
-                      </span>
-                      <span className="text-[0.65rem] px-1.5 py-0.5 rounded bg-primary/20 text-primary font-bold">Active</span>
-                    </Link>
-                    <Link
-                      href={`/projects/${project.id}/backlog`}
-                      className="flex items-center justify-between p-2 rounded-lg bg-background hover:bg-muted text-foreground text-xs font-medium border border-border transition-colors"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Layers className="size-3.5 text-primary" /> Backlog Stream
-                      </span>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* GROUP 2 — WORK */}
-                <div className="rounded-xl border border-border bg-card/60 p-3 space-y-2">
-                  <div className="text-[0.7rem] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                    <CheckSquare className="size-3 text-emerald-500" /> Work
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Link
-                      href={`/projects/${project.id}/requirements`}
-                      className="flex items-center justify-between p-2 rounded-lg bg-background hover:bg-muted text-foreground text-xs font-medium border border-border transition-colors"
-                    >
-                      <span className="flex items-center gap-2">
-                        <FileText className="size-3.5 text-emerald-500" /> Requirements & Review
-                      </span>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* GROUP 3 — COLLABORATE */}
-                <div className="rounded-xl border border-border bg-card/60 p-3 space-y-2">
-                  <div className="text-[0.7rem] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                    <Users className="size-3 text-cyan-500" /> Collaborate
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Link
-                      href={`/projects/${project.id}/meetings`}
-                      className="flex items-center justify-between p-2 rounded-lg bg-background hover:bg-muted text-foreground text-xs font-medium border border-border transition-colors"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Video className="size-3.5 text-cyan-500" /> Meetings & Notes
-                      </span>
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("members")}
-                      className="flex items-center justify-between p-2 rounded-lg bg-background hover:bg-muted text-foreground text-xs font-medium border border-border transition-colors w-full text-left cursor-pointer"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Users className="size-3.5 text-cyan-500" /> Team & Members
-                      </span>
-                      <span className="text-[0.65rem] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-bold">{members.length}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* GROUP 4 — INTELLIGENCE */}
-                <div className="rounded-xl border border-border bg-card/60 p-3 space-y-2">
-                  <div className="text-[0.7rem] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                    <Database className="size-3 text-purple-400" /> Intelligence
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Link
-                      href={`/projects/${project.id}/knowledge`}
-                      className="flex items-center justify-between p-2 rounded-lg bg-background hover:bg-muted text-foreground text-xs font-medium border border-border transition-colors"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Database className="size-3.5 text-purple-400" /> Knowledge Base
-                      </span>
-                    </Link>
-                    <Link
-                      href={`/projects/${project.id}/traceability`}
-                      className="flex items-center justify-between p-2 rounded-lg bg-background hover:bg-muted text-foreground text-xs font-medium border border-border transition-colors"
-                    >
-                      <span className="flex items-center gap-2">
-                        <GitFork className="size-3.5 text-amber-500" /> Traceability Matrix
-                      </span>
-                    </Link>
-                  </div>
-                </div>
-              </div>
               </div>
 
               {/* Sub-nav Tabs */}
@@ -666,40 +634,257 @@ export default function ProjectDetailPage() {
               </div>
             </div>
 
-            {/* TAB 1: OVERVIEW */}
+            {/* TAB 1: OVERVIEW SUMMARY DASHBOARD */}
             {activeTab === "overview" && (
               <div className="space-y-6">
-                {/* Stats Cards Grid */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Active Sprints
-                      </span>
-                      <Zap className="size-4 text-primary" />
+                {/* 6 Data-Driven Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                  {/* 1. SPRINT OVERVIEW */}
+                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                          <Zap className="size-4" /> Sprint Overview
+                        </span>
+                        {activeSprint ? (
+                          <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wider bg-muted text-muted-foreground border border-border">
+                            Planned
+                          </span>
+                        )}
+                      </div>
+
+                      {activeSprint ? (
+                        <div className="mt-3 space-y-2">
+                          <h4 className="text-base font-bold text-foreground truncate">{activeSprint.name || activeSprint.title || "Current Sprint"}</h4>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{activeSprint.goal || "Focusing on key deliverables."}</p>
+
+                          <div className="pt-2 grid grid-cols-2 gap-3 text-xs">
+                            <div className="rounded-lg bg-background p-2.5 border border-border">
+                              <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Story Points</span>
+                              <span className="text-sm font-bold text-foreground">{activeSprint.allocated_points || activeSprint.story_points || 0} Points</span>
+                            </div>
+                            <div className="rounded-lg bg-background p-2.5 border border-border">
+                              <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Total Tasks</span>
+                              <span className="text-sm font-bold text-foreground">{activeSprint.task_count || activeSprint.tasks?.length || 0} Tasks</span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-4 p-4 rounded-xl border border-dashed border-border bg-muted/20 text-center">
+                          <p className="text-xs font-semibold text-foreground">No Active Sprint</p>
+                          <p className="text-[0.75rem] text-muted-foreground mt-1">There is currently no active sprint running for this project.</p>
+                        </div>
+                      )}
                     </div>
-                    <div className="mt-3 text-2xl font-bold text-foreground">{project.sprint_count}</div>
+
+                    <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground font-medium">{project.sprint_count} Total Sprints</span>
+                      <Link
+                        href={`/projects/${project.id}/board`}
+                        className="inline-flex items-center gap-1 font-bold text-primary hover:underline"
+                      >
+                        View Sprint Board <ArrowRight className="size-3.5" />
+                      </Link>
+                    </div>
                   </div>
 
-                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Total Tasks
-                      </span>
-                      <CheckSquare className="size-4 text-secondary" />
+                  {/* 2. BACKLOG STREAM OVERVIEW */}
+                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                          <Layers className="size-4" /> Backlog Stream
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-primary/10 text-primary border border-primary/20">
+                          {backlogTasks.length} Items
+                        </span>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                        <div className="rounded-lg bg-background p-2.5 border border-border">
+                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">High / Urgent</span>
+                          <span className="text-sm font-bold text-destructive">
+                            {backlogTasks.filter((t) => t.priority === "HIGH" || t.priority === "URGENT").length} Items
+                          </span>
+                        </div>
+                        <div className="rounded-lg bg-background p-2.5 border border-border">
+                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Unassigned</span>
+                          <span className="text-sm font-bold text-foreground">
+                            {backlogTasks.filter((t) => !t.assignee_id).length} Items
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-3 text-2xl font-bold text-foreground">{project.task_count}</div>
+
+                    <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground font-medium">{backlogTasks.length} Ready for Planning</span>
+                      <Link
+                        href={`/projects/${project.id}/backlog`}
+                        className="inline-flex items-center gap-1 font-bold text-primary hover:underline"
+                      >
+                        View Backlog Stream <ArrowRight className="size-3.5" />
+                      </Link>
+                    </div>
                   </div>
 
-                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs dark:bg-card">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Project Members
-                      </span>
-                      <Users className="size-4 text-primary" />
+                  {/* 3. REQUIREMENTS & REVIEW OVERVIEW */}
+                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-500 flex items-center gap-1.5">
+                          <FileText className="size-4" /> Requirements & Review
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                          {requirements.length} Requirements
+                        </span>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                        <div className="rounded-lg bg-background p-2.5 border border-border">
+                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Approved</span>
+                          <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                            {requirements.filter((r) => r.status === "APPROVED" || r.status === "VALIDATED").length} Docs
+                          </span>
+                        </div>
+                        <div className="rounded-lg bg-background p-2.5 border border-border">
+                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">In Review / Draft</span>
+                          <span className="text-sm font-bold text-amber-500">
+                            {requirements.filter((r) => r.status === "IN_REVIEW" || r.status === "DRAFT" || !r.status).length} Docs
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-3 text-2xl font-bold text-foreground">{members.length || project.member_count}</div>
+
+                    <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground font-medium">AI Requirement Review Active</span>
+                      <Link
+                        href={`/projects/${project.id}/requirements`}
+                        className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                      >
+                        View Requirements & Review <ArrowRight className="size-3.5" />
+                      </Link>
+                    </div>
                   </div>
+
+                  {/* 4. MEETINGS OVERVIEW */}
+                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-extrabold uppercase tracking-wider text-cyan-500 flex items-center gap-1.5">
+                          <Video className="size-4" /> Meetings & Notes
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-cyan-500/10 text-cyan-600 border border-cyan-500/20">
+                          {meetings.length} Meetings
+                        </span>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                        <div className="rounded-lg bg-background p-2.5 border border-border">
+                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Scheduled</span>
+                          <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400">
+                            {meetings.filter((m) => m.status === "SCHEDULED").length} Upcoming
+                          </span>
+                        </div>
+                        <div className="rounded-lg bg-background p-2.5 border border-border">
+                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Completed</span>
+                          <span className="text-sm font-bold text-foreground">
+                            {meetings.filter((m) => m.status === "COMPLETED").length} Held
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground font-medium">AI Meeting Intelligence</span>
+                      <Link
+                        href={`/projects/${project.id}/meetings`}
+                        className="inline-flex items-center gap-1 font-bold text-cyan-600 dark:text-cyan-400 hover:underline"
+                      >
+                        View Meetings & Notes <ArrowRight className="size-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* 5. TEAM OVERVIEW */}
+                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-extrabold uppercase tracking-wider text-cyan-500 flex items-center gap-1.5">
+                          <Users className="size-4" /> Team Breakdown
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-muted text-foreground border border-border">
+                          {members.length} Members
+                        </span>
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap gap-1.5 text-[0.7rem]">
+                        {Array.from(new Set(members.map((m) => m.specialization || m.role))).map((spec) => (
+                          <span key={spec} className="px-2 py-1 rounded bg-background border border-border font-medium text-foreground">
+                            {formatSpecializationLabel(spec) || formatRoleLabel(spec)}: {members.filter((m) => (m.specialization || m.role) === spec).length}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground font-medium">{members.length} Assigned</span>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("members")}
+                        className="inline-flex items-center gap-1 font-bold text-primary hover:underline cursor-pointer"
+                      >
+                        View Team & Members <ArrowRight className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 6. PROJECT INTELLIGENCE OVERVIEW */}
+                  <div className="rounded-xl border border-border bg-card p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-extrabold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+                          <Database className="size-4" /> Project Intelligence
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[0.65rem] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                          Active RAG
+                        </span>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                        <div className="rounded-lg bg-background p-2.5 border border-border">
+                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Knowledge Base</span>
+                          <span className="text-sm font-bold text-purple-400">
+                            {knowledgeInfo?.documents_count || knowledgeInfo?.total_documents || knowledgeInfo?.documents?.length || 0} Docs
+                          </span>
+                        </div>
+                        <div className="rounded-lg bg-background p-2.5 border border-border">
+                          <span className="text-[0.65rem] text-muted-foreground uppercase font-bold block">Traceability Matrix</span>
+                          <span className="text-sm font-bold text-amber-500">Configured</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
+                      <Link
+                        href={`/projects/${project.id}/knowledge`}
+                        className="font-bold text-purple-400 hover:underline inline-flex items-center gap-1"
+                      >
+                        Knowledge Base <ArrowRight className="size-3" />
+                      </Link>
+                      <Link
+                        href={`/projects/${project.id}/traceability`}
+                        className="font-bold text-amber-500 hover:underline inline-flex items-center gap-1"
+                      >
+                        Traceability Matrix <ArrowRight className="size-3" />
+                      </Link>
+                    </div>
+                  </div>
+
                 </div>
 
                 {/* Description Card */}

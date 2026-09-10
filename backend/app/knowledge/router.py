@@ -28,11 +28,12 @@ router = APIRouter(prefix="/projects", tags=["Knowledge Base & RAG Context"])
 )
 def index_project_artifacts(
     project_id: UUID,
+    force: bool = Query(False, description="Force re-indexing all artifacts regardless of hash match"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     service = KnowledgeService(db)
-    result = service.index_project_artifacts(project_id, current_user)
+    result = service.index_project_artifacts(project_id, current_user, force=force)
     return success_response(message="Project knowledge base indexed successfully.", data=result)
 
 
@@ -85,3 +86,19 @@ def get_retrieval_telemetry(
     service = KnowledgeService(db)
     result = service.get_telemetry_logs(project_id, current_user, limit=limit)
     return success_response(message="Retrieval telemetry logs retrieved.", data=result)
+
+
+@router.get(
+    "/{project_id}/knowledge",
+    status_code=status.HTTP_200_OK,
+    summary="Get project knowledge base overview summary",
+)
+def get_knowledge_summary(
+    project_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = KnowledgeService(db)
+    result = service.get_knowledge_summary(project_id, current_user)
+    return success_response(message="Knowledge base summary retrieved.", data=result)
+

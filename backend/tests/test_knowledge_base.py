@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timezone, timedelta
+# pyrefly: ignore [missing-import]
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -27,16 +28,16 @@ class MismatchedDimensionProvider(BaseEmbeddingProvider):
         return "mismatched-test-provider"
 
     def get_dimension(self) -> int:
-        return 768  # Mismatched dimension (expected 1536)
+        return 9999  # Intentionally mismatched dimension
 
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
-        return [[0.1] * 768 for _ in texts]
+        return [[0.1] * 9999 for _ in texts]
 
 
 def test_embedding_dimension_validation_error():
     provider = MismatchedDimensionProvider()
     with pytest.raises(ConfigurationError) as exc_info:
-        provider.validate_dimension([[0.1] * 768])
+        provider.validate_dimension([[0.1] * 9999])
 
     assert "mismatch" in str(exc_info.value)
 

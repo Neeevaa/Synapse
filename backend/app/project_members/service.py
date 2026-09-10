@@ -21,7 +21,8 @@ from app.models.pending_membership import PendingMembership
 from app.models.invitation import Invitation
 from app.models.project import Project
 from app.models.user import User
-from app.models.enums import ProjectRole, Specialization, InvitationStatus
+from app.models.enums import ProjectRole, Specialization, InvitationStatus, NotificationType
+from app.notifications.service import NotificationService
 from app.project_members.repository import ProjectMemberRepository
 from app.project_members.schemas import (
     AddProjectMemberRequest,
@@ -296,6 +297,21 @@ class ProjectMemberService:
                 self.repo.add_member(member)
                 self.db.commit()
 
+                # Notify added member
+                notif_service = NotificationService(self.db)
+                notif_service.notify_users(
+                    recipient_ids=[target_user.id],
+                    sender_id=current_user.id,
+                    company_id=project.company_id,
+                    type=NotificationType.PROJECT_MEMBER_ADDED,
+                    title="Added to Project",
+                    message=f"You were added to project '{project.name}' as {role_enum.value}.",
+                    project_id=project_id,
+                    source_type="PROJECT",
+                    source_id=project_id,
+                    deep_link=f"/projects/{project_id}",
+                )
+
                 spec_val = member.specialization if isinstance(member.specialization, str) or member.specialization is None else member.specialization.value
 
                 return ProjectMemberResponse(
@@ -516,6 +532,22 @@ class ProjectMemberService:
 
             self.db.commit()
             self.db.refresh(member)
+
+            # Notify project PMs of new member joined
+            notif_service = NotificationService(self.db)
+            pm_ids = notif_service.get_project_pm_and_lead_ids(invitation.project_id)
+            notif_service.notify_users(
+                recipient_ids=pm_ids,
+                sender_id=current_user.id,
+                company_id=invitation.company_id,
+                type=NotificationType.PROJECT_MEMBER_ADDED,
+                title="New Member Joined Project",
+                message=f"{current_user.first_name} {current_user.last_name} joined the project.",
+                project_id=invitation.project_id,
+                source_type="PROJECT",
+                source_id=invitation.project_id,
+                deep_link=f"/projects/{invitation.project_id}",
+            )
 
             role_str = member.role.value if isinstance(member.role, ProjectRole) else str(member.role)
             spec_str = member.specialization.value if member.specialization else None

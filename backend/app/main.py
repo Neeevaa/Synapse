@@ -27,6 +27,7 @@ from app.evaluations.evaluation_router import router as evaluation_router
 from app.dashboard.router import router as dashboard_router
 from app.traceability.router import router as traceability_router
 from app.meetings.intelligence_router import router as meeting_intelligence_router
+from app.notifications.router import router as notifications_router
 
 # 1. Initialize Structured Logging
 setup_logging()
@@ -84,7 +85,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         )
         errors.append({"field": field, "message": err.get("msg", "Invalid value")})
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content=error_response(message="Validation failed.", errors=errors),
     )
 
@@ -121,6 +122,7 @@ app.include_router(evaluation_router, prefix="", tags=["Super Admin Research Eva
 app.include_router(dashboard_router, prefix="/dashboard", tags=["Dashboard Context"])
 app.include_router(traceability_router, prefix="/projects/{project_id}/traceability", tags=["Lifecycle Traceability"])
 app.include_router(meeting_intelligence_router, prefix="/projects/{project_id}/meetings", tags=["Meeting Intelligence"])
+app.include_router(notifications_router, prefix="/notifications", tags=["Notifications"])
 
 
 @app.get("/")

@@ -192,34 +192,57 @@ export default function TraceabilityMatrixPage({
         {!loading && !error && graph && (
           <div className="space-y-6">
             {/* Overview Summary Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-5 rounded-2xl border border-border bg-card shadow-2xs">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
-                  Total Requirements
-                </span>
-                <span className="text-2xl font-extrabold text-foreground mt-1 block">
-                  {graph.total_requirements}
-                </span>
-              </div>
+            {(() => {
+              const coverageGaps = graph.nodes.filter((n) => n.tasks_count === 0).length;
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="p-5 rounded-2xl border border-border bg-card shadow-2xs">
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+                      Total Requirements
+                    </span>
+                    <span className="text-2xl font-extrabold text-foreground mt-1 block">
+                      {graph.total_requirements}
+                    </span>
+                  </div>
 
-              <div className="p-5 rounded-2xl border border-border bg-card shadow-2xs">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
-                  Total Meetings Logged
-                </span>
-                <span className="text-2xl font-extrabold text-cyan-600 dark:text-cyan-400 mt-1 block">
-                  {graph.total_meetings}
-                </span>
-              </div>
+                  <div className="p-5 rounded-2xl border border-border bg-card shadow-2xs">
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+                      Total Meetings Logged
+                    </span>
+                    <span className="text-2xl font-extrabold text-cyan-600 dark:text-cyan-400 mt-1 block">
+                      {graph.total_meetings}
+                    </span>
+                  </div>
 
-              <div className="p-5 rounded-2xl border border-border bg-card shadow-2xs">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
-                  Total Execution Tasks
-                </span>
-                <span className="text-2xl font-extrabold text-primary mt-1 block">
-                  {graph.total_tasks}
-                </span>
-              </div>
-            </div>
+                  <div className="p-5 rounded-2xl border border-border bg-card shadow-2xs">
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+                      Total Execution Tasks
+                    </span>
+                    <span className="text-2xl font-extrabold text-primary mt-1 block">
+                      {graph.total_tasks}
+                    </span>
+                  </div>
+
+                  <div className={`p-5 rounded-2xl border shadow-2xs ${
+                    coverageGaps > 0
+                      ? "border-amber-500/30 bg-amber-500/5"
+                      : "border-emerald-500/30 bg-emerald-500/5"
+                  }`}>
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+                      Attention / Coverage
+                    </span>
+                    <span className={`text-2xl font-extrabold mt-1 block ${
+                      coverageGaps > 0 ? "text-amber-500" : "text-emerald-500"
+                    }`}>
+                      {coverageGaps > 0 ? `${coverageGaps} Uncovered` : "100% Linked"}
+                    </span>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {coverageGaps > 0 ? "Requirements with 0 execution tasks" : "All requirements have linked tasks"}
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Matrix Split View */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -251,9 +274,16 @@ export default function TraceabilityMatrixPage({
                             <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
                               {node.requirement_key}
                             </span>
-                            <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
-                              {node.action_items_count} Action Items
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              {node.tasks_count === 0 && (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                  No Tasks
+                                </span>
+                              )}
+                              <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
+                                {node.action_items_count} Action Items
+                              </span>
+                            </div>
                           </div>
 
                           <h4 className="font-bold text-foreground truncate">{node.requirement_title}</h4>
