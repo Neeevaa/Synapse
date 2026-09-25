@@ -309,7 +309,7 @@ export function SpecializationWidgetContainer({
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">Database Migrations</span>
-              <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">PostgreSQL Schema Synced</span>
+              <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">Database Schema Synced</span>
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">PR & Code Reviews</span>
@@ -347,12 +347,12 @@ export function SpecializationWidgetContainer({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
-              <span className="text-xs font-bold text-muted-foreground uppercase block">Model & Data Tasks</span>
+              <span className="text-xs font-bold text-muted-foreground uppercase block">Intelligence & Data Tasks</span>
               <span className="text-lg font-extrabold text-foreground">{specTasks.length} Active</span>
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
-              <span className="text-xs font-bold text-muted-foreground uppercase block">Provider Status</span>
-              <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">OpenAI Provider Active</span>
+              <span className="text-xs font-bold text-muted-foreground uppercase block">Intelligence Engine</span>
+              <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">AI Engine Operational</span>
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">Evaluation Pipeline</span>
@@ -414,7 +414,7 @@ export function SpecializationWidgetContainer({
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">Build Pipelines</span>
-              <span className="text-lg font-extrabold text-foreground">Next.js Turbopack Passing</span>
+              <span className="text-lg font-extrabold text-foreground">Production Pipeline Passing</span>
             </div>
           </div>
         </div>
@@ -596,6 +596,8 @@ export function ProjectManagerWorkspaceView({ context }: { context: DashboardCon
 }
 
 export function OwnerAdminWorkspaceView({ context }: { context: DashboardContextData }) {
+  const isOwner = context.user.company_role === "OWNER";
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -612,15 +614,43 @@ export function OwnerAdminWorkspaceView({ context }: { context: DashboardContext
         <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs">
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Company Role</span>
           <span className="text-2xl font-extrabold text-foreground mt-1 block">
-            {context.user.company_role || "ADMIN"}
+            {context.user.company_role === "OWNER" ? "CTO" : context.user.company_role || "ADMIN"}
           </span>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Subscription Entitlement</span>
-          <span className="text-2xl font-extrabold text-primary mt-1 block">Active</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Subscription Hub</span>
+          <span className="text-2xl font-extrabold text-primary mt-1 block">
+            {isOwner ? "CTO Tier Hub" : "Active"}
+          </span>
         </div>
       </div>
+
+      {/* CTO Subscription & Billing Quick Management */}
+      {isOwner && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card p-5 rounded-2xl border border-border shadow-2xs">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[0.65rem] font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                CTO Billing Hub
+              </span>
+              <h4 className="text-sm font-bold text-foreground">Organization Subscription & Plan Management</h4>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Review authoritative plan limits, explore subscription upgrades, and verify organization entitlements.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <Link
+              href="/company/settings?tab=plan"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-xs font-bold text-primary-foreground hover:bg-primary/95 shadow-2xs transition-all cursor-pointer"
+            >
+              Subscription & Billing <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

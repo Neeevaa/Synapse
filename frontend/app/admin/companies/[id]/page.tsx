@@ -99,7 +99,7 @@ interface AuditLog {
 
 const ALL_ENTERPRISE_FEATURES = [
   { code: "FEATURE_AI_AGENTS", label: "AI Agents" },
-  { code: "FEATURE_RAG", label: "RAG Knowledge Search" },
+  { code: "FEATURE_RAG", label: "Project Knowledge Search" },
   { code: "FEATURE_KNOWLEDGE_GRAPH", label: "Knowledge Graph" },
   { code: "FEATURE_PREDICTIVE_DELAY", label: "Predictive Delay Detection" },
   { code: "FEATURE_CONTEXTUAL_DELAY", label: "Contextual Delay Diagnostics" },

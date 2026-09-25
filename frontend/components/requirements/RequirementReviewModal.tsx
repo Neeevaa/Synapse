@@ -223,7 +223,7 @@ export default function RequirementReviewModal({
             <div className="py-16 text-center space-y-3">
               <Loader2 className="size-8 animate-spin text-primary mx-auto" />
               <p className="text-xs font-semibold text-muted-foreground">
-                Analyzing requirement against project knowledge base & RAG context...
+                Analyzing requirement against project knowledge base...
               </p>
             </div>
           )}

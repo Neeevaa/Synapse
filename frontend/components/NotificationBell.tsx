@@ -16,6 +16,7 @@ import {
   Loader2,
   ExternalLink,
   Layers,
+  CreditCard,
 } from "lucide-react";
 
 interface NotificationItem {
@@ -102,6 +103,16 @@ function getNotificationIcon(type: string) {
       return <Sparkles className="size-4 text-primary shrink-0" />;
     case "PROJECT_MEMBER_ADDED":
       return <UserPlus className="size-4 text-emerald-500 shrink-0" />;
+    case "SUBSCRIPTION_PAYMENT_REMINDER":
+      return <CreditCard className="size-4 text-amber-500 shrink-0" />;
+    case "ENTERPRISE_REQUEST_SUBMITTED":
+      return <FileText className="size-4 text-blue-500 shrink-0" />;
+    case "ENTERPRISE_REQUEST_APPROVED":
+      return <Sparkles className="size-4 text-emerald-500 shrink-0" />;
+    case "ENTERPRISE_REQUEST_REJECTED":
+      return <X className="size-4 text-rose-500 shrink-0" />;
+    case "ENTERPRISE_ACTIVATED":
+      return <Zap className="size-4 text-primary shrink-0" />;
     default:
       return <Bell className="size-4 text-primary shrink-0" />;
   }

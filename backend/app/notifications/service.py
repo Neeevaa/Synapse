@@ -120,20 +120,32 @@ class NotificationService:
         Retrieves paginated notifications for the current user, grouped by project context.
         """
         offset = max(0, (page - 1) * limit)
-        notifications, total = self.repo.get_user_notifications(
-            recipient_user_id=current_user.id,
-            company_id=current_user.company_id,
-            project_id=project_id,
-            is_read=is_read,
-            limit=limit,
-            offset=offset,
-        )
-
-        unread_count = self.repo.get_unread_count(
-            recipient_user_id=current_user.id,
-            company_id=current_user.company_id,
-            project_id=project_id,
-        )
+        if current_user.is_super_admin:
+            notifications, total = self.repo.get_super_admin_notifications(
+                recipient_user_id=current_user.id,
+                project_id=project_id,
+                is_read=is_read,
+                limit=limit,
+                offset=offset,
+            )
+            unread_count = self.repo.get_super_admin_unread_count(
+                recipient_user_id=current_user.id,
+                project_id=project_id,
+            )
+        else:
+            notifications, total = self.repo.get_user_notifications(
+                recipient_user_id=current_user.id,
+                company_id=current_user.company_id,
+                project_id=project_id,
+                is_read=is_read,
+                limit=limit,
+                offset=offset,
+            )
+            unread_count = self.repo.get_unread_count(
+                recipient_user_id=current_user.id,
+                company_id=current_user.company_id,
+                project_id=project_id,
+            )
 
         items = [self._to_response(n) for n in notifications]
 
@@ -141,7 +153,7 @@ class NotificationService:
         groups_map: Dict[str, ProjectNotificationGroup] = {}
         for item in items:
             p_key = str(item.project_id) if item.project_id else "general"
-            p_name = item.project_name or "General / Company"
+            p_name = item.project_name or ("Platform / System" if current_user.is_super_admin else "General / Company")
 
             if p_key not in groups_map:
                 groups_map[p_key] = ProjectNotificationGroup(
@@ -172,6 +184,11 @@ class NotificationService:
         current_user: User,
         project_id: Optional[UUID] = None,
     ) -> int:
+        if current_user.is_super_admin:
+            return self.repo.get_super_admin_unread_count(
+                recipient_user_id=current_user.id,
+                project_id=project_id,
+            )
         return self.repo.get_unread_count(
             recipient_user_id=current_user.id,
             company_id=current_user.company_id,
@@ -200,11 +217,17 @@ class NotificationService:
         current_user: User,
         project_id: Optional[UUID] = None,
     ) -> int:
-        count = self.repo.mark_all_as_read(
-            recipient_user_id=current_user.id,
-            company_id=current_user.company_id,
-            project_id=project_id,
-        )
+        if current_user.is_super_admin:
+            count = self.repo.mark_all_super_admin_as_read(
+                recipient_user_id=current_user.id,
+                project_id=project_id,
+            )
+        else:
+            count = self.repo.mark_all_as_read(
+                recipient_user_id=current_user.id,
+                company_id=current_user.company_id,
+                project_id=project_id,
+            )
         self.db.commit()
         return count
 

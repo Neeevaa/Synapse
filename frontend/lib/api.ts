@@ -1,4 +1,5 @@
 import axios from "axios";
+import { sanitizeErrorMessage } from "./utils";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API || "http://127.0.0.1:8000",
@@ -132,6 +133,15 @@ api.interceptors.response.use(
           }
         }
         return Promise.reject(refreshError);
+      }
+    }
+
+    if (error?.response?.data) {
+      if (typeof error.response.data.message === "string") {
+        error.response.data.message = sanitizeErrorMessage(error.response.data.message);
+      }
+      if (typeof error.response.data.detail === "string") {
+        error.response.data.detail = sanitizeErrorMessage(error.response.data.detail);
       }
     }
 

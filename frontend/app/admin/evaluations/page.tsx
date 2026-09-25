@@ -296,7 +296,7 @@ export default function EvaluationsAdminPage() {
           <div className="space-y-1">
             <span className="font-bold text-purple-300">Comparative Empirical Design Policy</span>
             <p className="text-purple-200/90 leading-relaxed">
-              To guarantee research integrity, Synapse strictly enforces that RAG improvement claims are held until both <strong className="text-slate-200 font-mono">LLM_ONLY</strong> and <strong className="text-cyan-300 font-mono">RAG_LLM</strong> experiments are executed side-by-side on identical human-verified evaluation datasets.
+              To guarantee research integrity, Synapse strictly enforces that intelligence improvement claims are held until both <strong className="text-slate-200 font-mono">Direct Synthesis</strong> and <strong className="text-cyan-300 font-mono">Knowledge-Grounded</strong> experiments are executed side-by-side on identical human-verified evaluation datasets.
             </p>
           </div>
         </div>
@@ -314,7 +314,7 @@ export default function EvaluationsAdminPage() {
           </div>
 
           <div className="p-4 rounded-xl border border-border bg-card space-y-1 shadow-2xs">
-            <span className="text-[0.7rem] font-semibold text-muted-foreground uppercase tracking-wider">Latest Model</span>
+            <span className="text-[0.7rem] font-semibold text-muted-foreground uppercase tracking-wider">Latest Engine</span>
             <div className="text-xs font-mono font-bold text-purple-400 truncate">
               {latestCompletedRun ? latestCompletedRun.model_name : "N/A"}
             </div>
@@ -382,8 +382,8 @@ export default function EvaluationsAdminPage() {
                 <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold">
                   <tr>
                     <th className="py-3 px-4">Condition</th>
-                    <th className="py-3 px-4">Model</th>
-                    <th className="py-3 px-4">Embedding Model</th>
+                    <th className="py-3 px-4">Engine</th>
+                    <th className="py-3 px-4">Knowledge Index</th>
                     <th className="py-3 px-4">Prompt</th>
                     <th className="py-3 px-4">Top K</th>
                     <th className="py-3 px-4 font-mono text-purple-400">F1</th>
@@ -680,14 +680,14 @@ export default function EvaluationsAdminPage() {
                     onChange={(e: any) => setRunCondition(e.target.value)}
                     className="w-full p-2.5 rounded-lg border border-input bg-background text-foreground focus:outline-none font-bold"
                   >
-                    <option value="LLM_ONLY">LLM_ONLY (No retrieval, no context)</option>
-                    <option value="RAG_LLM">RAG_LLM (Full vector retrieval + context)</option>
-                    <option value="RAG_LLM_HUMAN">RAG_LLM_HUMAN (RAG + Human decision metrics)</option>
+                    <option value="LLM_ONLY">Direct Synthesis (Baseline, no context)</option>
+                    <option value="RAG_LLM">Knowledge-Grounded (Project context)</option>
+                    <option value="RAG_LLM_HUMAN">Knowledge-Grounded + Human Metrics</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-muted-foreground font-semibold mb-1">Model Name</label>
+                  <label className="block text-muted-foreground font-semibold mb-1">Intelligence Engine</label>
                   <input
                     type="text"
                     value={runModel}
@@ -698,7 +698,7 @@ export default function EvaluationsAdminPage() {
 
                 {runCondition !== "LLM_ONLY" && (
                   <div>
-                    <label className="block text-muted-foreground font-semibold mb-1">Embedding Model</label>
+                    <label className="block text-muted-foreground font-semibold mb-1">Knowledge Index Engine</label>
                     <input
                       type="text"
                       value={runEmbedModel}

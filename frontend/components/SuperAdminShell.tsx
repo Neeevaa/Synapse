@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import NotificationBell from "@/components/NotificationBell";
 import {
   ShieldAlert,
   ShieldCheck,
@@ -18,6 +19,7 @@ import {
   User as UserIcon,
   BarChart3,
   History,
+  Sparkles,
 } from "lucide-react";
 
 interface SuperAdminUser {
@@ -142,6 +144,7 @@ export default function SuperAdminShell({ children, pageTitle }: SuperAdminShell
   const adminNavItems = [
     { name: "Platform Overview", href: "/admin", icon: LayoutDashboard },
     { name: "Company Management", href: "/admin/companies", icon: Building2 },
+    { name: "Enterprise Requests", href: "/admin/enterprise-requests", icon: Sparkles },
     { name: "Platform Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "Audit Logs", href: "/admin/audit-logs", icon: History },
   ];
@@ -190,6 +193,8 @@ export default function SuperAdminShell({ children, pageTitle }: SuperAdminShell
 
         {/* User Badge & Actions */}
         <div className="flex items-center gap-3 sm:gap-4">
+          <NotificationBell />
+
           <div className="flex items-center gap-2 bg-muted/60 border border-border px-3 py-1.5 rounded-xl">
             <div className="size-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xs font-bold">
               <UserIcon className="size-3.5" />

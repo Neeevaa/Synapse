@@ -8,8 +8,13 @@ from app.models.enums import SubscriptionPlan
 PLAN_DEFINITIONS = {
     SubscriptionPlan.FREE: {
         "id": SubscriptionPlan.FREE,
+        "code": "FREE",
         "name": "Free",
         "price": "$0 / month",
+        "price_inr": 0,
+        "price_display": "₹0 / month",
+        "currency": "INR",
+        "billing_period": "month",
         "description": "For individuals and small teams exploring Synapse",
         "cta_text": "Select Free",
         "is_popular": False,
@@ -44,8 +49,13 @@ PLAN_DEFINITIONS = {
     },
     SubscriptionPlan.STARTER: {
         "id": SubscriptionPlan.STARTER,
+        "code": "STARTER",
         "name": "Starter",
         "price": "$19 / month",
+        "price_inr": 799,
+        "price_display": "₹799 / month",
+        "currency": "INR",
+        "billing_period": "month",
         "description": "For growing teams managing multiple projects",
         "cta_text": "Select Starter",
         "is_popular": False,
@@ -78,8 +88,13 @@ PLAN_DEFINITIONS = {
     },
     SubscriptionPlan.PRO: {
         "id": SubscriptionPlan.PRO,
+        "code": "PRO",
         "name": "Pro",
         "price": "$49 / month",
+        "price_inr": 1999,
+        "price_display": "₹1,999 / month",
+        "currency": "INR",
+        "billing_period": "month",
         "description": "For teams that want AI-driven project intelligence",
         "cta_text": "Select Pro",
         "is_popular": True,
@@ -111,8 +126,13 @@ PLAN_DEFINITIONS = {
     },
     SubscriptionPlan.ENTERPRISE: {
         "id": SubscriptionPlan.ENTERPRISE,
+        "code": "ENTERPRISE",
         "name": "Enterprise",
         "price": "Custom",
+        "price_inr": None,
+        "price_display": "Custom",
+        "currency": "INR",
+        "billing_period": "month",
         "description": "For organizations operating Synapse at scale",
         "cta_text": "Contact Sales",
         "is_popular": False,
@@ -148,3 +168,21 @@ def get_plan_definition(plan: SubscriptionPlan | str) -> dict:
     """Retrieves full structured configuration for a given subscription plan."""
     plan_key = SubscriptionPlan(plan) if isinstance(plan, str) else plan
     return PLAN_DEFINITIONS.get(plan_key, PLAN_DEFINITIONS[SubscriptionPlan.FREE])
+
+
+def get_authoritative_plan_price(plan: SubscriptionPlan | str) -> int:
+    """
+    Returns the authoritative amount in paise (INR) for a paid subscription plan.
+    Converts INR rupees to paise (e.g. 1999 INR -> 199900 paise).
+    Raises ValueError if the plan is free, enterprise, or invalid.
+    """
+    plan_key = SubscriptionPlan(plan) if isinstance(plan, str) else plan
+    defn = PLAN_DEFINITIONS.get(plan_key)
+    if not defn:
+        raise ValueError(f"Invalid subscription plan: {plan}")
+
+    price_inr = defn.get("price_inr")
+    if price_inr is None or price_inr <= 0:
+        raise ValueError(f"Plan '{plan_key.value}' does not have a fixed checkout price.")
+
+    return price_inr * 100

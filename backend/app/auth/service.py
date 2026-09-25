@@ -42,8 +42,12 @@ from app.models.invitation import Invitation
 from app.models.email_verification import EmailVerificationToken
 from app.models.refresh_token import RefreshToken
 from app.models.password_reset import PasswordResetToken
-from app.models.enums import CompanyRole, ProjectRole, Specialization, InvitationStatus
-from app.core.security import hash_password, verify_password
+from app.models.enums import CompanyRole, ProjectRole, Specialization, InvitationStatus, NotificationType, SubscriptionPlan, EnterpriseRequestStatus
+from app.models.notification import Notification
+from app.models.subscription import EnterpriseSubscriptionRequest
+from app.subscriptions.enterprise_pricing import calculate_enterprise_pricing
+from app.subscriptions.payment_service import SubscriptionPaymentService
+from app.subscriptions.schemas import CreateEnterpriseRequest, EnterpriseResourceLimits
 from app.core.security import hash_password, verify_password, create_access_token, hash_token
 from app.events import event_bus
 from app.activities.service import ActivityService
@@ -108,8 +112,67 @@ class AuthService:
             )
             self.repo.create_user(user)
 
-            # Commit the transaction
+            # If registering with ENTERPRISE plan, atomically create the EnterpriseSubscriptionRequest and notify Super Admins
+            payment_reminder_sent = False
+            if data.subscription_plan == SubscriptionPlan.ENTERPRISE:
+                cfg = data.enterprise_config or {}
+                raw_limits = cfg.get("limits") or cfg.get("requested_resources") or {}
+                caps = cfg.get("requested_capabilities", [])
+                reason = cfg.get("requested_reason") or cfg.get("business_justification")
+
+                st_bytes = raw_limits.get("max_storage_bytes")
+                st_gb = raw_limits.get("max_storage_gb", -1)
+                if st_gb == -1 and st_bytes is not None:
+                    st_gb = -1 if st_bytes < 0 else max(1, st_bytes // (1024 * 1024 * 1024))
+
+                ent_payload = CreateEnterpriseRequest(
+                    limits=EnterpriseResourceLimits(
+                        max_users=raw_limits.get("max_users", -1),
+                        max_active_projects=raw_limits.get("max_active_projects", raw_limits.get("max_projects", -1)),
+                        max_storage_gb=st_gb,
+                        max_ai_executions=raw_limits.get("max_ai_executions", -1),
+                        max_automation_workflows=raw_limits.get("max_automation_workflows", -1),
+                    ),
+                    requested_capabilities=caps,
+                    requested_reason=reason,
+                )
+                payment_svc = SubscriptionPaymentService(self.db)
+                payment_svc.create_enterprise_request(
+                    user=user,
+                    payload=ent_payload,
+                    company=company,
+                    commit=False,
+                )
+            elif data.subscription_plan in (SubscriptionPlan.STARTER, SubscriptionPlan.PRO):
+                plan_label = data.subscription_plan.value.capitalize()
+                reminder_notif = Notification(
+                    recipient_user_id=user.id,
+                    company_id=company.id,
+                    project_id=None,
+                    type=NotificationType.SUBSCRIPTION_PAYMENT_REMINDER,
+                    title="Subscription Fee Payment Reminder",
+                    message=(
+                        f"Welcome to Synapse! Your organization is registered under the {plan_label} plan. "
+                        f"Please complete your subscription payment to maintain full access to all premium features."
+                    ),
+                    source_type="SUBSCRIPTION",
+                    source_id=company.id,
+                    deep_link="/company/settings",
+                    is_read=False,
+                )
+                self.db.add(reminder_notif)
+                payment_reminder_sent = True
+
+            # Commit the single atomic transaction
             self.db.commit()
+
+            # Generate stateless JWT AccessToken for immediate onboarding / payment flow
+            jwt_payload = {
+                "sub": str(user.id),
+                "email": user.email,
+                "role": user.role.value if hasattr(user.role, "value") else str(user.role),
+            }
+            access_token = create_access_token(data=jwt_payload)
 
             # Log success event in a structured format
             logger.info(
@@ -127,6 +190,9 @@ class AuthService:
                 user_id=user.id,
                 company_id=company.id,
                 verification_token="",
+                access_token=access_token,
+                token_type="bearer",
+                payment_reminder_sent=payment_reminder_sent,
             )
         except Exception as e:
             self.db.rollback()

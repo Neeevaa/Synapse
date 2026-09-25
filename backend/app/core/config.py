@@ -1,7 +1,10 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 load_dotenv()
 
 
@@ -30,11 +33,16 @@ class Settings(BaseSettings):
     OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "qwen3-4b-instruct-2507")
     OLLAMA_EMBEDDING_MODEL: str = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
 
+    # Razorpay Payment Gateway
+    RAZORPAY_KEY_ID: str = os.getenv("RAZORPAY_KEY_ID", "").strip()
+    RAZORPAY_KEY_SECRET: str = os.getenv("RAZORPAY_KEY_SECRET", "").strip()
+    RAZORPAY_WEBHOOK_SECRET: str = os.getenv("RAZORPAY_WEBHOOK_SECRET", "").strip()
+
     jwt: JWTSettings = JWTSettings()
     db: DatabaseSettings = DatabaseSettings()
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(env_path) if env_path.exists() else ".env",
         extra="ignore",
     )
 

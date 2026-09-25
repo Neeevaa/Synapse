@@ -24,6 +24,13 @@ from app.admin.service import AdminService
 from app.common.responses import APIResponse, success_response
 from app.permissions.dependencies import require_super_admin
 from app.models.user import User
+from app.subscriptions.schemas import (
+    EnterpriseRequestDetail,
+    ApproveEnterpriseRequest,
+    RejectEnterpriseRequest,
+    CalculatePriceRequest,
+    CalculatePriceResponse,
+)
 
 router = APIRouter()
 
@@ -453,3 +460,119 @@ def get_analytics_ai_usage(
         message="AI usage analytics retrieved successfully.",
         data=result,
     )
+
+
+@router.get(
+    "/enterprise-requests",
+    status_code=status.HTTP_200_OK,
+    summary="List all Enterprise subscription requests for Super Admin",
+)
+def list_enterprise_requests(
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
+    status_filter: str | None = Query(default=None, alias="status"),
+    current_user: User = Depends(require_super_admin()),
+    db: Session = Depends(get_db),
+):
+    service = AdminService(db)
+    result = service.list_enterprise_requests(page=page, limit=limit, status_filter=status_filter)
+    return success_response(
+        message="Enterprise requests retrieved successfully.",
+        data=result,
+    )
+
+
+@router.get(
+    "/enterprise-requests/{request_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Get detailed Enterprise subscription request for Super Admin",
+)
+def get_enterprise_request_detail(
+    request_id: UUID,
+    current_user: User = Depends(require_super_admin()),
+    db: Session = Depends(get_db),
+):
+    service = AdminService(db)
+    result = service.get_enterprise_request(request_id)
+    return success_response(
+        message="Enterprise request details retrieved successfully.",
+        data=result,
+    )
+
+
+@router.post(
+    "/enterprise-requests/calculate-price",
+    response_model=APIResponse[CalculatePriceResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Calculate dynamic Enterprise price preview for review modal",
+)
+def calculate_price_preview_general(
+    payload: CalculatePriceRequest,
+    current_user: User = Depends(require_super_admin()),
+    db: Session = Depends(get_db),
+):
+    service = AdminService(db)
+    result = service.calculate_enterprise_price_preview(payload.limits, payload.capabilities)
+    return success_response(
+        message="Enterprise price preview calculated successfully.",
+        data=result,
+    )
+
+
+@router.post(
+    "/enterprise-requests/{request_id}/calculate-price",
+    response_model=APIResponse[CalculatePriceResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Calculate dynamic Enterprise price preview for review modal",
+)
+def calculate_price_preview(
+    request_id: UUID,
+    payload: CalculatePriceRequest,
+    current_user: User = Depends(require_super_admin()),
+    db: Session = Depends(get_db),
+):
+    service = AdminService(db)
+    result = service.calculate_enterprise_price_preview(payload.limits, payload.capabilities)
+    return success_response(
+        message="Enterprise price preview calculated successfully.",
+        data=result,
+    )
+
+
+@router.post(
+    "/enterprise-requests/{request_id}/approve",
+    status_code=status.HTTP_200_OK,
+    summary="Approve Enterprise request with authoritative snapshot and transition to PAYMENT_PENDING",
+)
+def approve_enterprise_request(
+    request_id: UUID,
+    payload: ApproveEnterpriseRequest,
+    current_user: User = Depends(require_super_admin()),
+    db: Session = Depends(get_db),
+):
+    service = AdminService(db)
+    result = service.approve_enterprise_request(request_id, payload, current_user)
+    return success_response(
+        message="Enterprise request approved successfully. Status moved to PAYMENT_PENDING.",
+        data=result,
+    )
+
+
+@router.post(
+    "/enterprise-requests/{request_id}/reject",
+    status_code=status.HTTP_200_OK,
+    summary="Reject Enterprise subscription request with required reason",
+)
+def reject_enterprise_request(
+    request_id: UUID,
+    payload: RejectEnterpriseRequest,
+    current_user: User = Depends(require_super_admin()),
+    db: Session = Depends(get_db),
+):
+    service = AdminService(db)
+    result = service.reject_enterprise_request(request_id, payload, current_user)
+    return success_response(
+        message="Enterprise request declined successfully.",
+        data=result,
+    )
+

@@ -506,12 +506,22 @@ export default function MeetingsListPage() {
                         </span>
                       </td>
                       <td className="py-3.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <Link
-                          href={`/projects/${projectId}/meetings/${m.id}`}
-                          className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 font-medium px-2.5 py-1 rounded bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 transition-colors cursor-pointer"
-                        >
-                          View Meeting <ChevronRight className="size-3.5" />
-                        </Link>
+                        <div className="flex items-center justify-end gap-2">
+                          {m.status === "IN_PROGRESS" && (
+                            <Link
+                              href={`/projects/${projectId}/meetings/${m.id}/room`}
+                              className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 font-semibold px-2.5 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors cursor-pointer animate-pulse"
+                            >
+                              <Video className="size-3.5" /> Join Room
+                            </Link>
+                          )}
+                          <Link
+                            href={`/projects/${projectId}/meetings/${m.id}`}
+                            className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 font-medium px-2.5 py-1 rounded bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 transition-colors cursor-pointer"
+                          >
+                            View Meeting <ChevronRight className="size-3.5" />
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   ))}

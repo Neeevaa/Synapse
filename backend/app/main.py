@@ -28,6 +28,7 @@ from app.dashboard.router import router as dashboard_router
 from app.traceability.router import router as traceability_router
 from app.meetings.intelligence_router import router as meeting_intelligence_router
 from app.notifications.router import router as notifications_router
+from app.subscriptions.router import router as subscriptions_router
 
 # 1. Initialize Structured Logging
 setup_logging()
@@ -123,6 +124,7 @@ app.include_router(dashboard_router, prefix="/dashboard", tags=["Dashboard Conte
 app.include_router(traceability_router, prefix="/projects/{project_id}/traceability", tags=["Lifecycle Traceability"])
 app.include_router(meeting_intelligence_router, prefix="/projects/{project_id}/meetings", tags=["Meeting Intelligence"])
 app.include_router(notifications_router, prefix="/notifications", tags=["Notifications"])
+app.include_router(subscriptions_router, prefix="", tags=["Subscriptions & Billing"])
 
 
 @app.get("/")

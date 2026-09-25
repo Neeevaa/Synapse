@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:workflow": "node --test __tests__/meetingIntelligenceWorkflow.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

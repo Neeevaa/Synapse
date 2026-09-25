@@ -851,7 +851,7 @@ export default function ProjectDetailPage() {
                           <Database className="size-4" /> Project Intelligence
                         </span>
                         <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-                          Active RAG
+                          Project Knowledge Active
                         </span>
                       </div>
 

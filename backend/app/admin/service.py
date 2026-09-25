@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import func, select
@@ -11,7 +12,18 @@ from app.models.ai_job import AIJob
 from app.models.invitation import Invitation
 from app.models.admin_audit_log import AdminAuditLog
 from app.models.company_resource import CompanyResourceAllocation
-from app.models.enums import SubscriptionPlan, CompanyStatus, ProjectStatus, AIJobStatus
+from app.models.enums import SubscriptionPlan, CompanyStatus, ProjectStatus, AIJobStatus, EnterpriseRequestStatus, NotificationType
+from app.models.subscription import EnterpriseSubscriptionRequest
+from app.models.notification import Notification
+from app.subscriptions.enterprise_pricing import calculate_enterprise_pricing, ENTERPRISE_CAPABILITIES_CATALOG
+from app.subscriptions.schemas import (
+    EnterpriseRequestDetail,
+    ApproveEnterpriseRequest,
+    RejectEnterpriseRequest,
+    CalculatePriceRequest,
+    CalculatePriceResponse,
+    EnterpriseResourceLimits,
+)
 from app.subscriptions.service import EntitlementService
 from app.admin.schemas import (
     AdminCompanyItem,
@@ -940,3 +952,281 @@ class AdminService:
             executions_by_type=by_type,
             executions_this_month=executions_this_month,
         )
+
+    def list_enterprise_requests(
+        self,
+        page: int = 1,
+        limit: int = 20,
+        status_filter: str | None = None,
+    ) -> dict[str, Any]:
+        """Lists all Enterprise requests across organizations for Super Admin review."""
+        query = select(EnterpriseSubscriptionRequest)
+        if status_filter:
+            try:
+                st = EnterpriseRequestStatus(status_filter.upper())
+                query = query.filter(EnterpriseSubscriptionRequest.status == st)
+            except ValueError:
+                pass
+
+        total = self.db.scalar(select(func.count()).select_from(query.subquery())) or 0
+
+        requests = self.db.execute(
+            query.order_by(EnterpriseSubscriptionRequest.created_at.desc())
+            .offset((page - 1) * limit)
+            .limit(limit)
+        ).scalars().all()
+
+        items = []
+        for req in requests:
+            comp = self.db.execute(
+                select(Company).filter(Company.id == req.company_id)
+            ).scalar_one_or_none()
+            user = self.db.execute(
+                select(User).filter(User.id == req.requested_by)
+            ).scalar_one_or_none() if req.requested_by else None
+            items.append(self._to_enterprise_detail(req, comp, user))
+
+        pages = (total + limit - 1) // limit if total > 0 else 1
+        return {
+            "items": [item.model_dump() for item in items],
+            "total": total,
+            "page": page,
+            "pages": pages,
+        }
+
+    def get_enterprise_request(self, request_id: UUID) -> EnterpriseRequestDetail:
+        """Retrieves full detail of a specific Enterprise request."""
+        req = self.db.execute(
+            select(EnterpriseSubscriptionRequest).filter(
+                EnterpriseSubscriptionRequest.id == request_id
+            )
+        ).scalar_one_or_none()
+
+        if not req:
+            raise ResourceNotFound("Enterprise subscription request not found.")
+
+        comp = self.db.execute(
+            select(Company).filter(Company.id == req.company_id)
+        ).scalar_one_or_none()
+        user = self.db.execute(
+            select(User).filter(User.id == req.requested_by)
+        ).scalar_one_or_none() if req.requested_by else None
+
+        return self._to_enterprise_detail(req, comp, user)
+
+    def calculate_enterprise_price_preview(
+        self,
+        limits: EnterpriseResourceLimits,
+        capabilities: list[str],
+    ) -> CalculatePriceResponse:
+        """Calculates dynamic price and breakdown preview based on limits and capabilities."""
+        pricing = calculate_enterprise_pricing(limits.model_dump(), capabilities)
+        return CalculatePriceResponse(**pricing)
+
+    def approve_enterprise_request(
+        self,
+        request_id: UUID,
+        payload: ApproveEnterpriseRequest,
+        admin_user: User,
+    ) -> EnterpriseRequestDetail:
+        """
+        Super Admin approves an Enterprise subscription request:
+        1. Computes authoritative dynamic price and itemized breakdown.
+        2. Persists permanent snapshot of approved limits, capabilities, breakdown, and version.
+        3. Transitions status directly to PAYMENT_PENDING.
+        4. Notifies the organization CTO with deep link to Billing.
+        """
+        req = self.db.execute(
+            select(EnterpriseSubscriptionRequest)
+            .filter(EnterpriseSubscriptionRequest.id == request_id)
+            .with_for_update()
+        ).scalar_one_or_none()
+
+        if not req:
+            raise ResourceNotFound("Enterprise subscription request not found.")
+
+        if req.status not in (EnterpriseRequestStatus.PENDING, EnterpriseRequestStatus.UNDER_REVIEW):
+            raise BaseBusinessException(
+                f"Cannot approve request currently in status '{req.status.value}'.",
+                status_code=400,
+            )
+
+        # Authoritative server-side pricing
+        limits_dict = payload.adjusted_limits.model_dump()
+        pricing = calculate_enterprise_pricing(limits_dict, payload.approved_capabilities)
+
+        now = datetime.now(timezone.utc)
+        req.approved_limits = limits_dict
+        req.approved_capabilities = payload.approved_capabilities
+        req.calculated_price = pricing["total_monthly_price"]
+        req.price_breakdown = pricing
+        req.pricing_version = pricing["pricing_version"]
+        req.admin_comment = payload.admin_comment
+        req.status = EnterpriseRequestStatus.PAYMENT_PENDING
+        req.approved_at = now
+
+        # Notify CTO
+        comp = self.db.execute(
+            select(Company).filter(Company.id == req.company_id)
+        ).scalar_one_or_none()
+
+        recipient_id = req.requested_by
+        if not recipient_id and comp:
+            owner = self.db.execute(
+                select(User).filter(User.company_id == comp.id, User.role == "OWNER")
+            ).scalars().first()
+            if owner:
+                recipient_id = owner.id
+
+        if recipient_id:
+            notif = Notification(
+                recipient_user_id=recipient_id,
+                company_id=req.company_id,
+                type=NotificationType.ENTERPRISE_REQUEST_APPROVED,
+                title="Enterprise Plan Request Approved",
+                message=(
+                    f"Your Enterprise plan request has been approved at ₹{pricing['total_monthly_price']:,} / month. "
+                    "Please review the approved configuration and proceed to payment to activate your subscription."
+                ),
+                source_type="ENTERPRISE_REQUEST",
+                source_id=req.id,
+                deep_link="/company/settings",
+                is_read=False,
+            )
+            self.db.add(notif)
+
+        self.db.commit()
+        self.db.refresh(req)
+
+        requester = self.db.execute(
+            select(User).filter(User.id == req.requested_by)
+        ).scalar_one_or_none() if req.requested_by else None
+
+        return self._to_enterprise_detail(req, comp, requester)
+
+    def reject_enterprise_request(
+        self,
+        request_id: UUID,
+        payload: RejectEnterpriseRequest,
+        admin_user: User,
+    ) -> EnterpriseRequestDetail:
+        """
+        Super Admin rejects an Enterprise subscription request with a required reason.
+        Transitions status to REJECTED and notifies the CTO.
+        """
+        req = self.db.execute(
+            select(EnterpriseSubscriptionRequest)
+            .filter(EnterpriseSubscriptionRequest.id == request_id)
+            .with_for_update()
+        ).scalar_one_or_none()
+
+        if not req:
+            raise ResourceNotFound("Enterprise subscription request not found.")
+
+        if req.status not in (EnterpriseRequestStatus.PENDING, EnterpriseRequestStatus.UNDER_REVIEW):
+            raise BaseBusinessException(
+                f"Cannot reject request currently in status '{req.status.value}'.",
+                status_code=400,
+            )
+
+        now = datetime.now(timezone.utc)
+        req.status = EnterpriseRequestStatus.REJECTED
+        req.admin_comment = payload.admin_comment
+        req.rejected_at = now
+
+        comp = self.db.execute(
+            select(Company).filter(Company.id == req.company_id)
+        ).scalar_one_or_none()
+
+        recipient_id = req.requested_by
+        if not recipient_id and comp:
+            owner = self.db.execute(
+                select(User).filter(User.company_id == comp.id, User.role == "OWNER")
+            ).scalars().first()
+            if owner:
+                recipient_id = owner.id
+
+        if recipient_id:
+            notif = Notification(
+                recipient_user_id=recipient_id,
+                company_id=req.company_id,
+                type=NotificationType.ENTERPRISE_REQUEST_REJECTED,
+                title="Enterprise Plan Request Declined",
+                message=f"Your Enterprise plan request was declined. Reason: {payload.admin_comment}",
+                source_type="ENTERPRISE_REQUEST",
+                source_id=req.id,
+                deep_link="/company/settings",
+                is_read=False,
+            )
+            self.db.add(notif)
+
+        self.db.commit()
+        self.db.refresh(req)
+
+        requester = self.db.execute(
+            select(User).filter(User.id == req.requested_by)
+        ).scalar_one_or_none() if req.requested_by else None
+
+        return self._to_enterprise_detail(req, comp, requester)
+
+    def _to_enterprise_detail(
+        self,
+        req: EnterpriseSubscriptionRequest,
+        company: Company | None,
+        user: User | None,
+    ) -> EnterpriseRequestDetail:
+        comp_name = company.name if company else "Unknown Organization"
+        user_name = f"{user.first_name} {user.last_name}".strip() if user else None
+        user_email = user.email if user else None
+
+        requested_res = {
+            "max_users": req.requested_user_limit,
+            "max_projects": req.requested_project_limit,
+            "max_storage_bytes": -1 if req.requested_storage_gb < 0 else req.requested_storage_gb * 1024 * 1024 * 1024,
+            "max_ai_executions": req.requested_ai_executions,
+            "max_automation_workflows": req.requested_automation_workflows,
+        }
+        approved_res = None
+        if req.approved_limits:
+            st_gb = req.approved_limits.get("max_storage_gb", -1)
+            approved_res = {
+                "max_users": req.approved_limits.get("max_users", -1),
+                "max_projects": req.approved_limits.get("max_active_projects", req.approved_limits.get("max_projects", -1)),
+                "max_storage_bytes": -1 if st_gb < 0 else st_gb * 1024 * 1024 * 1024,
+                "max_ai_executions": req.approved_limits.get("max_ai_executions", -1),
+                "max_automation_workflows": req.approved_limits.get("max_automation_workflows", -1),
+            }
+
+        return EnterpriseRequestDetail(
+            id=req.id,
+            company_id=req.company_id,
+            company_name=comp_name,
+            requested_by=req.requested_by,
+            requester_name=user_name,
+            requester_email=user_email,
+            status=req.status.value,
+            requested_user_limit=req.requested_user_limit,
+            requested_project_limit=req.requested_project_limit,
+            requested_storage_gb=req.requested_storage_gb,
+            requested_ai_executions=req.requested_ai_executions,
+            requested_automation_workflows=req.requested_automation_workflows,
+            requested_capabilities=req.requested_capabilities or [],
+            requested_reason=req.requested_reason,
+            approved_limits=req.approved_limits,
+            approved_capabilities=req.approved_capabilities,
+            calculated_price=req.calculated_price,
+            price_breakdown=req.price_breakdown,
+            pricing_version=req.pricing_version,
+            currency=req.currency,
+            admin_comment=req.admin_comment,
+            approved_at=req.approved_at,
+            rejected_at=req.rejected_at,
+            created_at=req.created_at,
+            updated_at=req.updated_at,
+            requested_resources=requested_res,
+            approved_resources=approved_res,
+            business_justification=req.requested_reason,
+            admin_notes=req.admin_comment,
+            rejection_reason=req.admin_comment if req.status == EnterpriseRequestStatus.REJECTED else None,
+        )
+

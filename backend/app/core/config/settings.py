@@ -1,3 +1,4 @@
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from app.core.config.database import DatabaseSettings
 from app.core.config.jwt import JWTSettings
@@ -10,6 +11,11 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:3000"
     GOOGLE_CLIENT_ID: str = "739603254405-bh9v6k5kaccp7duuoasp4sfgnufsnkqe.apps.googleusercontent.com"
     GOOGLE_CLIENT_SECRET: str = "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"
+
+    # Razorpay Payment Gateway (Test Mode)
+    RAZORPAY_KEY_ID: str = os.getenv("RAZORPAY_KEY_ID", "")
+    RAZORPAY_KEY_SECRET: str = os.getenv("RAZORPAY_KEY_SECRET", "")
+    RAZORPAY_WEBHOOK_SECRET: str = os.getenv("RAZORPAY_WEBHOOK_SECRET", "")
 
     model_config = SettingsConfigDict(
         env_file=".env",

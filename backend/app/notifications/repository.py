@@ -118,3 +118,78 @@ class NotificationRepository:
         result = self.db.execute(stmt)
         self.db.flush()
         return result.rowcount or 0
+
+    def get_super_admin_notifications(
+        self,
+        recipient_user_id: UUID,
+        project_id: Optional[UUID] = None,
+        is_read: Optional[bool] = None,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> tuple[list[Notification], int]:
+        """
+        Specialized query for Super Admins.
+        Queries notifications across all tenant companies directed to the platform super admin.
+        """
+        query = (
+            select(Notification)
+            .options(joinedload(Notification.project))
+            .filter(
+                Notification.recipient_user_id == recipient_user_id,
+            )
+        )
+
+        if project_id is not None:
+            query = query.filter(Notification.project_id == project_id)
+
+        if is_read is not None:
+            query = query.filter(Notification.is_read == is_read)
+
+        total = self.db.scalar(select(func.count()).select_from(query.subquery())) or 0
+
+        notifications = list(
+            self.db.scalars(
+                query.order_by(desc(Notification.created_at), desc(Notification.id))
+                .offset(offset)
+                .limit(limit)
+            ).all()
+        )
+
+        return notifications, total
+
+    def get_super_admin_unread_count(
+        self,
+        recipient_user_id: UUID,
+        project_id: Optional[UUID] = None,
+    ) -> int:
+        """Unread count for Super Admins across all tenant organizations."""
+        query = select(func.count(Notification.id)).filter(
+            Notification.recipient_user_id == recipient_user_id,
+            Notification.is_read == False,
+        )
+        if project_id is not None:
+            query = query.filter(Notification.project_id == project_id)
+
+        return self.db.scalar(query) or 0
+
+    def mark_all_super_admin_as_read(
+        self,
+        recipient_user_id: UUID,
+        project_id: Optional[UUID] = None,
+    ) -> int:
+        """Marks all notifications as read for Super Admin across all tenant organizations."""
+        now = datetime.now(timezone.utc)
+        stmt = (
+            update(Notification)
+            .where(
+                Notification.recipient_user_id == recipient_user_id,
+                Notification.is_read == False,
+            )
+            .values(is_read=True, read_at=now)
+        )
+        if project_id is not None:
+            stmt = stmt.where(Notification.project_id == project_id)
+
+        result = self.db.execute(stmt)
+        self.db.flush()
+        return result.rowcount or 0

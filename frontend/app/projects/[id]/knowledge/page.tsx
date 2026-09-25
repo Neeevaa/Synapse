@@ -127,7 +127,7 @@ export default function KnowledgeBasePage() {
       const statusData = res.data.data;
       setIndexStatus(statusData);
       setNotice({
-        message: `Indexed ${statusData.total_documents_indexed} documents into ${statusData.total_chunks_created} vector chunks! (${statusData.documents_skipped_hash_match} unchanged skipped)`,
+        message: `Indexed ${statusData.total_documents_indexed} documents into ${statusData.total_chunks_created} knowledge segments! (${statusData.documents_skipped_hash_match} unchanged skipped)`,
         type: "success",
       });
       if (activeTab === "telemetry") {
@@ -158,7 +158,7 @@ export default function KnowledgeBasePage() {
       const res = await api.post(`/projects/${projectId}/knowledge/search`, payload);
       setSearchResults(res.data.data);
     } catch (err: any) {
-      setSearchError(err.response?.data?.message || "Vector similarity search failed.");
+      setSearchError(err.response?.data?.message || "Semantic search failed.");
     } finally {
       setSearching(false);
     }
@@ -178,7 +178,7 @@ export default function KnowledgeBasePage() {
       const res = await api.post(`/projects/${projectId}/knowledge/rag-context`, payload);
       setRagData(res.data.data);
     } catch (err: any) {
-      setRagError(err.response?.data?.message || "Failed to construct RAG prompt context.");
+      setRagError(err.response?.data?.message || "Failed to construct project context.");
     } finally {
       setConstructingRAG(false);
     }
@@ -195,7 +195,7 @@ export default function KnowledgeBasePage() {
                 Project Dashboard
               </Link>
               <span>/</span>
-              <span className="text-foreground">Knowledge Base & Vector Store</span>
+              <span className="text-foreground">Project Knowledge Base</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
@@ -203,10 +203,10 @@ export default function KnowledgeBasePage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-foreground tracking-tight">
-                  Knowledge Base & pgvector Store
+                  Project Knowledge Base
                 </h1>
                 <p className="text-xs text-muted-foreground">
-                  Versioned artifact ingestion, token chunking, cosine vector search & RAG context construction
+                  Versioned artifact indexing, contextual search, and intelligence synthesis
                 </p>
               </div>
             </div>
@@ -277,7 +277,7 @@ export default function KnowledgeBasePage() {
             <div className="text-2xl font-extrabold text-foreground">
               {indexStatus?.total_chunks_created ?? "—"}
             </div>
-            <p className="text-xs text-muted-foreground">Searchable vector segments ready for retrieval</p>
+            <p className="text-xs text-muted-foreground">Searchable knowledge segments ready for retrieval</p>
           </div>
 
           <div className="p-5 rounded-2xl border border-border/80 bg-card shadow-2xs hover:shadow-xs transition-shadow space-y-2">
@@ -295,14 +295,14 @@ export default function KnowledgeBasePage() {
 
           <div className="p-5 rounded-2xl border border-border/80 bg-card shadow-2xs hover:shadow-xs transition-shadow space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-              <span>Retrieval Engine</span>
+              <span>Knowledge Index</span>
               <Cpu className="size-4 text-amber-400" />
             </div>
             <div className="text-sm font-bold text-foreground truncate">
-              {indexStatus?.embedding_model ?? "mock-deterministic-v1"}
+              Semantic Project Knowledge
             </div>
             <p className="text-xs text-muted-foreground">
-              Semantic Search Active ({indexStatus?.embedding_dimension ?? 1536} dim)
+              Semantic Search & Context Active
             </p>
           </div>
         </div>
@@ -317,7 +317,7 @@ export default function KnowledgeBasePage() {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Search className="size-4" /> Vector Search Playground
+            <Search className="size-4" /> Semantic Search Playground
           </button>
           <button
             onClick={() => setActiveTab("rag")}
@@ -327,7 +327,7 @@ export default function KnowledgeBasePage() {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Code2 className="size-4" /> RAG Context Inspector
+            <Code2 className="size-4" /> Context Evaluation
           </button>
           <button
             onClick={() => setActiveTab("telemetry")}
@@ -337,7 +337,7 @@ export default function KnowledgeBasePage() {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Activity className="size-4" /> Retrieval Telemetry Logs
+            <Activity className="size-4" /> Search Telemetry Logs
           </button>
         </div>
 
@@ -389,7 +389,7 @@ export default function KnowledgeBasePage() {
                   className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-primary text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   {searching ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
-                  Search Vectors
+                  Search Knowledge
                 </button>
               </div>
             </form>
@@ -405,7 +405,7 @@ export default function KnowledgeBasePage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-xs text-muted-foreground font-medium px-1">
                   <span>
-                    Found <strong className="text-foreground">{searchResults.total_results}</strong> relevant vector chunks
+                    Found <strong className="text-foreground">{searchResults.total_results}</strong> relevant knowledge segments
                   </span>
                   <span>Latency: <strong className="text-primary">{searchResults.query_latency_ms} ms</strong></span>
                 </div>
@@ -467,7 +467,7 @@ export default function KnowledgeBasePage() {
                   type="text"
                   value={ragQuery}
                   onChange={(e) => setRagQuery(e.target.value)}
-                  placeholder="Enter RAG query string to construct grounded LLM prompt context..."
+                  placeholder="Enter query to evaluate grounded project context..."
                   className="flex-1 px-4 py-2 text-xs rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <button
@@ -476,7 +476,7 @@ export default function KnowledgeBasePage() {
                   className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-primary text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   {constructingRAG ? <Loader2 className="size-4 animate-spin" /> : <Code2 className="size-4" />}
-                  Construct RAG Context
+                  Evaluate Context
                 </button>
               </div>
             </form>
@@ -491,13 +491,13 @@ export default function KnowledgeBasePage() {
               <div className="p-6 rounded-xl border border-border bg-card shadow-xs space-y-4">
                 <div className="flex items-center justify-between border-b border-border pb-4">
                   <div>
-                    <h3 className="text-sm font-bold text-foreground">Constructed Prompt Context Window</h3>
+                    <h3 className="text-sm font-bold text-foreground">Retrieved Project Context</h3>
                     <p className="text-xs text-muted-foreground">
-                      Structured grounding citations for LLM requirements review & analysis
+                      Structured grounding citations for requirements review & intelligence analysis
                     </p>
                   </div>
                   <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold">
-                    Total Context Tokens: ~{ragData.total_tokens}
+                    Context Size: ~{ragData.total_tokens} units
                   </div>
                 </div>
 
@@ -532,10 +532,10 @@ export default function KnowledgeBasePage() {
                       <th className="px-4 py-3">Timestamp</th>
                       <th className="px-4 py-3">Query</th>
                       <th className="px-4 py-3">Top K</th>
-                      <th className="px-4 py-3">Chunks</th>
+                      <th className="px-4 py-3">Segments</th>
                       <th className="px-4 py-3">Scores Range</th>
                       <th className="px-4 py-3">Latency (ms)</th>
-                      <th className="px-4 py-3">Embedding Model</th>
+                      <th className="px-4 py-3">Index Type</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -566,8 +566,8 @@ export default function KnowledgeBasePage() {
                           <td className="px-4 py-3 font-semibold text-amber-400">
                             {log.retrieval_latency_ms} ms
                           </td>
-                          <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                            {log.embedding_model}
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
+                            Semantic Knowledge
                           </td>
                         </tr>
                       ))

@@ -29,6 +29,12 @@ class UserRegisterRequest(BaseModel):
     subscription_plan: SubscriptionPlan = Field(
         default=SubscriptionPlan.FREE, description="Company subscription plan selection"
     )
+    payment_preference: str | None = Field(
+        default=None, description="Payment preference: 'PROCEED' or 'PAY_LATER'"
+    )
+    enterprise_config: dict | None = Field(
+        default=None, description="Custom Enterprise limits and capabilities configuration"
+    )
 
     @field_validator("first_name", "last_name")
     @classmethod
@@ -75,6 +81,9 @@ class UserRegisterResponseData(BaseModel):
     user_id: UUID
     company_id: UUID
     verification_token: str
+    access_token: str | None = None
+    token_type: str = "bearer"
+    payment_reminder_sent: bool = False
 
 
 class LoginRequest(BaseModel):
