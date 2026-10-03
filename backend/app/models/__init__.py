@@ -43,3 +43,4 @@ from app.models.evaluation import (
 )
 from app.models.notification import Notification
 from app.models.subscription import Subscription, PaymentOrder, Payment, EnterpriseSubscriptionRequest
+from app.models.test_case import TestCase

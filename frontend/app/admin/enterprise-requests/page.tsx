@@ -130,9 +130,16 @@ function EnterpriseRequestsContent() {
     setLoading(true);
     try {
       const res = await api.get("/admin/enterprise-requests");
-      setRequests(res.data.data || []);
+      const rawData = res.data?.data;
+      const items = Array.isArray(rawData)
+        ? rawData
+        : Array.isArray(rawData?.items)
+        ? rawData.items
+        : [];
+      setRequests(items);
     } catch (err: any) {
       console.error("Failed to load enterprise requests:", err);
+      setRequests([]);
     } finally {
       setLoading(false);
     }
@@ -144,8 +151,9 @@ function EnterpriseRequestsContent() {
 
   // Auto-open review modal when deep-linked from notification
   useEffect(() => {
-    if (!targetId || requests.length === 0) return;
-    const match = requests.find((r) => r.id === targetId);
+    const list = Array.isArray(requests) ? requests : [];
+    if (!targetId || list.length === 0) return;
+    const match = list.find((r) => r.id === targetId);
     if (match) {
       openReviewModal(match);
     }
@@ -316,7 +324,9 @@ function EnterpriseRequestsContent() {
     }
   };
 
-  const filteredRequests = requests.filter((r) => {
+  const safeRequests = Array.isArray(requests) ? requests : [];
+
+  const filteredRequests = safeRequests.filter((r) => {
     const matchesStatus = statusFilter === "ALL" || r.status === statusFilter;
     const matchesSearch =
       r.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -368,7 +378,7 @@ function EnterpriseRequestsContent() {
 
   return (
     <SuperAdminShell pageTitle="Enterprise Custom Subscription Requests">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="w-full space-y-6">
         {/* Header Title Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-5">
           <div>
@@ -410,9 +420,9 @@ function EnterpriseRequestsContent() {
                 }`}
               >
                 {tab.replace("_", " ")}
-                {tab === "PENDING" && requests.filter((r) => r.status === "PENDING").length > 0 && (
+                {tab === "PENDING" && safeRequests.filter((r) => r.status === "PENDING").length > 0 && (
                   <span className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-500 font-bold">
-                    {requests.filter((r) => r.status === "PENDING").length}
+                    {safeRequests.filter((r) => r.status === "PENDING").length}
                   </span>
                 )}
               </button>

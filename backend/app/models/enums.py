@@ -269,6 +269,37 @@ class EnterpriseRequestStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
+class TestCaseCategory(str, Enum):
+    __test__ = False
+    FUNCTIONAL = "FUNCTIONAL"
+    NEGATIVE = "NEGATIVE"
+    BOUNDARY = "BOUNDARY"
+    ACCEPTANCE = "ACCEPTANCE"
+
+
+class TestCaseStatus(str, Enum):
+    __test__ = False
+    DRAFT = "DRAFT"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+
+class TestCasePriority(str, Enum):
+    __test__ = False
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    URGENT = "URGENT"
+
+
+class TestCaseSource(str, Enum):
+    __test__ = False
+    AI_GENERATED = "AI_GENERATED"
+    MANUAL = "MANUAL"
+
+
+
+
 
 
 

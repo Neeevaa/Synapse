@@ -334,9 +334,10 @@ export default function RegisterPage() {
       <div className="w-full max-w-xl rounded-2xl border border-border bg-card p-8 shadow-xl dark:bg-card">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="size-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-black shadow-xs">
-              S
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="size-9 rounded-xl bg-white border border-border flex items-center justify-center shadow-xs overflow-hidden p-1">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="Synapse" className="size-full object-contain" />
             </div>
             <span className="text-xl font-extrabold tracking-wider text-foreground">SYNAPSE</span>
           </div>

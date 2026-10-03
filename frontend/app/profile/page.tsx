@@ -207,7 +207,7 @@ export default function MyProfilePage() {
 
   return (
     <ProtectedShell pageTitle="My Profile">
-      <div className="space-y-8 max-w-5xl mx-auto">
+      <div className="space-y-8 w-full">
         {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center py-20">

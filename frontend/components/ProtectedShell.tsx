@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -55,6 +55,9 @@ interface ProtectedShellProps {
   pageTitle?: string;
 }
 
+// Shared pinned state to preserve user preference across navigation
+let sharedPinnedState = false;
+
 export default function ProtectedShell({ children, pageTitle }: ProtectedShellProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -63,6 +66,79 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
+
+  // Pinned expanded state (toggled via double-click on sidebar)
+  const [isPinned, setIsPinned] = useState(false);
+
+  // Hover & Keyboard Focus expansion state with 150ms leave delay
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const leaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Sync with shared state on mount
+  useEffect(() => {
+    if (sharedPinnedState) {
+      setIsPinned(true);
+    }
+  }, []);
+
+  const handleDoubleClick = () => {
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
+    }
+    setIsPinned((prev) => {
+      const next = !prev;
+      sharedPinnedState = next;
+      if (!next) {
+        setIsHovered(false);
+      }
+      return next;
+    });
+  };
+
+  const handleMouseEnter = () => {
+    if (isPinned) return;
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
+    }
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (isPinned) return;
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+    }
+    leaveTimerRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 100);
+  };
+
+  const handleFocus = () => {
+    if (isPinned) return;
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
+    }
+    setIsFocused(true);
+  };
+
+  const handleBlur = (e: React.FocusEvent) => {
+    if (isPinned) return;
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsFocused(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (leaveTimerRef.current) clearTimeout(leaveTimerRef.current);
+    };
+  }, []);
+
+  const isExpanded = isPinned || isHovered || isFocused || sidebarOpen;
 
   // Active Project Context State
   const [activeProject, setActiveProject] = useState<{ id: string; name: string } | null>(null);
@@ -215,249 +291,282 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
   }
 
   let navItems = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Projects", href: "/projects", icon: FolderKanban },
-    { name: "Sprints", href: "/sprints", icon: Zap },
-    { name: "Tasks", href: "/tasks", icon: CheckSquare },
+    {
+      name: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+      isActive: pathname === "/dashboard",
+    },
+    {
+      name: "Projects",
+      href: "/projects",
+      icon: FolderKanban,
+      isActive:
+        pathname === "/projects" ||
+        (pathname.startsWith("/projects/") && !currentProjectId),
+    },
+    {
+      name: "Sprints",
+      href: "/sprints",
+      icon: Zap,
+      isActive: pathname === "/sprints" || pathname.startsWith("/sprints/"),
+    },
+    {
+      name: "Tasks",
+      href: "/tasks",
+      icon: CheckSquare,
+      isActive: pathname === "/tasks" || pathname.startsWith("/tasks/"),
+    },
   ];
 
   if (user?.is_super_admin) {
     navItems = [
-      { name: "Platform Admin", href: "/admin", icon: ShieldAlert },
+      {
+        name: "Platform Admin",
+        href: "/admin",
+        icon: ShieldAlert,
+        isActive: pathname.startsWith("/admin"),
+      },
     ];
   } else if (user?.role === "OWNER" || user?.role === "ADMIN") {
-    navItems.push({ name: "Company Settings", href: "/company/settings", icon: Building2 });
+    navItems.push({
+      name: "Company Settings",
+      href: "/company/settings",
+      icon: Building2,
+      isActive: pathname.startsWith("/company"),
+    });
   }
 
+  const projectNavItems = currentProjectId
+    ? [
+      {
+        name: "Sprint Board",
+        href: `/projects/${currentProjectId}/board`,
+        icon: Kanban,
+        isActive: pathname === `/projects/${currentProjectId}/board`,
+        badge: hasActiveSprint ? "Active" : undefined,
+      },
+      {
+        name: "Backlog Stream",
+        href: `/projects/${currentProjectId}/backlog`,
+        icon: Layers,
+        isActive: pathname === `/projects/${currentProjectId}/backlog`,
+      },
+      {
+        name: "Requirements",
+        href: `/projects/${currentProjectId}/requirements`,
+        icon: FileText,
+        isActive: pathname.startsWith(`/projects/${currentProjectId}/requirements`),
+      },
+      {
+        name: "Meetings",
+        href: `/projects/${currentProjectId}/meetings`,
+        icon: Video,
+        isActive: pathname.startsWith(`/projects/${currentProjectId}/meetings`),
+      },
+      {
+        name: "Team & Members",
+        href: `/projects/${currentProjectId}?tab=members`,
+        icon: Users,
+        isActive: pathname === `/projects/${currentProjectId}`,
+      },
+      {
+        name: "Knowledge Base",
+        href: `/projects/${currentProjectId}/knowledge`,
+        icon: Database,
+        isActive: pathname === `/projects/${currentProjectId}/knowledge`,
+      },
+      {
+        name: "Traceability",
+        href: `/projects/${currentProjectId}/traceability`,
+        icon: GitFork,
+        isActive: pathname === `/projects/${currentProjectId}/traceability`,
+      },
+    ]
+    : [];
+
   return (
-    <div className="min-h-screen bg-background text-foreground flex dark:bg-background">
+    <div className="h-screen w-screen overflow-hidden bg-background text-foreground flex">
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden backdrop-blur-xs"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Floating Pill Sidebar Rail */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar/95 backdrop-blur-md border-r border-sidebar-border text-sidebar-foreground transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 flex flex-col justify-between select-none ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-100"
-        }`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onFocusCapture={handleFocus}
+        onBlurCapture={handleBlur}
+        onDoubleClick={handleDoubleClick}
+        className={`fixed left-3 top-3 bottom-3 z-50 rounded-[34px] border border-sidebar-border/80 bg-sidebar/95 backdrop-blur-md shadow-xl lg:shadow-2xl flex flex-col justify-between select-none transition-[width,transform] duration-200 ease-in-out ${isExpanded ? "w-[212px]" : "w-[68px]"
+          } ${sidebarOpen
+            ? "translate-x-0"
+            : "-translate-x-[calc(100%+24px)] lg:translate-x-0"
+          }`}
       >
         <div className="flex flex-col flex-1 min-h-0">
-          <div className="flex h-14 items-center justify-between px-5 border-b border-sidebar-border/80 shrink-0">
-            <Link href="/dashboard" className="flex items-center gap-2.5 group">
-              <div className="size-7 rounded-lg bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold shadow-xs text-xs">
-                S
-              </div>
-              <span className="text-base font-extrabold tracking-wider text-sidebar-foreground group-hover:text-primary transition-colors">
-                SYNAPSE
-              </span>
-            </Link>
-            <button
+          {/* Top Brand Logo Circular Badge */}
+          <div className="flex items-center p-2 py-3 border-b border-sidebar-border/60 shrink-0">
+            <Link
+              href="/dashboard"
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-sidebar-foreground hover:opacity-80 p-1"
+              className="flex items-center group outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
             >
-              <X className="size-4" />
-            </button>
+              <div className="w-[52px] flex items-center justify-center shrink-0">
+                <div className="size-10 rounded-full bg-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform overflow-hidden p-1 border border-sidebar-border/80">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/logo.png" alt="Synapse" className="size-full object-contain" />
+                </div>
+              </div>
+              <div
+                className={`flex flex-col overflow-hidden transition-all duration-200 ${isExpanded
+                  ? "opacity-100 max-w-[140px] ml-1"
+                  : "opacity-0 max-w-0 ml-0 pointer-events-none"
+                  }`}
+              >
+                <span className="text-sm font-extrabold tracking-wider text-sidebar-foreground group-hover:text-primary transition-colors">
+                  SYNAPSE
+                </span>
+                <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest leading-none">
+                  Workspace
+                </span>
+              </div>
+            </Link>
+            {sidebarOpen && (
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden ml-auto text-sidebar-foreground hover:opacity-80 p-1 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            )}
           </div>
 
-          {/* Navigation Links */}
-          <nav className="p-3 space-y-1 overflow-y-auto flex-1">
-            <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
-              Platform Workspaces
-            </div>
+          {/* Navigation Links List */}
+          <nav className="p-2 space-y-1 overflow-y-auto flex-1 no-scrollbar">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isProjectsTab = item.href === "/projects";
-              const isActive = pathname === item.href || (isProjectsTab && pathname.startsWith("/projects/"));
               return (
-                <div key={item.name} className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <Link
-                      href={item.href}
-                      onClick={() => setSidebarOpen(false)}
-                      className={`flex-1 flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 ${
-                        isActive
-                          ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold ring-1 ring-primary/30 shadow-xs"
-                          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
-                      }`}
-                    >
-                      <Icon className="size-4 shrink-0" />
-                      <span className="truncate">{item.name}</span>
-                    </Link>
-                    {isProjectsTab && currentProjectId && (
-                      <button
-                        type="button"
-                        onClick={() => setProjectsExpanded(!projectsExpanded)}
-                        className="p-1.5 text-muted-foreground hover:text-sidebar-foreground cursor-pointer rounded-md hover:bg-sidebar-accent/50"
-                      >
-                        {projectsExpanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
-                      </button>
-                    )}
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  title={!isExpanded ? item.name : undefined}
+                  className={`group relative flex items-center h-10 w-full rounded-xl text-xs transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-primary ${item.isActive
+                    ? "bg-primary text-primary-foreground shadow-md font-bold"
+                    : "text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground font-medium"
+                    }`}
+                >
+                  <div className="w-[52px] h-10 flex items-center justify-center shrink-0">
+                    <Icon className="size-4.5 shrink-0" />
                   </div>
 
-                  {/* Grouped Project Workspace Sub-navigation */}
-                  {isProjectsTab && currentProjectId && projectsExpanded && (
-                    <div className="mt-1 ml-3 pl-3 border-l border-sidebar-border/70 space-y-2.5 py-1">
-                      {/* Active Project Context Badge */}
-                      <div className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5 truncate px-1">
-                        <FolderKanban className="size-3.5 shrink-0" />
-                        <span className="truncate">{activeProject?.name || "Active Project"}</span>
-                      </div>
-
-                      {/* PLAN */}
-                      <div className="space-y-0.5">
-                        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 px-2 py-0.5">
-                          Plan
-                        </div>
-                        <Link
-                          href={`/projects/${currentProjectId}/board`}
-                          onClick={() => setSidebarOpen(false)}
-                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-                            pathname === `/projects/${currentProjectId}/board`
-                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
-                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
-                          }`}
-                        >
-                          <span className="flex items-center gap-2 truncate">
-                            <Kanban className="size-3.5 shrink-0 text-primary" />
-                            <span className="truncate">Sprint Board</span>
-                          </span>
-                          {hasActiveSprint && (
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/15 text-primary font-bold border border-primary/20 shrink-0">
-                              Active
-                            </span>
-                          )}
-                        </Link>
-                        <Link
-                          href={`/projects/${currentProjectId}/backlog`}
-                          onClick={() => setSidebarOpen(false)}
-                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-                            pathname === `/projects/${currentProjectId}/backlog`
-                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
-                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
-                          }`}
-                        >
-                          <Layers className="size-3.5 shrink-0 text-primary" />
-                          <span className="truncate">Backlog Stream</span>
-                        </Link>
-                      </div>
-
-                      {/* WORK */}
-                      <div className="space-y-0.5">
-                        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 px-2 py-0.5">
-                          Work
-                        </div>
-                        <Link
-                          href={`/projects/${currentProjectId}/requirements`}
-                          onClick={() => setSidebarOpen(false)}
-                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-                            pathname === `/projects/${currentProjectId}/requirements`
-                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
-                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
-                          }`}
-                        >
-                          <FileText className="size-3.5 shrink-0 text-primary" />
-                          <span className="truncate">Requirements & Review</span>
-                        </Link>
-                      </div>
-
-                      {/* COLLABORATE */}
-                      <div className="space-y-0.5">
-                        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 px-2 py-0.5">
-                          Collaborate
-                        </div>
-                        <Link
-                          href={`/projects/${currentProjectId}/meetings`}
-                          onClick={() => setSidebarOpen(false)}
-                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-                            pathname.startsWith(`/projects/${currentProjectId}/meetings`)
-                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
-                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
-                          }`}
-                        >
-                          <Video className="size-3.5 shrink-0 text-primary" />
-                          <span className="truncate">Meetings & Notes</span>
-                        </Link>
-                        <Link
-                          href={`/projects/${currentProjectId}?tab=members`}
-                          onClick={() => setSidebarOpen(false)}
-                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-                            pathname === `/projects/${currentProjectId}`
-                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
-                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
-                          }`}
-                        >
-                          <Users className="size-3.5 shrink-0 text-primary" />
-                          <span className="truncate">Team & Members</span>
-                        </Link>
-                      </div>
-
-                      {/* INTELLIGENCE */}
-                      <div className="space-y-0.5">
-                        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 px-2 py-0.5">
-                          Intelligence
-                        </div>
-                        <Link
-                          href={`/projects/${currentProjectId}/knowledge`}
-                          onClick={() => setSidebarOpen(false)}
-                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-                            pathname === `/projects/${currentProjectId}/knowledge`
-                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
-                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
-                          }`}
-                        >
-                          <Database className="size-3.5 shrink-0 text-primary" />
-                          <span className="truncate">Knowledge Base</span>
-                        </Link>
-                        <Link
-                          href={`/projects/${currentProjectId}/traceability`}
-                          onClick={() => setSidebarOpen(false)}
-                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-                            pathname === `/projects/${currentProjectId}/traceability`
-                              ? "bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary font-bold"
-                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
-                          }`}
-                        >
-                          <GitFork className="size-3.5 shrink-0 text-primary" />
-                          <span className="truncate">Traceability Matrix</span>
-                        </Link>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  <div
+                    className={`flex items-center justify-between flex-1 overflow-hidden transition-all duration-200 ${isExpanded
+                      ? "opacity-100 max-w-[140px] pr-2"
+                      : "opacity-0 max-w-0 ml-0 pointer-events-none"
+                      }`}
+                  >
+                    <span className="truncate whitespace-nowrap">{item.name}</span>
+                  </div>
+                </Link>
               );
             })}
+
+            {/* Project Sub-navigation Section when inside active project */}
+            {projectNavItems.length > 0 && (
+              <>
+                <div className="my-2 border-t border-sidebar-border/60 mx-1 shrink-0" />
+
+                {isExpanded && (
+                  <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-1.5 truncate">
+                    <FolderKanban className="size-3 shrink-0 text-primary" />
+                    <span className="truncate">{activeProject?.name || "Project Workspace"}</span>
+                  </div>
+                )}
+
+                {projectNavItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                      title={!isExpanded ? item.name : undefined}
+                      className={`group relative flex items-center h-10 w-full rounded-xl text-xs transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-primary ${item.isActive
+                        ? "bg-primary text-primary-foreground shadow-md font-bold"
+                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground font-medium"
+                        }`}
+                    >
+                      <div className="w-[52px] h-10 flex items-center justify-center shrink-0">
+                        <Icon className="size-4.5 shrink-0" />
+                      </div>
+
+                      <div
+                        className={`flex items-center justify-between flex-1 overflow-hidden transition-all duration-200 ${isExpanded
+                          ? "opacity-100 max-w-[140px] pr-2"
+                          : "opacity-0 max-w-0 ml-0 pointer-events-none"
+                          }`}
+                      >
+                        <span className="truncate whitespace-nowrap">{item.name}</span>
+                        {item.badge && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary-foreground font-bold border border-primary-foreground/20 ml-1.5 shrink-0">
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </>
+            )}
           </nav>
         </div>
 
-        {/* Sidebar Footer AI Info */}
-        <div className="p-3 m-3 rounded-xl bg-sidebar-accent/50 border border-sidebar-border/80 shrink-0">
-          <div className="flex items-center gap-2 text-xs font-bold text-sidebar-foreground">
-            <Bot className="size-3.5 text-primary" />
-            AI Agents Active
+        {/* Sidebar Footer AI Pill (workspace monitor) */}
+        <div
+          className={`transition-all duration-200 overflow-hidden shrink-0 ${
+            isExpanded
+              ? "p-2 border-t border-sidebar-border/60 opacity-100 max-h-24"
+              : "max-h-0 opacity-0 pointer-events-none p-0 border-0"
+          }`}
+        >
+          <div className="p-2 rounded-xl bg-sidebar-accent/50 border border-sidebar-border/80">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-sidebar-foreground">
+              <Bot className="size-3.5 text-primary shrink-0" />
+              <span className="truncate">AI Copilot</span>
+            </div>
+            <p className="mt-0.5 text-[10px] text-muted-foreground leading-tight truncate">
+              Monitoring dependencies
+            </p>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-            Synapse AI Copilot is monitoring project dependencies.
-          </p>
         </div>
       </aside>
 
-      {/* Main Content Container */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Bar */}
-        <header className="h-14 border-b border-border/80 bg-card/85 backdrop-blur-md px-4 sm:px-6 lg:px-8 flex items-center justify-between shadow-2xs sticky top-0 z-30">
+      {/* Main Content Area */}
+      <div
+        className={`flex-1 flex flex-col h-screen min-w-0 overflow-hidden transition-[padding] duration-200 ease-in-out ${
+          isPinned ? "lg:pl-[236px]" : "lg:pl-[92px]"
+        }`}
+      >
+        {/* Top Bar Header */}
+        <header className="h-14 shrink-0 border-b border-border/80 bg-card/85 backdrop-blur-md px-4 sm:px-6 lg:px-8 flex items-center justify-between shadow-2xs z-30">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-foreground hover:opacity-80 p-1"
+              className="lg:hidden text-foreground hover:opacity-80 p-1 cursor-pointer"
             >
               <Menu className="size-6" />
             </button>
             <h1 className="text-lg font-bold text-foreground">
-              {pageTitle || navItems.find((item) => item.href === pathname)?.name || "Dashboard"}
+              {pageTitle ||
+                projectNavItems.find((item) => item.isActive)?.name ||
+                navItems.find((item) => item.isActive)?.name ||
+                "Dashboard"}
             </h1>
           </div>
 
@@ -467,7 +576,7 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
 
             <Link
               href="/profile"
-              title="View & Edit My Profile"
+              title="View Profile"
               className="flex items-center gap-2.5 p-1 rounded-xl transition-all hover:bg-muted/70 border border-transparent hover:border-border/60 group"
             >
               {user?.avatar_url ? (
@@ -517,13 +626,13 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
               ) : (
                 <LogOut className="size-3.5 text-muted-foreground" />
               )}
-              <span className="hidden sm:inline">Logout</span>
+              <span className="hidden sm:inline">Sign Out</span>
             </button>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-6 overflow-y-auto min-h-0 w-full">
           {children}
         </main>
 

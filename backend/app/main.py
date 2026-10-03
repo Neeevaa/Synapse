@@ -29,6 +29,8 @@ from app.traceability.router import router as traceability_router
 from app.meetings.intelligence_router import router as meeting_intelligence_router
 from app.notifications.router import router as notifications_router
 from app.subscriptions.router import router as subscriptions_router
+from app.testcases.router import router as testcases_router
+
 
 # 1. Initialize Structured Logging
 setup_logging()
@@ -125,6 +127,8 @@ app.include_router(traceability_router, prefix="/projects/{project_id}/traceabil
 app.include_router(meeting_intelligence_router, prefix="/projects/{project_id}/meetings", tags=["Meeting Intelligence"])
 app.include_router(notifications_router, prefix="/notifications", tags=["Notifications"])
 app.include_router(subscriptions_router, prefix="", tags=["Subscriptions & Billing"])
+app.include_router(testcases_router, prefix="", tags=["Test Cases"])
+
 
 
 @app.get("/")

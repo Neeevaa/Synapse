@@ -123,10 +123,11 @@ function ResetPasswordContent() {
   return (
     <div>
       <div className="flex flex-col items-center">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-            S
-            </div>
+        <div className="flex items-center gap-2.5 mb-2">
+          <div className="size-9 rounded-xl bg-white border border-border flex items-center justify-center shadow-xs overflow-hidden p-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Synapse" className="size-full object-contain" />
+          </div>
           <span className="text-xl font-bold text-foreground">SYNAPSE</span>
         </div>
         <h2 className="text-2xl font-bold text-foreground">

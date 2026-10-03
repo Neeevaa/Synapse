@@ -143,7 +143,7 @@ export default function UnifiedDashboardPage() {
 
   return (
     <ProtectedShell pageTitle="Unified Workspace Dashboard">
-      <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="space-y-6 w-full">
         {/* Pending Project Invitation Banner */}
         {pendingInvites.length > 0 && !loading && (
           <div className="rounded-xl border border-primary/30 bg-gradient-to-r from-primary/10 via-card to-card p-5 shadow-2xs space-y-3">

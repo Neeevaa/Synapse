@@ -257,36 +257,36 @@ export default function MeetingsListPage() {
   const getTypeBadgeStyle = (type: string) => {
     switch (type) {
       case "PLANNING":
-        return "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
+        return "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20";
       case "STANDUP":
-        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
       case "REVIEW":
-        return "bg-purple-500/10 text-purple-400 border-purple-500/20";
+        return "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
       case "RETROSPECTIVE":
-        return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+        return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
       case "REQUIREMENT_DISCUSSION":
-        return "bg-indigo-500/10 text-indigo-400 border-indigo-500/20";
+        return "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20";
       case "TECHNICAL":
-        return "bg-sky-500/10 text-sky-400 border-sky-500/20";
+        return "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20";
       case "CLIENT":
-        return "bg-rose-500/10 text-rose-400 border-rose-500/20";
+        return "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20";
       default:
-        return "bg-slate-500/10 text-slate-400 border-slate-500/20";
+        return "bg-muted text-muted-foreground border-border";
     }
   };
 
   const getStatusBadgeStyle = (st: string) => {
     switch (st) {
       case "SCHEDULED":
-        return "bg-sky-500/15 text-sky-400 border-sky-500/30";
+        return "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30";
       case "IN_PROGRESS":
-        return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 animate-pulse";
+        return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 animate-pulse";
       case "COMPLETED":
-        return "bg-purple-500/15 text-purple-400 border-purple-500/30";
+        return "bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30";
       case "CANCELLED":
-        return "bg-zinc-600/20 text-zinc-400 border-zinc-500/30";
+        return "bg-muted text-muted-foreground border-border";
       default:
-        return "bg-slate-500/15 text-slate-400 border-slate-500/30";
+        return "bg-muted text-muted-foreground border-border";
     }
   };
 
@@ -306,34 +306,34 @@ export default function MeetingsListPage() {
 
   return (
     <ProtectedShell>
-      <div className="max-w-7xl mx-auto space-y-6 pb-12">
+      <div className="w-full space-y-6 pb-12">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center justify-between">
           <Link
             href={`/projects/${projectId}`}
-            className="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="size-4" /> Back to Project Overview
           </Link>
-          <div className="text-xs text-slate-400">
-            {project?.name && <span className="font-semibold text-slate-200">{project.name}</span>}
+          <div className="text-xs text-muted-foreground">
+            {project?.name && <span className="font-semibold text-foreground">{project.name}</span>}
           </div>
         </div>
 
         {/* Banner Header */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="rounded-xl border border-border bg-card p-6 shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="size-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
-              <Video className="size-6 text-cyan-400" />
+              <Video className="size-6 text-cyan-500" />
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-xl font-bold text-white tracking-tight">Project Meetings</h1>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                <h1 className="text-xl font-bold text-foreground tracking-tight">Project Meetings</h1>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
                   {totalCount} Total
                 </span>
               </div>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Structured meeting intelligence feeding AI summarization, automatic task generation, and requirement traceability
               </p>
             </div>
@@ -352,25 +352,25 @@ export default function MeetingsListPage() {
           <div
             className={`rounded-lg p-4 text-xs font-medium border flex items-center justify-between ${
               notice.type === "success"
-                ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/60"
-                : "bg-rose-950/40 text-rose-300 border-rose-800/60"
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
             }`}
           >
             <span className="flex items-center gap-2">
               <CheckCircle2 className="size-4 shrink-0" /> {notice.message}
             </span>
-            <button onClick={() => setNotice(null)} className="text-slate-400 hover:text-white">
+            <button onClick={() => setNotice(null)} className="text-muted-foreground hover:text-foreground">
               <X className="size-4" />
             </button>
           </div>
         )}
 
         {/* Toolbar & Filters */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-4">
+        <div className="rounded-xl border border-border bg-card p-4 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Search Input */}
             <div className="relative sm:col-span-2">
-              <Search className="absolute left-3 top-2.5 size-4 text-slate-400" />
+              <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search meeting title, agenda, or notes..."
@@ -379,7 +379,7 @@ export default function MeetingsListPage() {
                   setSearchKeyword(e.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-lg border border-slate-800 bg-slate-950 pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                className="w-full rounded-lg border border-border bg-background pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-cyan-500 focus:outline-none"
               />
             </div>
 
@@ -391,7 +391,7 @@ export default function MeetingsListPage() {
                   setTypeFilter(e.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-cyan-500 focus:outline-none"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-cyan-500 focus:outline-none"
               >
                 <option value="ALL">All Meeting Types</option>
                 <option value="PLANNING">Planning</option>
@@ -413,7 +413,7 @@ export default function MeetingsListPage() {
                   setStatusFilter(e.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-cyan-500 focus:outline-none"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-cyan-500 focus:outline-none"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="SCHEDULED">Scheduled</option>
@@ -426,22 +426,22 @@ export default function MeetingsListPage() {
         </div>
 
         {/* Meetings List / Table */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 overflow-hidden shadow-xs">
+        <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
           {loading ? (
-            <div className="flex flex-col items-center justify-center p-12 text-slate-400 space-y-3">
+            <div className="flex flex-col items-center justify-center p-12 text-muted-foreground space-y-3">
               <Loader2 className="size-8 animate-spin text-cyan-500" />
               <p className="text-xs font-medium">Loading project meetings...</p>
             </div>
           ) : error ? (
-            <div className="p-8 text-center text-rose-400 space-y-2">
+            <div className="p-8 text-center text-rose-500 space-y-2">
               <AlertCircle className="size-8 mx-auto" />
               <p className="text-xs font-semibold">{error}</p>
             </div>
           ) : meetings.length === 0 ? (
-            <div className="p-12 text-center text-slate-400 space-y-3">
-              <Video className="size-10 mx-auto text-slate-600" />
-              <h3 className="text-sm font-semibold text-slate-300">No meetings scheduled</h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            <div className="p-12 text-center text-muted-foreground space-y-3">
+              <Video className="size-10 mx-auto text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">No meetings scheduled</h3>
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
                 No project meetings match your active filters. Click "Schedule Meeting" to create one.
               </p>
               <button
@@ -453,8 +453,8 @@ export default function MeetingsListPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-300">
-                <thead className="bg-slate-950/60 text-slate-400 font-semibold border-b border-slate-800 uppercase tracking-wider">
+              <table className="w-full text-left text-xs text-foreground">
+                <thead className="bg-muted/40 text-muted-foreground font-semibold border-b border-border uppercase tracking-wider">
                   <tr>
                     <th className="py-3.5 px-4">Title</th>
                     <th className="py-3.5 px-4">Type</th>
@@ -465,14 +465,14 @@ export default function MeetingsListPage() {
                     <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-border">
                   {meetings.map((m) => (
                     <tr
                       key={m.id}
                       onClick={() => router.push(`/projects/${projectId}/meetings/${m.id}`)}
-                      className="hover:bg-slate-800/40 transition-colors cursor-pointer group"
+                      className="hover:bg-muted/30 transition-colors cursor-pointer group"
                     >
-                      <td className="py-3.5 px-4 font-semibold text-slate-100 group-hover:text-cyan-300 transition-colors max-w-xs truncate">
+                      <td className="py-3.5 px-4 font-semibold text-foreground group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors max-w-xs md:max-w-sm lg:max-w-md xl:max-w-xl truncate" title={m.title}>
                         {m.title}
                       </td>
                       <td className="py-3.5 px-4">
@@ -480,24 +480,24 @@ export default function MeetingsListPage() {
                           {m.meeting_type.replace("_", " ")}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-300 whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-foreground whitespace-nowrap">
                         <div className="flex items-center gap-1.5">
-                          <Calendar className="size-3.5 text-slate-400" />
+                          <Calendar className="size-3.5 text-muted-foreground" />
                           <span>{formatDate(m.scheduled_at)}</span>
-                          <span className="text-xs text-slate-400 font-mono">({m.duration_minutes}m)</span>
+                          <span className="text-xs text-muted-foreground font-mono">({m.duration_minutes}m)</span>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-300">
+                      <td className="py-3.5 px-4 text-foreground">
                         <div className="flex items-center gap-2">
-                          <div className="size-6 rounded-full bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-xs font-bold">
+                          <div className="size-6 rounded-full bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 flex items-center justify-center text-xs font-bold">
                             {m.organizer_name ? m.organizer_name.charAt(0).toUpperCase() : "U"}
                           </div>
                           <span className="truncate max-w-[120px]">{m.organizer_name || "Organizer"}</span>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-400 font-mono">
-                        <span className="inline-flex items-center gap-1 rounded bg-slate-800 px-2 py-0.5 text-xs text-slate-300 border border-slate-700">
-                          <Users className="size-3 text-cyan-400" /> {m.participants ? m.participants.length : 0}
+                      <td className="py-3.5 px-4 text-muted-foreground font-mono">
+                        <span className="inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-xs text-foreground border border-border">
+                          <Users className="size-3 text-cyan-500" /> {m.participants ? m.participants.length : 0}
                         </span>
                       </td>
                       <td className="py-3.5 px-4">
@@ -510,14 +510,14 @@ export default function MeetingsListPage() {
                           {m.status === "IN_PROGRESS" && (
                             <Link
                               href={`/projects/${projectId}/meetings/${m.id}/room`}
-                              className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 font-semibold px-2.5 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors cursor-pointer animate-pulse"
+                              className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-semibold px-2.5 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors cursor-pointer animate-pulse"
                             >
                               <Video className="size-3.5" /> Join Room
                             </Link>
                           )}
                           <Link
                             href={`/projects/${projectId}/meetings/${m.id}`}
-                            className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 font-medium px-2.5 py-1 rounded bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1 text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 font-medium px-2.5 py-1 rounded bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 transition-colors cursor-pointer"
                           >
                             View Meeting <ChevronRight className="size-3.5" />
                           </Link>
@@ -534,13 +534,13 @@ export default function MeetingsListPage() {
         {/* SCHEDULE MEETING MODAL (Width: 700px - 800px) */}
         {scheduleModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
-            <div className="relative w-full max-w-3xl max-h-[90vh] rounded-2xl border border-slate-800 bg-slate-900 text-slate-100 shadow-2xl flex flex-col overflow-hidden">
+            <div className="relative w-full max-w-3xl max-h-[90vh] rounded-2xl border border-border bg-card text-foreground shadow-2xl flex flex-col overflow-hidden">
               {/* Modal Header */}
-              <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Video className="size-5 text-cyan-400" /> Schedule Project Meeting
+              <div className="p-6 border-b border-border flex items-center justify-between bg-muted/30">
+                <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                  <Video className="size-5 text-cyan-500" /> Schedule Project Meeting
                 </h3>
-                <button onClick={() => setScheduleModalOpen(false)} className="text-slate-400 hover:text-white cursor-pointer">
+                <button onClick={() => setScheduleModalOpen(false)} className="text-muted-foreground hover:text-foreground cursor-pointer">
                   <X className="size-5" />
                 </button>
               </div>
@@ -548,7 +548,7 @@ export default function MeetingsListPage() {
               {/* Modal Body */}
               <div className="flex-1 overflow-y-auto p-6">
                 {scheduleError && (
-                  <div className="mb-4 rounded-lg bg-rose-950/40 border border-rose-800/60 p-3 text-xs text-rose-300 flex items-center gap-2">
+                  <div className="mb-4 rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
                     <AlertCircle className="size-4 shrink-0" /> {scheduleError}
                   </div>
                 )}
@@ -556,29 +556,29 @@ export default function MeetingsListPage() {
                 <form id="schedule-meeting-form" onSubmit={handleScheduleSubmit} className="space-y-6">
                   {/* Basic Details Section */}
                   <div className="space-y-4">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-1">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-1">
                       Meeting Overview
                     </h4>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">Meeting Title *</label>
+                      <label className="block text-xs font-semibold text-foreground mb-1">Meeting Title *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. Sprint 12 Planning & Backlog Refinement"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-cyan-500 focus:outline-none"
                       />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-300 mb-1">Meeting Type</label>
+                        <label className="block text-xs font-semibold text-foreground mb-1">Meeting Type</label>
                         <select
                           value={meetingType}
                           onChange={(e) => setMeetingType(e.target.value)}
-                          className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-cyan-500 focus:outline-none"
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-cyan-500 focus:outline-none"
                         >
                           <option value="PLANNING">Planning</option>
                           <option value="STANDUP">Standup</option>
@@ -592,53 +592,53 @@ export default function MeetingsListPage() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-slate-300 mb-1">Date & Time *</label>
+                        <label className="block text-xs font-semibold text-foreground mb-1">Date & Time *</label>
                         <input
                           type="datetime-local"
                           required
                           value={scheduledAt}
                           onChange={(e) => setScheduledAt(e.target.value)}
-                          className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-cyan-500 focus:outline-none"
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-cyan-500 focus:outline-none"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-slate-300 mb-1">Duration (Minutes)</label>
+                        <label className="block text-xs font-semibold text-foreground mb-1">Duration (Minutes)</label>
                         <input
                           type="number"
                           min={5}
                           max={1440}
                           value={durationMinutes}
                           onChange={(e) => setDurationMinutes(parseInt(e.target.value) || 60)}
-                          className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-cyan-500 focus:outline-none"
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-cyan-500 focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">Description / Context</label>
+                      <label className="block text-xs font-semibold text-foreground mb-1">Description / Context</label>
                       <textarea
                         rows={2}
                         placeholder="Brief overview of meeting goals and focus areas..."
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-cyan-500 focus:outline-none"
                       />
                     </div>
                   </div>
 
                   {/* Organizer & Participants Section */}
                   <div className="space-y-4">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-1">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border pb-1">
                       Organizer & Participants
                     </h4>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">Organizer</label>
+                      <label className="block text-xs font-semibold text-foreground mb-1">Organizer</label>
                       <select
                         value={organizerId}
                         onChange={(e) => setOrganizerId(e.target.value)}
-                        className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-cyan-500 focus:outline-none"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-cyan-500 focus:outline-none"
                       >
                         {projectMembers.map((mem) => (
                           <option key={mem.id} value={mem.user_id}>
@@ -649,8 +649,8 @@ export default function MeetingsListPage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-2">Select Participants</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-3 rounded-xl border border-slate-800 bg-slate-950/60">
+                      <label className="block text-xs font-semibold text-foreground mb-2">Select Participants</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-3 rounded-xl border border-border bg-muted/20">
                         {projectMembers.map((mem) => {
                           const isSelected = selectedParticipantIds.includes(mem.user_id);
                           return (
@@ -658,8 +658,8 @@ export default function MeetingsListPage() {
                               key={mem.id}
                               className={`flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer transition-colors ${
                                 isSelected
-                                  ? "bg-cyan-950/30 border-cyan-500/50 text-white"
-                                  : "bg-slate-900/40 border-slate-800 text-slate-400 hover:text-slate-200"
+                                  ? "bg-cyan-500/10 border-cyan-500/40 text-foreground"
+                                  : "bg-card border-border text-muted-foreground hover:text-foreground"
                               }`}
                             >
                               <input
@@ -669,7 +669,7 @@ export default function MeetingsListPage() {
                                 className="accent-cyan-500 rounded"
                               />
                               <span className="truncate">{mem.user_name}</span>
-                              <span className="text-[10px] text-slate-500 ml-auto font-mono">({formatMemberRole(mem)})</span>
+                              <span className="text-[10px] text-muted-foreground ml-auto font-mono">({formatMemberRole(mem)})</span>
                             </label>
                           );
                         })}
@@ -679,12 +679,12 @@ export default function MeetingsListPage() {
 
                   {/* Agenda Items Section */}
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-1">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Meeting Agenda</h4>
+                    <div className="flex items-center justify-between border-b border-border pb-1">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Meeting Agenda</h4>
                       <button
                         type="button"
                         onClick={handleAddAgendaRow}
-                        className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 font-semibold cursor-pointer"
+                        className="inline-flex items-center gap-1 text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 font-semibold cursor-pointer"
                       >
                         <Plus className="size-3.5" /> Add Agenda Topic
                       </button>
@@ -692,8 +692,8 @@ export default function MeetingsListPage() {
 
                     <div className="space-y-2">
                       {agendaItems.map((item, idx) => (
-                        <div key={idx} className="flex items-start gap-2 p-3 rounded-xl border border-slate-800 bg-slate-950/60">
-                          <span className="font-mono text-xs font-bold text-cyan-400 mt-2">{idx + 1}.</span>
+                        <div key={idx} className="flex items-start gap-2 p-3 rounded-xl border border-border bg-muted/20">
+                          <span className="font-mono text-xs font-bold text-cyan-500 mt-2">{idx + 1}.</span>
                           <div className="flex-1 space-y-2">
                             <input
                               type="text"
@@ -704,7 +704,7 @@ export default function MeetingsListPage() {
                                 copy[idx].title = e.target.value;
                                 setAgendaItems(copy);
                               }}
-                              className="w-full rounded-md border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                              className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-cyan-500 focus:outline-none"
                             />
                             <input
                               type="text"
@@ -715,14 +715,14 @@ export default function MeetingsListPage() {
                                 copy[idx].description = e.target.value;
                                 setAgendaItems(copy);
                               }}
-                              className="w-full rounded-md border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs text-slate-300 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                              className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-cyan-500 focus:outline-none"
                             />
                           </div>
                           {agendaItems.length > 1 && (
                             <button
                               type="button"
                               onClick={() => handleRemoveAgendaRow(idx)}
-                              className="text-slate-500 hover:text-rose-400 p-1 mt-1 cursor-pointer"
+                              className="text-muted-foreground hover:text-rose-500 p-1 mt-1 cursor-pointer"
                             >
                               <Trash2 className="size-4" />
                             </button>
@@ -735,11 +735,11 @@ export default function MeetingsListPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="p-4 border-t border-slate-800 bg-slate-950/60 flex items-center justify-end gap-3">
+              <div className="p-4 border-t border-border bg-muted/30 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setScheduleModalOpen(false)}
-                  className="rounded-lg bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 transition-colors cursor-pointer"
+                  className="rounded-lg border border-border bg-muted px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted/80 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>

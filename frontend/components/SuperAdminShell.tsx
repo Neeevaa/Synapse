@@ -155,8 +155,9 @@ export default function SuperAdminShell({ children, pageTitle }: SuperAdminShell
       <header className="h-16 border-b-2 border-border bg-card/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-40 shadow-xs">
         <div className="flex items-center gap-4 sm:gap-6">
           <Link href="/admin" className="flex items-center gap-3 group">
-            <div className="size-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-black shadow-xs group-hover:scale-105 transition-transform">
-              <ShieldCheck className="size-5" />
+            <div className="size-9 rounded-xl bg-white border border-border flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform overflow-hidden p-1">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="Synapse" className="size-full object-contain" />
             </div>
             <div>
               <span className="text-base font-extrabold tracking-wider text-foreground block leading-none">
@@ -229,7 +230,7 @@ export default function SuperAdminShell({ children, pageTitle }: SuperAdminShell
       </header>
 
       {/* Main Administrative Container */}
-      <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl w-full mx-auto space-y-6">
+      <main className="flex-1 p-4 sm:p-6 lg:p-6 w-full space-y-6">
         {pageTitle && (
           <div className="flex items-center justify-between pb-3 border-b border-border">
             <h1 className="text-2xl font-extrabold text-foreground tracking-tight flex items-center gap-3">

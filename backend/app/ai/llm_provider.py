@@ -84,6 +84,71 @@ class MockLLMProvider(BaseLLMProvider):
                     },
                 ],
             }
+        elif "TestCase" in schema_name:
+            req_title = "Requirement Feature"
+            for line in prompt.splitlines():
+                if line.strip().startswith("- Title:"):
+                    req_title = line.split(":", 1)[1].strip()
+                    break
+
+            mock_raw_data = {
+                "test_cases": [
+                    {
+                        "title": f"TC-FUNC-01: Verify Successful Execution of {req_title}",
+                        "description": f"Validate that the system successfully executes the core workflow for {req_title} under valid inputs.",
+                        "category": "FUNCTIONAL",
+                        "priority": "HIGH",
+                        "preconditions": "User is authenticated with required project role and valid workspace context.",
+                        "steps": [
+                            {"step": 1, "action": f"Navigate to the target feature page for {req_title}.", "expected_result": "Page loads with all input controls accessible."},
+                            {"step": 2, "action": "Enter valid required inputs according to specification.", "expected_result": "Inputs pass frontend form validation without warning."},
+                            {"step": 3, "action": "Submit the request.", "expected_result": "Operation succeeds, API returns 200/201 status, and state updates."}
+                        ],
+                        "test_data": "valid_user_session=active, payload={'status': 'ACTIVE', 'mode': 'STANDARD'}",
+                        "expected_result": f"System successfully completes {req_title} workflow and commits changes."
+                    },
+                    {
+                        "title": f"TC-NEG-01: Verify Error Handling for Invalid Inputs in {req_title}",
+                        "description": f"Ensure {req_title} rejects invalid payloads, unauthorized requests, or malformed data with descriptive errors.",
+                        "category": "NEGATIVE",
+                        "priority": "HIGH",
+                        "preconditions": "User session is active or testing unauthenticated access paths.",
+                        "steps": [
+                            {"step": 1, "action": "Submit the action with empty or missing required fields.", "expected_result": "System rejects the submission with HTTP 422 Unprocessable Content."},
+                            {"step": 2, "action": "Submit invalid data types or unauthorized token.", "expected_result": "System returns appropriate 401/403 security error and aborts transaction."}
+                        ],
+                        "test_data": "invalid_payload={'field': None}, unauthorized_token='invalid_jwt'",
+                        "expected_result": "System blocks the invalid transaction and displays structured error messages."
+                    },
+                    {
+                        "title": f"TC-BOUND-01: Verify Upper/Lower Bounds and Edge Conditions for {req_title}",
+                        "description": f"Validate boundary limits, max string lengths, empty strings, and numeric thresholds for {req_title}.",
+                        "category": "BOUNDARY",
+                        "priority": "MEDIUM",
+                        "preconditions": "Test environment ready to accept boundary input fixtures.",
+                        "steps": [
+                            {"step": 1, "action": "Provide input with minimum allowed character length (1 character).", "expected_result": "Input is accepted successfully."},
+                            {"step": 2, "action": "Provide input exceeding maximum allowed limit by 1 character.", "expected_result": "System validates boundary and rejects with boundary limit error."},
+                            {"step": 3, "action": "Provide zero/empty payload where applicable.", "expected_result": "System handles gracefully without unhandled null exceptions."}
+                        ],
+                        "test_data": "min_len=1, max_len=256, threshold_val=9999",
+                        "expected_result": "System enforces boundary limits strictly without truncation or unhandled crashes."
+                    },
+                    {
+                        "title": f"TC-ACC-01: Verify Acceptance Criteria Compliance for {req_title}",
+                        "description": f"Verify all documented acceptance criteria and business verification criteria are satisfied for {req_title}.",
+                        "category": "ACCEPTANCE",
+                        "priority": "HIGH",
+                        "preconditions": "Feature environment configured with representative production-like data.",
+                        "steps": [
+                            {"step": 1, "action": "Review requirement acceptance criteria items sequentially.", "expected_result": "All criteria items are identifiable in system behavior."},
+                            {"step": 2, "action": "Execute the end-to-end user scenario.", "expected_result": "System behavior matches the stakeholder-approved criteria exactly."}
+                        ],
+                        "test_data": "acceptance_criteria_checklist={'verified': True}",
+                        "expected_result": "Requirement satisfies stakeholder acceptance criteria and passes definition of done."
+                    }
+                ]
+            }
         else:
             mock_raw_data = {
                 "findings": [
@@ -110,6 +175,7 @@ class MockLLMProvider(BaseLLMProvider):
 
         validated_object = response_schema.model_validate(mock_raw_data)
         return validated_object, mock_raw_data
+
 
 
 import os
@@ -283,7 +349,8 @@ class LocalOllamaLLMProvider(BaseLLMProvider):
         )
 
         try:
-            with urllib.request.urlopen(req, timeout=120) as response:
+            ollama_timeout = int(os.getenv("OLLAMA_TIMEOUT", "300"))
+            with urllib.request.urlopen(req, timeout=ollama_timeout) as response:
                 resp_bytes = response.read()
                 resp_json = json.loads(resp_bytes.decode("utf-8"))
         except urllib.error.HTTPError as e:

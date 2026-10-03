@@ -502,32 +502,32 @@ export default function MeetingRoomPage() {
   return (
     <div className="relative min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none font-sans">
       {/* TOP BAR / HEADER */}
-      <header className="h-16 px-6 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md flex items-center justify-between z-30 shrink-0">
+      <header className="h-16 px-6 border-b border-border bg-card/90 backdrop-blur-md flex items-center justify-between z-30 shrink-0">
         <div className="flex items-center gap-4">
           <Link
             href={`/projects/${projectId}/meetings/${meetingId}`}
             title="Back to Meeting Details"
-            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-cyan-400 transition-colors py-1.5 px-2.5 rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors py-1.5 px-2.5 rounded-lg hover:bg-muted border border-transparent hover:border-border"
           >
             <ArrowLeft className="size-4" />
             <span className="hidden sm:inline font-medium">Details</span>
           </Link>
 
-          <div className="h-5 w-px bg-slate-800 hidden sm:block" />
+          <div className="h-5 w-px bg-border hidden sm:block" />
 
           <div className="flex items-center gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-sm font-bold text-white tracking-tight truncate max-w-[200px] sm:max-w-xs md:max-w-md">
+                <h1 className="text-sm font-bold text-foreground tracking-tight truncate max-w-[200px] sm:max-w-xs md:max-w-md">
                   {meeting.title}
                 </h1>
-                <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-muted text-muted-foreground border border-border">
                   {meeting.meeting_type.replace("_", " ")}
                 </span>
               </div>
               {project && (
-                <p className="text-[11px] text-slate-400 truncate max-w-[220px]">
-                  Project: <span className="text-slate-300 font-medium">{project.name}</span>
+                <p className="text-[11px] text-muted-foreground truncate max-w-[220px]">
+                  Project: <span className="text-foreground font-medium">{project.name}</span>
                 </p>
               )}
             </div>
@@ -537,7 +537,7 @@ export default function MeetingRoomPage() {
         {/* STATUS & CLOCK */}
         <div className="flex items-center gap-3">
           {/* LIVE BADGE */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold tracking-wide shadow-xs">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold tracking-wide shadow-xs">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -546,8 +546,8 @@ export default function MeetingRoomPage() {
           </div>
 
           {/* ELAPSED TIMER */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 text-xs font-mono font-semibold tracking-wider">
-            <Clock className="size-3.5 text-cyan-400" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-muted border border-border text-foreground text-xs font-mono font-semibold tracking-wider">
+            <Clock className="size-3.5 text-cyan-600 dark:text-cyan-400" />
             <span>{formatTime(elapsedSeconds)}</span>
           </div>
 
@@ -556,8 +556,8 @@ export default function MeetingRoomPage() {
             onClick={() => setShowSidePanel(!showSidePanel)}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer border ${
               showSidePanel
-                ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
-                : "bg-slate-900 text-slate-400 hover:text-white border-slate-800 hover:bg-slate-800"
+                ? "bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border-cyan-500/40"
+                : "bg-muted text-muted-foreground hover:text-foreground border-border hover:bg-muted/80"
             }`}
           >
             <Users className="size-3.5" />
@@ -729,15 +729,15 @@ export default function MeetingRoomPage() {
 
         {/* SLIDE-OUT SIDE PANEL (PARTICIPANTS & AGENDA) */}
         {showSidePanel && (
-          <aside className="absolute right-0 top-0 bottom-0 w-80 bg-slate-900 border-l border-slate-800 flex flex-col z-20 shadow-2xl transition-all">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+          <aside className="absolute right-0 top-0 bottom-0 w-80 bg-card border-l border-border flex flex-col z-20 shadow-2xl transition-all">
+            <div className="p-4 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setSidePanelTab("participants")}
                   className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
                     sidePanelTab === "participants"
-                      ? "bg-cyan-500/20 text-cyan-300"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-cyan-500/20 text-cyan-700 dark:text-cyan-300"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   Participants ({allParticipantTiles.length})
@@ -746,8 +746,8 @@ export default function MeetingRoomPage() {
                   onClick={() => setSidePanelTab("agenda")}
                   className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
                     sidePanelTab === "agenda"
-                      ? "bg-cyan-500/20 text-cyan-300"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-cyan-500/20 text-cyan-700 dark:text-cyan-300"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   Agenda ({meeting.agenda_items?.length || 0})
@@ -755,7 +755,7 @@ export default function MeetingRoomPage() {
               </div>
               <button
                 onClick={() => setShowSidePanel(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800"
+                className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted cursor-pointer"
               >
                 <X className="size-4" />
               </button>
@@ -772,27 +772,27 @@ export default function MeetingRoomPage() {
                   return (
                     <div
                       key={p.user_id}
-                      className="flex items-center justify-between p-2.5 rounded-xl border border-slate-800/80 bg-slate-950/60"
+                      className="flex items-center justify-between p-2.5 rounded-xl border border-border bg-muted/20"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="size-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 flex items-center justify-center text-xs font-bold shrink-0">
+                        <div className="size-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-700 dark:text-cyan-300 flex items-center justify-center text-xs font-bold shrink-0">
                           {getInitials(p.user_name, p.user_email)}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs font-semibold text-white truncate">
+                          <p className="text-xs font-semibold text-foreground truncate">
                             {p.user_name || p.user_email} {isSelf && "(You)"}
                           </p>
-                          <p className="text-[10px] text-slate-400 truncate flex items-center gap-1">
-                            {isOrganizer && <Crown className="size-2.5 text-amber-400 inline" />}
+                          <p className="text-[10px] text-muted-foreground truncate flex items-center gap-1">
+                            {isOrganizer && <Crown className="size-2.5 text-amber-500 inline" />}
                             {role}
                           </p>
                         </div>
                       </div>
                       <div className="shrink-0 pl-2">
                         {pMuted ? (
-                          <MicOff className="size-3.5 text-rose-400" />
+                          <MicOff className="size-3.5 text-rose-500" />
                         ) : (
-                          <Mic className="size-3.5 text-emerald-400" />
+                          <Mic className="size-3.5 text-emerald-500" />
                         )}
                       </div>
                     </div>
@@ -801,21 +801,21 @@ export default function MeetingRoomPage() {
               ) : (
                 <div className="space-y-3">
                   {(!meeting.agenda_items || meeting.agenda_items.length === 0) ? (
-                    <p className="text-xs text-slate-500 text-center py-6">No agenda items defined.</p>
+                    <p className="text-xs text-muted-foreground text-center py-6">No agenda items defined.</p>
                   ) : (
                     meeting.agenda_items.map((ag, idx) => (
                       <div
                         key={ag.id || idx}
-                        className="p-3 rounded-xl border border-slate-800 bg-slate-950/60 space-y-1"
+                        className="p-3 rounded-xl border border-border bg-muted/20 space-y-1"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-mono text-cyan-400 font-bold">Topic {idx + 1}</span>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-medium">
+                          <span className="text-[11px] font-mono text-cyan-700 dark:text-cyan-400 font-bold">Topic {idx + 1}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border font-medium">
                             {ag.status}
                           </span>
                         </div>
-                        <h4 className="text-xs font-bold text-white">{ag.title}</h4>
-                        {ag.description && <p className="text-[11px] text-slate-400">{ag.description}</p>}
+                        <h4 className="text-xs font-bold text-foreground">{ag.title}</h4>
+                        {ag.description && <p className="text-[11px] text-muted-foreground">{ag.description}</p>}
                       </div>
                     ))
                   )}
@@ -827,10 +827,10 @@ export default function MeetingRoomPage() {
       </main>
 
       {/* BOTTOM CONTROL BAR */}
-      <footer className="h-20 px-6 bg-slate-950/90 border-t border-slate-800/80 backdrop-blur-md flex items-center justify-between z-30 shrink-0">
+      <footer className="h-20 px-6 bg-card/90 border-t border-border backdrop-blur-md flex items-center justify-between z-30 shrink-0">
         {/* Prototype info label */}
-        <div className="hidden lg:flex items-center gap-2 text-xs text-slate-400">
-          <span className="size-2 rounded-full bg-cyan-400" />
+        <div className="hidden lg:flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="size-2 rounded-full bg-cyan-500" />
           <span className="font-mono">Synapse In-App Video Prototype</span>
         </div>
 
@@ -840,13 +840,13 @@ export default function MeetingRoomPage() {
           <button
             onClick={toggleMicrophone}
             title={isMuted ? "Unmute Microphone" : "Mute Microphone"}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-md ${
+            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs ${
               isMuted
-                ? "bg-rose-600 hover:bg-rose-500 text-white shadow-rose-900/40"
-                : "bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700"
+                ? "bg-rose-600 hover:bg-rose-500 text-white"
+                : "bg-muted hover:bg-muted/80 text-foreground border border-border"
             }`}
           >
-            {isMuted ? <MicOff className="size-4 text-white" /> : <Mic className="size-4 text-emerald-400" />}
+            {isMuted ? <MicOff className="size-4 text-white" /> : <Mic className="size-4 text-emerald-500 dark:text-emerald-400" />}
             <span className="hidden sm:inline">{isMuted ? "Unmute" : "Mute"}</span>
           </button>
 
@@ -854,25 +854,25 @@ export default function MeetingRoomPage() {
           <button
             onClick={toggleCamera}
             title={isVideoOff ? "Turn Camera On" : "Turn Camera Off"}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-md ${
+            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs ${
               isVideoOff
-                ? "bg-rose-600 hover:bg-rose-500 text-white shadow-rose-900/40"
-                : "bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700"
+                ? "bg-rose-600 hover:bg-rose-500 text-white"
+                : "bg-muted hover:bg-muted/80 text-foreground border border-border"
             }`}
           >
-            {isVideoOff ? <VideoOff className="size-4 text-white" /> : <Video className="size-4 text-cyan-400" />}
+            {isVideoOff ? <VideoOff className="size-4 text-white" /> : <Video className="size-4 text-cyan-600 dark:text-cyan-400" />}
             <span className="hidden sm:inline">{isVideoOff ? "Start Video" : "Stop Video"}</span>
           </button>
 
-          <div className="h-6 w-px bg-slate-800 mx-1" />
+          <div className="h-6 w-px bg-border mx-1" />
 
           {/* LEAVE MEETING BUTTON (Available to all participants) */}
           <button
             onClick={handleLeaveMeeting}
             title="Leave Meeting Room"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition-all cursor-pointer shadow-md hover:text-white"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted hover:bg-muted/80 border border-border text-foreground text-xs font-semibold transition-all cursor-pointer shadow-xs"
           >
-            <PhoneOff className="size-4 text-slate-400" />
+            <PhoneOff className="size-4 text-muted-foreground" />
             <span>Leave</span>
           </button>
 
@@ -881,7 +881,7 @@ export default function MeetingRoomPage() {
             <button
               onClick={() => setShowEndConfirmModal(true)}
               title="End Meeting for Everyone"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition-all cursor-pointer shadow-md shadow-rose-950/40"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition-all cursor-pointer shadow-xs"
             >
               <PhoneOff className="size-4 text-white" />
               <span className="hidden sm:inline">End Meeting</span>
@@ -890,8 +890,8 @@ export default function MeetingRoomPage() {
         </div>
 
         {/* RIGHT SIDE SPACER / CONTEXT */}
-        <div className="hidden lg:flex items-center justify-end text-xs text-slate-400">
-          <span className="font-mono text-slate-400">
+        <div className="hidden lg:flex items-center justify-end text-xs text-muted-foreground">
+          <span className="font-mono text-muted-foreground">
             Meeting ID: {meeting.id.slice(0, 8)}
           </span>
         </div>
@@ -900,21 +900,21 @@ export default function MeetingRoomPage() {
       {/* CONFIRM END MEETING MODAL (Host only) */}
       {showEndConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-100 shadow-2xl space-y-4">
-            <div className="flex items-center gap-3 text-rose-400">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 text-foreground shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-rose-500">
               <div className="size-10 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center">
                 <PhoneOff className="size-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">End Meeting for Everyone?</h3>
-                <p className="text-xs text-slate-400">This will complete the session for all attendees.</p>
+                <h3 className="text-base font-bold text-foreground">End Meeting for Everyone?</h3>
+                <p className="text-xs text-muted-foreground">This will complete the session for all attendees.</p>
               </div>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Conclude the live meeting room session. Meeting status will become{" "}
-              <strong className="text-purple-400">COMPLETED</strong>, and you will proceed to the{" "}
-              <strong className="text-cyan-400">Meeting Intelligence</strong> workflow to add your meeting transcript.
+              <strong className="text-purple-600 dark:text-purple-400">COMPLETED</strong>, and you will proceed to the{" "}
+              <strong className="text-cyan-600 dark:text-cyan-400">Meeting Intelligence</strong> workflow to add your meeting transcript.
             </p>
 
             <div className="flex items-center justify-end gap-3 pt-2">
@@ -922,7 +922,7 @@ export default function MeetingRoomPage() {
                 type="button"
                 onClick={() => setShowEndConfirmModal(false)}
                 disabled={endingMeeting}
-                className="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border cursor-pointer transition-colors"
               >
                 Cancel
               </button>
@@ -930,7 +930,7 @@ export default function MeetingRoomPage() {
                 type="button"
                 onClick={handleConfirmEndMeeting}
                 disabled={endingMeeting}
-                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white cursor-pointer shadow-md"
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white cursor-pointer shadow-xs transition-colors"
               >
                 {endingMeeting ? <Loader2 className="size-3.5 animate-spin" /> : <PhoneOff className="size-3.5" />}
                 End Meeting Now
@@ -943,46 +943,46 @@ export default function MeetingRoomPage() {
       {/* POST-MEETING INTELLIGENCE WORKFLOW MODAL */}
       {showIntelligenceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 text-slate-100 shadow-2xl p-6 sm:p-8 space-y-6">
+          <div className="relative w-full max-w-2xl rounded-2xl border border-border bg-card text-foreground shadow-2xl p-6 sm:p-8 space-y-6">
             {/* Header */}
-            <div className="space-y-2 border-b border-slate-800 pb-5">
+            <div className="space-y-2 border-b border-border pb-5">
               <div className="flex items-center justify-between">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30">
                   <Sparkles className="size-3.5" /> Meeting Concluded
                 </div>
                 <button
                   onClick={() => router.push(`/projects/${projectId}/meetings/${meetingId}`)}
-                  className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 cursor-pointer"
+                  className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted cursor-pointer transition-colors"
                   title="Close to Meeting Details"
                 >
                   <X className="size-5" />
                 </button>
               </div>
 
-              <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <h2 className="text-xl font-bold text-foreground tracking-tight flex items-center gap-2">
                 Meeting Intelligence
               </h2>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Meeting concluded. Add the meeting transcript to generate structured project intelligence.
               </p>
             </div>
 
             {transcriptNotice && (
-              <div className="rounded-lg bg-cyan-950/40 border border-cyan-800/60 p-3 text-xs text-cyan-300 flex items-center gap-2">
+              <div className="rounded-lg bg-cyan-500/10 border border-cyan-500/30 p-3 text-xs text-cyan-700 dark:text-cyan-300 flex items-center gap-2">
                 <Info className="size-4 shrink-0" />
                 <span>{transcriptNotice}</span>
               </div>
             )}
 
             {/* Input Options: Paste vs Upload Tabs */}
-            <div className="flex border-b border-slate-800 gap-6">
+            <div className="flex border-b border-border gap-6">
               <button
                 type="button"
                 onClick={() => setIntelligenceMode("paste")}
                 className={`pb-3 text-xs font-semibold border-b-2 cursor-pointer transition-colors flex items-center gap-2 ${
                   intelligenceMode === "paste"
-                    ? "border-cyan-500 text-cyan-400"
-                    : "border-transparent text-slate-400 hover:text-slate-200"
+                    ? "border-cyan-500 text-cyan-700 dark:text-cyan-400"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <FileText className="size-4" /> Paste Transcript
@@ -992,8 +992,8 @@ export default function MeetingRoomPage() {
                 onClick={() => setIntelligenceMode("upload")}
                 className={`pb-3 text-xs font-semibold border-b-2 cursor-pointer transition-colors flex items-center gap-2 ${
                   intelligenceMode === "upload"
-                    ? "border-cyan-500 text-cyan-400"
-                    : "border-transparent text-slate-400 hover:text-slate-200"
+                    ? "border-cyan-500 text-cyan-700 dark:text-cyan-400"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <UploadCloud className="size-4" /> Upload Transcript File
@@ -1003,8 +1003,8 @@ export default function MeetingRoomPage() {
             {/* TAB CONTENT: PASTE */}
             {intelligenceMode === "paste" && (
               <div className="space-y-3">
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <label className="font-medium text-slate-300">Raw Transcript Text</label>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <label className="font-medium text-foreground">Raw Transcript Text</label>
                   <span className="font-mono text-[11px]">{pastedTranscript.length} characters</span>
                 </div>
                 <textarea
@@ -1012,7 +1012,7 @@ export default function MeetingRoomPage() {
                   value={pastedTranscript}
                   onChange={(e) => setPastedTranscript(e.target.value)}
                   placeholder="Paste complete raw speaker transcript here...&#10;&#10;[00:01] Sarah: Welcome everyone to the sprint review.&#10;[00:15] Alex: I've finished the user authentication endpoints.&#10;[00:45] Sarah: Great, let's link that to the auth requirement."
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 p-4 text-xs font-mono text-slate-200 placeholder-slate-600 leading-relaxed focus:border-cyan-500 focus:outline-none"
+                  className="w-full rounded-xl border border-input bg-background p-4 text-xs font-mono text-foreground placeholder:text-muted-foreground leading-relaxed focus:border-cyan-500 focus:outline-none"
                 />
               </div>
             )}
@@ -1029,17 +1029,17 @@ export default function MeetingRoomPage() {
                 />
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-slate-800 hover:border-cyan-500/60 rounded-2xl p-8 text-center cursor-pointer transition-colors bg-slate-950/60 hover:bg-slate-950 space-y-3"
+                  className="border-2 border-dashed border-border hover:border-cyan-500/60 rounded-2xl p-8 text-center cursor-pointer transition-colors bg-muted/20 hover:bg-muted/40 space-y-3"
                 >
-                  <UploadCloud className="size-10 text-cyan-400 mx-auto" />
+                  <UploadCloud className="size-10 text-cyan-600 dark:text-cyan-400 mx-auto" />
                   <div>
-                    <p className="text-xs font-semibold text-white">Click or drag & drop to upload transcript</p>
-                    <p className="text-[11px] text-slate-400 mt-1">
-                      Supported prototype formats: <span className="font-mono text-slate-300">.txt, .vtt, .srt, .md, .json</span>
+                    <p className="text-xs font-semibold text-foreground">Click or drag & drop to upload transcript</p>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Supported prototype formats: <span className="font-mono text-muted-foreground">.txt, .vtt, .srt, .md, .json</span>
                     </p>
                   </div>
                   {uploadedFileName && (
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 text-xs font-medium border border-cyan-500/30">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-xs font-medium border border-cyan-500/30">
                       <FileCode className="size-3.5" /> {uploadedFileName}
                     </div>
                   )}
@@ -1047,8 +1047,8 @@ export default function MeetingRoomPage() {
 
                 {pastedTranscript && (
                   <div className="space-y-1.5">
-                    <p className="text-[11px] font-semibold text-slate-400">Extracted Transcript Preview:</p>
-                    <div className="max-h-32 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950 p-3 text-[11px] font-mono text-slate-300 leading-relaxed">
+                    <p className="text-[11px] font-semibold text-muted-foreground">Extracted Transcript Preview:</p>
+                    <div className="max-h-32 overflow-y-auto rounded-xl border border-border bg-background p-3 text-[11px] font-mono text-foreground leading-relaxed">
                       {pastedTranscript.slice(0, 400)}...
                     </div>
                   </div>
@@ -1057,11 +1057,11 @@ export default function MeetingRoomPage() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-800">
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-4 border-t border-border">
               <button
                 type="button"
                 onClick={() => router.push(`/projects/${projectId}/meetings/${meetingId}`)}
-                className="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer text-center"
+                className="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border transition-colors cursor-pointer text-center"
               >
                 Skip to Meeting Details
               </button>
@@ -1070,7 +1070,7 @@ export default function MeetingRoomPage() {
                 type="button"
                 onClick={handleSaveTranscript}
                 disabled={savingTranscript || !pastedTranscript.trim()}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2 text-xs font-semibold rounded-lg bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors cursor-pointer shadow-md"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2 text-xs font-semibold rounded-lg bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors cursor-pointer shadow-xs"
               >
                 {savingTranscript ? (
                   <Loader2 className="size-3.5 animate-spin" />

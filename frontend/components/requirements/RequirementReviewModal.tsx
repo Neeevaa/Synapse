@@ -398,12 +398,12 @@ export default function RequirementReviewModal({
 
                         {expandedEvidence[f.id] && (
                           <div className="space-y-3 pt-2">
-                            {/* GROUNDED EVIDENCE CARD (Cyan/Slate) */}
-                            <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/60 space-y-1.5">
-                              <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-400">
+                            {/* GROUNDED EVIDENCE CARD */}
+                            <div className="p-3.5 rounded-xl bg-muted/40 border border-border space-y-1.5">
+                              <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-600 dark:text-cyan-400">
                                 <Layers className="size-3.5" /> Project Evidence:
                               </div>
-                              <p className="text-xs font-mono text-slate-300 leading-relaxed whitespace-pre-wrap">
+                              <p className="text-xs font-mono text-foreground leading-relaxed whitespace-pre-wrap">
                                 {f.evidence}
                               </p>
                             </div>

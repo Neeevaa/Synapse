@@ -352,7 +352,7 @@ export default function CompanySettingsPage() {
 
   return (
     <ProtectedShell pageTitle="Company Settings">
-      <div className="space-y-6 max-w-6xl mx-auto">
+      <div className="space-y-6 w-full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>

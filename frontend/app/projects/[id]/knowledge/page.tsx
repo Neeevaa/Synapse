@@ -186,7 +186,7 @@ export default function KnowledgeBasePage() {
 
   return (
     <ProtectedShell>
-      <div className="min-h-screen bg-background text-foreground p-6 md:p-10 space-y-8">
+      <div className="w-full space-y-6">
         {/* Header Navigation */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
           <div className="space-y-1">
@@ -422,12 +422,12 @@ export default function KnowledgeBasePage() {
                             {res.source_type}
                           </span>
                           {res.source_key && (
-                            <span className="px-2.5 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs font-mono font-semibold">
+                            <span className="px-2.5 py-0.5 rounded-md bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20 text-xs font-mono font-semibold">
                               {res.source_key}
                             </span>
                           )}
                           {res.source_version && (
-                            <span className="px-2.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold">
+                            <span className="px-2.5 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold">
                               v{res.source_version}
                             </span>
                           )}
@@ -435,7 +435,7 @@ export default function KnowledgeBasePage() {
                         </div>
 
                         <div className="flex items-center gap-3">
-                          <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                          <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
                             <Sparkles className="size-3" /> {(res.similarity_score * 100).toFixed(1)}% Match
                           </span>
                           <Link
@@ -558,12 +558,12 @@ export default function KnowledgeBasePage() {
                           <td className="px-4 py-3 font-semibold text-primary">
                             {log.retrieved_chunk_ids?.length || 0}
                           </td>
-                          <td className="px-4 py-3 font-mono text-emerald-400">
+                          <td className="px-4 py-3 font-mono text-emerald-700 dark:text-emerald-400">
                             {log.similarity_scores?.length
                               ? `${(Math.min(...log.similarity_scores) * 100).toFixed(0)}% - ${(Math.max(...log.similarity_scores) * 100).toFixed(0)}%`
                               : "N/A"}
                           </td>
-                          <td className="px-4 py-3 font-semibold text-amber-400">
+                          <td className="px-4 py-3 font-semibold text-amber-700 dark:text-amber-400">
                             {log.retrieval_latency_ms} ms
                           </td>
                           <td className="px-4 py-3 text-xs text-muted-foreground">

@@ -82,21 +82,21 @@ export default function WorkflowProgressTracker({
 
   return (
     <div
-      className={`rounded-2xl border border-slate-800 bg-slate-900/90 text-slate-100 p-5 md:p-6 shadow-sm space-y-6 ${className}`}
+      className={`rounded-2xl border border-border bg-card text-foreground p-5 md:p-6 shadow-2xs space-y-6 ${className}`}
     >
       {/* Tracker Header if title provided */}
       {(title || subtitle) && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-800/80 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border pb-3">
           <div>
-            {title && <h3 className="text-sm font-bold text-white tracking-tight">{title}</h3>}
-            {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+            {title && <h3 className="text-sm font-bold text-foreground tracking-tight">{title}</h3>}
+            {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
           </div>
           {currentStep && (
-            <span className="self-start sm:self-auto inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-              <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="self-start sm:self-auto inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Step {currentIndex + 1} of {steps.length}: {currentStep.label}
               {typeof progressPercent === "number" && (
-                <span className="ml-1 pl-1.5 border-l border-emerald-500/30 font-mono text-[11px] text-emerald-300">
+                <span className="ml-1 pl-1.5 border-l border-emerald-500/30 font-mono text-[11px] text-emerald-600 dark:text-emerald-300">
                   {progressPercent}%
                 </span>
               )}
@@ -125,31 +125,30 @@ export default function WorkflowProgressTracker({
                 {/* STEP NODE + LABEL */}
                 <div
                   onClick={() => isClickable && onStepClick && onStepClick(step.id)}
-                  className={`flex flex-col items-center group relative z-10 select-none ${
-                    isClickable ? "cursor-pointer" : "cursor-default"
-                  }`}
+                  className={`flex flex-col items-center group relative z-10 select-none ${isClickable ? "cursor-pointer" : "cursor-default"
+                    }`}
                   style={{ width: "120px" }}
                 >
                   {/* NODE INDICATOR */}
                   <div className="relative flex items-center justify-center">
                     {isCompleted ? (
                       /* COMPLETED STEP: Clean green circle with check mark */
-                      <div className="size-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-xs transition-transform duration-200 group-hover:scale-105">
+                      <div className="size-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-xs transition-transform duration-200 group-hover:scale-105">
                         <Check className="size-4 stroke-[3]" />
                       </div>
                     ) : isCurrent ? (
                       /* ACTIVE / CURRENT STEP: Rounded capsule/square with owner icon inside */
-                      <div className="size-9 rounded-xl border-2 border-emerald-400 bg-slate-950 flex items-center justify-center shadow-md ring-4 ring-emerald-500/20 transition-transform duration-200 group-hover:scale-105">
+                      <div className="size-9 rounded-xl border-2 border-emerald-500 bg-card flex items-center justify-center shadow-md ring-4 ring-emerald-500/20 transition-transform duration-200 group-hover:scale-105">
                         {renderOwnerInsideNode(step)}
                       </div>
                     ) : isBlocked ? (
                       /* BLOCKED STEP */
-                      <div className="size-8 rounded-full border border-rose-700 bg-rose-950/60 text-rose-400 flex items-center justify-center">
+                      <div className="size-8 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
                         <AlertCircle className="size-4" />
                       </div>
                     ) : (
                       /* PENDING / FUTURE STEP: Understated circle */
-                      <div className="size-8 rounded-full border border-slate-700/80 bg-slate-950/60 text-slate-400 flex items-center justify-center text-xs font-semibold">
+                      <div className="size-8 rounded-full border border-border bg-muted/40 text-muted-foreground flex items-center justify-center text-xs font-semibold">
                         <span>{idx + 1}</span>
                       </div>
                     )}
@@ -158,18 +157,17 @@ export default function WorkflowProgressTracker({
                   {/* STEP LABEL (Minimum font size 12px) */}
                   <div className="mt-2.5 text-center px-1">
                     <p
-                      className={`text-xs leading-snug transition-colors ${
-                        isCurrent
-                          ? "font-bold text-emerald-400 tracking-tight"
+                      className={`text-xs leading-snug transition-colors ${isCurrent
+                          ? "font-bold text-emerald-600 dark:text-emerald-400 tracking-tight"
                           : isCompleted
-                          ? "font-semibold text-slate-200 group-hover:text-white"
-                          : "font-medium text-slate-400"
-                      }`}
+                            ? "font-semibold text-foreground"
+                            : "font-medium text-muted-foreground"
+                        }`}
                     >
                       {step.label}
                     </p>
                     {/* Owner hint under label */}
-                    <span className="hidden sm:block text-[11px] text-slate-400 mt-0.5 truncate max-w-[110px]">
+                    <span className="hidden sm:block text-[11px] text-muted-foreground mt-0.5 truncate max-w-[110px]">
                       {step.ownerType === "ai" ? "AI Engine" : step.ownerDisplay.name.split(" ")[0]}
                     </span>
                   </div>
@@ -179,13 +177,12 @@ export default function WorkflowProgressTracker({
                 {!isLast && (
                   <div className="flex-1 h-0.5 -mt-6 mx-1 relative z-0">
                     <div
-                      className={`h-full transition-all duration-300 rounded-full ${
-                        isTrackActive
+                      className={`h-full transition-all duration-300 rounded-full ${isTrackActive
                           ? "bg-emerald-500"
                           : isCompleted
-                          ? "bg-emerald-500/50"
-                          : "bg-slate-800"
-                      }`}
+                            ? "bg-emerald-500/50"
+                            : "bg-border"
+                        }`}
                     />
                   </div>
                 )}
@@ -197,38 +194,38 @@ export default function WorkflowProgressTracker({
 
       {/* COMPACT CURRENT STEP DETAILS PANEL */}
       {showDetailsPanel && currentStep && (
-        <div className="rounded-xl border border-slate-800/90 bg-slate-950/70 p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-inner">
+        <div className="rounded-xl border border-border bg-muted/20 p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-inner">
           {/* LEFT: STEP CONTEXT */}
           <div className="space-y-1.5 max-w-xl">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-bold">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-bold">
                 Current Step • {currentIndex + 1} of {steps.length}
               </span>
             </div>
-            <h4 className="text-sm font-bold text-white tracking-tight">{currentStep.label}</h4>
+            <h4 className="text-sm font-bold text-foreground tracking-tight">{currentStep.label}</h4>
             {currentStep.description && (
-              <p className="text-xs text-slate-300 leading-relaxed">{currentStep.description}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{currentStep.description}</p>
             )}
           </div>
 
           {/* MIDDLE: OWNER IDENTITY */}
-          <div className="flex items-center gap-3 bg-slate-900/90 border border-slate-800 px-3.5 py-2.5 rounded-xl shrink-0">
+          <div className="flex items-center gap-3 bg-card border border-border px-3.5 py-2.5 rounded-xl shrink-0">
             <div className="size-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
               {currentStep.ownerType === "ai" ? (
-                <Bot className="size-4 text-emerald-400" />
+                <Bot className="size-4 text-emerald-500" />
               ) : (
-                <User className="size-4 text-emerald-400" />
+                <User className="size-4 text-emerald-500" />
               )}
             </div>
             <div className="min-w-0">
-              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">
+              <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider block">
                 Step Owner
               </span>
-              <p className="text-xs font-bold text-slate-100 truncate max-w-[150px]">
+              <p className="text-xs font-bold text-foreground truncate max-w-[150px]">
                 {currentStep.ownerDisplay.name}
               </p>
               {currentStep.ownerDisplay.role && (
-                <span className="text-[11px] text-slate-400 block truncate max-w-[150px]">
+                <span className="text-[11px] text-muted-foreground block truncate max-w-[150px]">
                   {currentStep.ownerDisplay.role}
                 </span>
               )}
@@ -242,7 +239,7 @@ export default function WorkflowProgressTracker({
                 type="button"
                 onClick={currentStep.onAction}
                 disabled={currentStep.actionDisabled || currentStep.actionLoading}
-                className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold transition-all shadow-md shadow-emerald-950/50 cursor-pointer"
+                className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold transition-all shadow-md shadow-emerald-950/20 cursor-pointer"
               >
                 {currentStep.actionLoading ? (
                   <Loader2 className="size-3.5 animate-spin" />

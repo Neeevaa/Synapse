@@ -30,6 +30,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import RequirementReviewModal from "@/components/requirements/RequirementReviewModal";
+import TestCaseWorkspace from "@/components/requirements/TestCaseWorkspace";
+
 
 interface RequirementVersion {
   id: string;
@@ -91,7 +93,9 @@ export default function RequirementsPage() {
   // Detail Drawer & Version Inspector State
   const [selectedReq, setSelectedReq] = useState<RequirementItem | null>(null);
   const [activeVersion, setActiveVersion] = useState<RequirementVersion | null>(null);
+  const [activeDetailTab, setActiveDetailTab] = useState<"overview" | "acceptance" | "test-cases" | "history">("overview");
   const [reviewModalReq, setReviewModalReq] = useState<RequirementItem | null>(null);
+
 
   // Create Modal State
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
@@ -170,12 +174,17 @@ export default function RequirementsPage() {
     fetchRequirements();
   }, [fetchRequirements]);
 
-  const handleOpenDetail = (req: RequirementItem) => {
+  const handleOpenDetail = (
+    req: RequirementItem,
+    initialTab: "overview" | "acceptance" | "test-cases" | "history" = "overview"
+  ) => {
     setSelectedReq(req);
+    setActiveDetailTab(initialTab);
     // Set latest version as default active view
     const latestVer = req.versions && req.versions.length > 0 ? req.versions[0] : null;
     setActiveVersion(latestVer);
   };
+
 
   const handleCreateRequirement = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -284,45 +293,45 @@ export default function RequirementsPage() {
   const getTypeBadgeStyle = (type: string) => {
     switch (type) {
       case "FUNCTIONAL":
-        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
       case "NON_FUNCTIONAL":
-        return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+        return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
       case "USER_STORY":
-        return "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
+        return "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20";
       default:
-        return "bg-slate-500/10 text-slate-400 border-slate-500/20";
+        return "bg-muted text-muted-foreground border-border";
     }
   };
 
   const getPriorityBadgeStyle = (prio: string) => {
     switch (prio) {
       case "URGENT":
-        return "bg-rose-500/15 text-rose-400 border-rose-500/30";
+        return "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30";
       case "HIGH":
-        return "bg-orange-500/15 text-orange-400 border-orange-500/30";
+        return "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30";
       case "MEDIUM":
-        return "bg-sky-500/15 text-sky-400 border-sky-500/30";
+        return "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30";
       case "LOW":
-        return "bg-slate-500/15 text-slate-400 border-slate-500/30";
+        return "bg-muted text-muted-foreground border-border";
       default:
-        return "bg-slate-500/15 text-slate-400 border-slate-500/30";
+        return "bg-muted text-muted-foreground border-border";
     }
   };
 
   const getStatusBadgeStyle = (st: string) => {
     switch (st) {
       case "APPROVED":
-        return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+        return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
       case "REVIEW":
-        return "bg-amber-500/15 text-amber-400 border-amber-500/30";
+        return "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30";
       case "DRAFT":
-        return "bg-slate-500/15 text-slate-400 border-slate-500/30";
+        return "bg-muted text-muted-foreground border-border";
       case "REJECTED":
-        return "bg-rose-500/15 text-rose-400 border-rose-500/30";
+        return "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30";
       case "ARCHIVED":
-        return "bg-zinc-600/20 text-zinc-400 border-zinc-500/30";
+        return "bg-zinc-500/15 text-zinc-600 dark:text-zinc-400 border-zinc-500/30";
       default:
-        return "bg-slate-500/15 text-slate-400 border-slate-500/30";
+        return "bg-muted text-muted-foreground border-border";
     }
   };
 
@@ -342,34 +351,34 @@ export default function RequirementsPage() {
 
   return (
     <ProtectedShell>
-      <div className="max-w-7xl mx-auto space-y-6 pb-12">
+      <div className="w-full space-y-6 pb-12">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center justify-between">
           <Link
             href={`/projects/${projectId}`}
-            className="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="size-4" /> Back to Project Overview
           </Link>
-          <div className="text-xs text-slate-400">
-            {project?.name && <span className="font-semibold text-slate-200">{project.name}</span>}
+          <div className="text-xs text-muted-foreground">
+            {project?.name && <span className="font-semibold text-foreground">{project.name}</span>}
           </div>
         </div>
 
         {/* Banner Header */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="size-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-              <FileText className="size-6 text-emerald-400" />
+              <FileText className="size-6 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-xl font-bold text-white tracking-tight">Requirements Management</h1>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <h1 className="text-xl font-extrabold text-foreground tracking-tight">Requirements Management</h1>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                   {totalCount} Total
                 </span>
               </div>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Structured, versioned software requirements for traceability, review, and AI synthesis
               </p>
             </div>
@@ -377,7 +386,7 @@ export default function RequirementsPage() {
 
           <button
             onClick={() => setCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-emerald-500 cursor-pointer shrink-0"
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-emerald-500 cursor-pointer shrink-0"
           >
             <Plus className="size-4" /> New Requirement
           </button>
@@ -386,16 +395,16 @@ export default function RequirementsPage() {
         {/* Global Action Notice */}
         {actionNotice && (
           <div
-            className={`rounded-lg p-4 text-xs font-medium border flex items-center justify-between ${
+            className={`rounded-xl p-4 text-xs font-medium border flex items-center justify-between ${
               actionNotice.type === "success"
-                ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/60"
-                : "bg-rose-950/40 text-rose-300 border-rose-800/60"
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                : "bg-destructive/10 text-destructive border-destructive/20"
             }`}
           >
             <span className="flex items-center gap-2">
               <CheckCircle2 className="size-4 shrink-0" /> {actionNotice.message}
             </span>
-            <button onClick={() => setActionNotice(null)} className="text-slate-400 hover:text-white">
+            <button onClick={() => setActionNotice(null)} className="text-muted-foreground hover:text-foreground">
               <X className="size-4" />
             </button>
           </div>
@@ -436,11 +445,11 @@ export default function RequirementsPage() {
         </div>
 
         {/* Filters and Search Bar */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-4">
+        <div className="rounded-2xl border border-border bg-card p-4 space-y-4 shadow-2xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {/* Search Input */}
             <div className="relative sm:col-span-2">
-              <Search className="absolute left-3 top-2.5 size-4 text-slate-400" />
+              <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search by title, key, or criteria..."
@@ -449,7 +458,7 @@ export default function RequirementsPage() {
                   setSearchKeyword(e.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-lg border border-slate-800 bg-slate-950 pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
               />
             </div>
 
@@ -461,7 +470,7 @@ export default function RequirementsPage() {
                   setTypeFilter(e.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
               >
                 <option value="ALL">All Types</option>
                 <option value="FUNCTIONAL">Functional</option>
@@ -478,7 +487,7 @@ export default function RequirementsPage() {
                   setPriorityFilter(e.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
               >
                 <option value="ALL">All Priorities</option>
                 <option value="URGENT">Urgent</option>
@@ -496,7 +505,7 @@ export default function RequirementsPage() {
                   setStatusFilter(e.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="DRAFT">Draft</option>
@@ -510,35 +519,35 @@ export default function RequirementsPage() {
         </div>
 
         {/* Requirements Table */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 overflow-hidden shadow-xs">
+        <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xs">
           {loading ? (
-            <div className="flex flex-col items-center justify-center p-12 text-slate-400 space-y-3">
+            <div className="flex flex-col items-center justify-center p-12 text-muted-foreground space-y-3">
               <Loader2 className="size-8 animate-spin text-emerald-500" />
               <p className="text-xs font-medium">Loading project requirements...</p>
             </div>
           ) : error ? (
-            <div className="p-8 text-center text-rose-400 space-y-2">
+            <div className="p-8 text-center text-rose-500 space-y-2">
               <AlertCircle className="size-8 mx-auto" />
               <p className="text-xs font-semibold">{error}</p>
             </div>
           ) : requirements.length === 0 ? (
-            <div className="p-12 text-center text-slate-400 space-y-3">
-              <BookOpen className="size-10 mx-auto text-slate-600" />
-              <h3 className="text-sm font-semibold text-slate-300">No requirements found</h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            <div className="p-12 text-center text-muted-foreground space-y-3">
+              <BookOpen className="size-10 mx-auto text-muted-foreground/60" />
+              <h3 className="text-sm font-semibold text-foreground">No requirements found</h3>
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
                 No software requirements match your active filter criteria. Click "New Requirement" to create one.
               </p>
               <button
                 onClick={() => setCreateModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 cursor-pointer"
               >
                 <Plus className="size-3.5" /> Create Requirement
               </button>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-300">
-                <thead className="bg-slate-950/60 text-slate-400 font-semibold border-b border-slate-800 uppercase tracking-wider">
+              <table className="w-full text-left text-xs text-foreground">
+                <thead className="bg-muted/50 text-muted-foreground font-semibold border-b border-border uppercase tracking-wider">
                   <tr>
                     <th className="py-3.5 px-4">Key</th>
                     <th className="py-3.5 px-4">Title</th>
@@ -550,15 +559,15 @@ export default function RequirementsPage() {
                     <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-border">
                   {requirements.map((req) => (
                     <tr
                       key={req.id}
                       onClick={() => handleOpenDetail(req)}
-                      className="hover:bg-slate-800/40 transition-colors cursor-pointer group"
+                      className="hover:bg-muted/40 transition-colors cursor-pointer group"
                     >
-                      <td className="py-3.5 px-4 font-mono font-bold text-emerald-400 whitespace-nowrap">{req.requirement_key}</td>
-                      <td className="py-3.5 px-4 font-semibold text-slate-100 group-hover:text-emerald-300 transition-colors max-w-md truncate">
+                      <td className="py-3.5 px-4 font-mono font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{req.requirement_key}</td>
+                      <td className="py-3.5 px-4 font-semibold text-foreground group-hover:text-primary transition-colors max-w-xs md:max-w-sm lg:max-w-md xl:max-w-xl truncate" title={req.title}>
                         {req.title}
                       </td>
                       <td className="py-3.5 px-4">
@@ -576,13 +585,20 @@ export default function RequirementsPage() {
                           {req.status}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-slate-400">
-                        <span className="inline-flex items-center gap-1 rounded bg-slate-800 px-2 py-0.5 text-xs font-bold border border-slate-700">
-                          <History className="size-3 text-slate-400" /> v{req.current_version}
+                      <td className="py-3.5 px-4 font-mono text-muted-foreground">
+                        <span className="inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-xs font-bold border border-border text-foreground">
+                          <History className="size-3 text-muted-foreground" /> v{req.current_version}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-400 whitespace-nowrap">{formatDate(req.updated_at)}</td>
+                      <td className="py-3.5 px-4 text-muted-foreground whitespace-nowrap">{formatDate(req.updated_at)}</td>
                       <td className="py-3.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => handleOpenDetail(req, "test-cases")}
+                          data-testid={`row-ai-test-cases-btn-${req.id}`}
+                          className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-semibold px-2.5 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors mr-2 cursor-pointer"
+                        >
+                          <Sparkles className="size-3 text-emerald-600 dark:text-emerald-400" /> AI Test Cases
+                        </button>
                         <button
                           onClick={() => setReviewModalReq(req)}
                           className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-semibold px-2.5 py-1 rounded bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors mr-2 cursor-pointer"
@@ -590,14 +606,14 @@ export default function RequirementsPage() {
                           <Sparkles className="size-3 text-primary" /> Review with AI
                         </button>
                         <button
-                          onClick={() => handleOpenDetail(req)}
-                          className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 font-medium px-2.5 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors mr-2 cursor-pointer"
+                          onClick={() => handleOpenDetail(req, "overview")}
+                          className="inline-flex items-center gap-1 text-xs text-foreground hover:bg-muted/80 font-medium px-2.5 py-1 rounded bg-muted border border-border transition-colors mr-2 cursor-pointer"
                         >
                           Details
                         </button>
                         <button
                           onClick={() => handleOpenEdit(req)}
-                          className="inline-flex items-center gap-1 text-xs text-slate-300 hover:text-white font-medium px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 text-xs text-foreground hover:bg-muted/80 font-medium px-2 py-1 rounded bg-muted border border-border transition-colors cursor-pointer"
                         >
                           <Edit3 className="size-3" /> Edit
                         </button>
@@ -610,15 +626,15 @@ export default function RequirementsPage() {
           )}
         </div>
 
-        {/* REQUIREMENT DETAIL & VERSION HISTORY MODAL (Recommended Width: 800px-900px) */}
+        {/* REQUIREMENT DETAIL & TEST CASE WORKSPACE */}
         {selectedReq && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
-            <div className="relative w-full max-w-4xl max-h-[90vh] rounded-2xl border border-slate-800 bg-slate-900 text-slate-100 shadow-2xl flex flex-col overflow-hidden">
-              {/* Modal Header */}
-              <div className="p-6 border-b border-slate-800 flex items-start justify-between bg-slate-950/60">
-                <div className="space-y-1">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-3 sm:p-6 backdrop-blur-xs">
+            <div className="relative w-full max-w-5xl max-h-[92vh] rounded-2xl border border-border bg-card text-foreground shadow-2xl flex flex-col overflow-hidden">
+              {/* Header */}
+              <div className="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/30">
+                <div className="space-y-1.5 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono font-bold text-sm text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20">
+                    <span className="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20">
                       {selectedReq.requirement_key}
                     </span>
                     <span className={`px-2.5 py-0.5 rounded text-xs font-semibold border ${getTypeBadgeStyle(selectedReq.requirement_type)}`}>
@@ -630,134 +646,243 @@ export default function RequirementsPage() {
                     <span className={`px-2.5 py-0.5 rounded text-xs font-semibold border ${getStatusBadgeStyle(selectedReq.status)}`}>
                       {selectedReq.status}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded text-xs font-mono font-medium bg-slate-800 text-slate-300 border border-slate-700">
+                    <span className="px-2.5 py-0.5 rounded text-xs font-mono font-medium bg-muted text-foreground border border-border">
                       v{activeVersion ? activeVersion.version_number : selectedReq.current_version}{" "}
                       {activeVersion && activeVersion.version_number === selectedReq.current_version && "(Current)"}
                     </span>
                   </div>
-                  <h2 className="text-xl font-bold text-white pt-1">{activeVersion ? activeVersion.title : selectedReq.title}</h2>
+                  <h2 className="text-xl font-extrabold text-foreground pt-1">{activeVersion ? activeVersion.title : selectedReq.title}</h2>
                 </div>
 
+                {/* Header Actions */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => setActiveDetailTab("test-cases")}
+                    data-testid="header-generate-test-cases-btn"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                  >
+                    <Sparkles className="size-3.5" /> Generate Test Cases with AI
+                  </button>
+
+                  <button
+                    onClick={() => handleOpenEdit(selectedReq)}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-muted hover:bg-muted/80 text-foreground border border-border px-3 py-2 text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    <Edit3 className="size-3.5" /> Edit
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedReq(null)}
+                    className="rounded-xl p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+                  >
+                    <X className="size-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Requirement Workspace Tabs */}
+              <div className="flex items-center gap-1 border-b border-border bg-muted/20 px-6 pt-2 pb-0">
                 <button
-                  onClick={() => setSelectedReq(null)}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
+                  onClick={() => setActiveDetailTab("overview")}
+                  data-testid="tab-overview"
+                  className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
+                    activeDetailTab === "overview"
+                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  <X className="size-5" />
+                  Overview
+                </button>
+
+                <button
+                  onClick={() => setActiveDetailTab("acceptance")}
+                  data-testid="tab-acceptance"
+                  className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
+                    activeDetailTab === "acceptance"
+                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Acceptance Criteria
+                </button>
+
+                <button
+                  onClick={() => setActiveDetailTab("test-cases")}
+                  data-testid="tab-ai-test-cases"
+                  className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+                    activeDetailTab === "test-cases"
+                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Sparkles className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span>AI Test Cases</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveDetailTab("history")}
+                  data-testid="tab-history"
+                  className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+                    activeDetailTab === "history"
+                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <History className="size-3.5 text-muted-foreground" />
+                  <span>History ({selectedReq.versions.length})</span>
                 </button>
               </div>
 
-              {/* Modal Content Grid */}
-              <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Requirement Details (2 Cols) */}
-                <div className="lg:col-span-2 space-y-6">
-                  {/* Status Bar Notice if inspecting historical version */}
-                  {activeVersion && activeVersion.version_number !== selectedReq.current_version && (
-                    <div className="rounded-lg bg-amber-950/40 border border-amber-800/60 p-3 text-xs text-amber-300 flex items-center gap-2">
-                      <History className="size-4 shrink-0" />
-                      <span>Viewing historical snapshot: <strong>Version {activeVersion.version_number}</strong> (Created on {formatDate(activeVersion.created_at)})</span>
-                    </div>
-                  )}
-
-                  {/* Description Section */}
-                  <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Description</h4>
-                    <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
-                      {activeVersion ? activeVersion.description : selectedReq.description}
-                    </div>
+              {/* Tab Workspace Panels */}
+              <div className="flex-1 overflow-y-auto">
+                {/* 1. AI TEST CASES WORKSPACE */}
+                {activeDetailTab === "test-cases" && (
+                  <div className="p-6">
+                    <TestCaseWorkspace
+                      projectId={projectId}
+                      requirementId={selectedReq.id}
+                      requirementTitle={activeVersion ? activeVersion.title : selectedReq.title}
+                      userRole={userRole}
+                    />
                   </div>
+                )}
 
-                  {/* Acceptance Criteria Section */}
-                  <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Acceptance Criteria</h4>
-                    <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
-                      {(activeVersion ? activeVersion.acceptance_criteria : selectedReq.acceptance_criteria) || (
-                        <span className="italic text-slate-500">No acceptance criteria specified.</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Metadata Summary Box */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-xs text-slate-400">
-                    <div>
-                      <span className="block text-xs text-slate-400 uppercase font-bold">Source</span>
-                      <span className="font-semibold text-slate-200">{selectedReq.source}</span>
-                    </div>
-                    <div>
-                      <span className="block text-xs text-slate-400 uppercase font-bold">Created By</span>
-                      <span className="font-semibold text-slate-200">{selectedReq.creator_name || "Author"}</span>
-                    </div>
-                    <div>
-                      <span className="block text-xs text-slate-400 uppercase font-bold">Created Date</span>
-                      <span className="font-semibold text-slate-200">{formatDate(selectedReq.created_at)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sidebar: Version History & Actions (1 Col) */}
-                <div className="space-y-6 border-t lg:border-t-0 lg:border-l border-slate-800 pt-6 lg:pt-0 lg:pl-6">
-                  {/* Status Actions Bar */}
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Requirement Actions</h4>
-                    
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => handleOpenEdit(selectedReq)}
-                        className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-2 text-xs font-semibold text-white border border-slate-700 transition-colors cursor-pointer"
-                      >
-                        <Edit3 className="size-3.5" /> Edit Requirement
-                      </button>
-
-                      {selectedReq.status === "DRAFT" && (
-                        <button
-                          disabled={actionLoading}
-                          onClick={() => handleStatusTransition("REVIEW", "Submitted for peer review")}
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-amber-600 hover:bg-amber-500 px-3 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
-                        >
-                          <Send className="size-3.5" /> Submit for Review
-                        </button>
-                      )}
-
-                      {canApprove && (selectedReq.status === "REVIEW" || selectedReq.status === "DRAFT") && (
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            disabled={actionLoading}
-                            onClick={() => handleStatusTransition("APPROVED", "Approved by Project Manager")}
-                            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
-                          >
-                            <CheckCircle2 className="size-3.5" /> Approve
-                          </button>
-                          <button
-                            disabled={actionLoading}
-                            onClick={() => handleStatusTransition("REJECTED", "Rejected during review")}
-                            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 px-3 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
-                          >
-                            <XCircle className="size-3.5" /> Reject
-                          </button>
+                {/* 2. OVERVIEW TAB */}
+                {activeDetailTab === "overview" && (
+                  <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 space-y-6">
+                      {activeVersion && activeVersion.version_number !== selectedReq.current_version && (
+                        <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                          <History className="size-4 shrink-0" />
+                          <span>
+                            Viewing historical snapshot: <strong>Version {activeVersion.version_number}</strong> (Created on {formatDate(activeVersion.created_at)})
+                          </span>
                         </div>
                       )}
 
-                      {selectedReq.status !== "ARCHIVED" && canApprove && (
-                        <button
-                          disabled={actionLoading}
-                          onClick={() => handleStatusTransition("ARCHIVED", "Archived requirement")}
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-slate-950 hover:bg-zinc-900 px-3 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200 border border-slate-800 transition-colors cursor-pointer"
-                        >
-                          <Archive className="size-3.5" /> Archive Requirement
-                        </button>
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Description</h4>
+                        <div className="rounded-xl border border-border bg-background p-4 text-xs text-foreground leading-relaxed whitespace-pre-wrap">
+                          {activeVersion ? activeVersion.description : selectedReq.description}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Acceptance Criteria Preview</h4>
+                        <div className="rounded-xl border border-border bg-background p-4 text-xs text-foreground leading-relaxed whitespace-pre-wrap">
+                          {(activeVersion ? activeVersion.acceptance_criteria : selectedReq.acceptance_criteria) || (
+                            <span className="italic text-muted-foreground">No acceptance criteria specified.</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-xl border border-border bg-muted/30 p-4 text-xs text-muted-foreground">
+                        <div>
+                          <span className="block text-xs text-muted-foreground uppercase font-bold">Source</span>
+                          <span className="font-semibold text-foreground">{selectedReq.source}</span>
+                        </div>
+                        <div>
+                          <span className="block text-xs text-muted-foreground uppercase font-bold">Created By</span>
+                          <span className="font-semibold text-foreground">{selectedReq.creator_name || "Author"}</span>
+                        </div>
+                        <div>
+                          <span className="block text-xs text-muted-foreground uppercase font-bold">Created Date</span>
+                          <span className="font-semibold text-foreground">{formatDate(selectedReq.created_at)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6 border-t lg:border-t-0 lg:border-l border-border pt-6 lg:pt-0 lg:pl-6">
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Requirement Actions</h4>
+                        <div className="space-y-2">
+                          <button
+                            onClick={() => handleOpenEdit(selectedReq)}
+                            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-muted hover:bg-muted/80 px-3 py-2 text-xs font-semibold text-foreground border border-border transition-colors cursor-pointer"
+                          >
+                            <Edit3 className="size-3.5" /> Edit Requirement
+                          </button>
+
+                          {selectedReq.status === "DRAFT" && (
+                            <button
+                              disabled={actionLoading}
+                              onClick={() => handleStatusTransition("REVIEW", "Submitted for peer review")}
+                              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-600 hover:bg-amber-500 px-3 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
+                            >
+                              <Send className="size-3.5" /> Submit for Review
+                            </button>
+                          )}
+
+                          {canApprove && (selectedReq.status === "REVIEW" || selectedReq.status === "DRAFT") && (
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                disabled={actionLoading}
+                                onClick={() => handleStatusTransition("APPROVED", "Approved by Project Manager")}
+                                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-3 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
+                              >
+                                <CheckCircle2 className="size-3.5" /> Approve
+                              </button>
+                              <button
+                                disabled={actionLoading}
+                                onClick={() => handleStatusTransition("REJECTED", "Rejected during review")}
+                                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 px-3 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
+                              >
+                                <XCircle className="size-3.5" /> Reject
+                              </button>
+                            </div>
+                          )}
+
+                          {selectedReq.status !== "ARCHIVED" && canApprove && (
+                            <button
+                              disabled={actionLoading}
+                              onClick={() => handleStatusTransition("ARCHIVED", "Archived requirement")}
+                              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-background hover:bg-muted px-3 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground border border-border transition-colors cursor-pointer"
+                            >
+                              <Archive className="size-3.5" /> Archive Requirement
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. ACCEPTANCE CRITERIA TAB */}
+                {activeDetailTab === "acceptance" && (
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        Detailed Acceptance Criteria
+                      </h4>
+                      <button
+                        onClick={() => setActiveDetailTab("test-cases")}
+                        className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-semibold cursor-pointer"
+                      >
+                        <Sparkles className="size-3.5" /> Convert to Test Cases
+                      </button>
+                    </div>
+
+                    <div className="rounded-xl border border-border bg-background p-5 text-xs text-foreground leading-relaxed whitespace-pre-wrap">
+                      {(activeVersion ? activeVersion.acceptance_criteria : selectedReq.acceptance_criteria) || (
+                        <div className="text-muted-foreground italic py-4 text-center">
+                          No acceptance criteria specified for this requirement version.
+                        </div>
                       )}
                     </div>
                   </div>
+                )}
 
-                  {/* Version History List */}
-                  <div className="space-y-3">
+                {/* 4. HISTORY TAB */}
+                {activeDetailTab === "history" && (
+                  <div className="p-6 space-y-4">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                        <History className="size-3.5 text-emerald-400" /> Version History
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                        <History className="size-3.5 text-emerald-600 dark:text-emerald-400" /> Version History
                       </h4>
-                      <span className="text-[11px] text-slate-500">{selectedReq.versions.length} versions</span>
+                      <span className="text-[11px] text-muted-foreground">{selectedReq.versions.length} versions recorded</span>
                     </div>
 
-                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    <div className="space-y-3">
                       {selectedReq.versions.map((ver) => {
                         const isSelected = activeVersion?.id === ver.id;
                         const isCurrent = ver.version_number === selectedReq.current_version;
@@ -765,75 +890,81 @@ export default function RequirementsPage() {
                           <div
                             key={ver.id}
                             onClick={() => setActiveVersion(ver)}
-                            className={`p-3 rounded-lg border text-xs cursor-pointer transition-all ${
+                            className={`p-4 rounded-xl border text-xs cursor-pointer transition-all ${
                               isSelected
-                                ? "bg-emerald-950/30 border-emerald-500/50 text-white"
-                                : "bg-slate-950/40 border-slate-800/80 text-slate-300 hover:border-slate-700"
+                                ? "bg-emerald-500/10 border-emerald-500/30 text-foreground"
+                                : "bg-card border-border text-foreground hover:bg-muted/30"
                             }`}
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-mono font-bold text-emerald-400 flex items-center gap-1.5">
-                                v{ver.version_number} {isCurrent && <span className="text-[10px] text-emerald-300 font-semibold">(Current)</span>}
+                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                                Version {ver.version_number}{" "}
+                                {isCurrent && (
+                                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                    Current
+                                  </span>
+                                )}
                               </span>
-                              <span className="text-[10px] text-slate-500">{formatDate(ver.created_at)}</span>
+                              <span className="text-[11px] text-muted-foreground">{formatDate(ver.created_at)}</span>
                             </div>
-                            <p className="text-[11px] text-slate-400 mt-1 line-clamp-1">
+                            <p className="text-xs text-foreground mt-2 font-medium">
                               {ver.change_summary || "Requirement update"}
                             </p>
-                            <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
-                              <span>By {ver.author_name || "Author"}</span>
-                              <span className="uppercase">{ver.status}</span>
+                            <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                              <span>Author: {ver.author_name || "Author"}</span>
+                              <span className="uppercase font-semibold">{ver.status}</span>
                             </div>
                           </div>
                         );
                       })}
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
         )}
 
+
         {/* CREATE REQUIREMENT MODAL */}
         {createModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
-            <div className="relative w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 text-slate-100 shadow-2xl p-6 space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <FileText className="size-5 text-emerald-400" /> New Requirement
+            <div className="relative w-full max-w-2xl rounded-2xl border border-border bg-card text-foreground shadow-2xl p-6 space-y-5">
+              <div className="flex items-center justify-between border-b border-border pb-4">
+                <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                  <FileText className="size-5 text-emerald-500" /> New Requirement
                 </h3>
-                <button onClick={() => setCreateModalOpen(false)} className="text-slate-400 hover:text-white">
+                <button onClick={() => setCreateModalOpen(false)} className="text-muted-foreground hover:text-foreground">
                   <X className="size-5" />
                 </button>
               </div>
 
               {createError && (
-                <div className="rounded-lg bg-rose-950/40 border border-rose-800/60 p-3 text-xs text-rose-300 flex items-center gap-2">
+                <div className="rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
                   <AlertCircle className="size-4 shrink-0" /> {createError}
                 </div>
               )}
 
               <form onSubmit={handleCreateRequirement} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Requirement Title *</label>
+                  <label className="block text-xs font-semibold text-foreground mb-1">Requirement Title *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Multi-factor Authentication Support"
                     value={createTitle}
                     onChange={(e) => setCreateTitle(e.target.value)}
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Type</label>
+                    <label className="block text-xs font-semibold text-foreground mb-1">Type</label>
                     <select
                       value={createType}
                       onChange={(e) => setCreateType(e.target.value)}
-                      className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
                     >
                       <option value="FUNCTIONAL">Functional</option>
                       <option value="NON_FUNCTIONAL">Non-Functional</option>
@@ -841,11 +972,11 @@ export default function RequirementsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Priority</label>
+                    <label className="block text-xs font-semibold text-foreground mb-1">Priority</label>
                     <select
                       value={createPriority}
                       onChange={(e) => setCreatePriority(e.target.value)}
-                      className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
                     >
                       <option value="URGENT">Urgent</option>
                       <option value="HIGH">High</option>
@@ -854,11 +985,11 @@ export default function RequirementsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Source</label>
+                    <label className="block text-xs font-semibold text-foreground mb-1">Source</label>
                     <select
                       value={createSource}
                       onChange={(e) => setCreateSource(e.target.value)}
-                      className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
                     >
                       <option value="MANUAL_ENTRY">Manual Entry</option>
                       <option value="SRS">SRS Document</option>
@@ -871,33 +1002,33 @@ export default function RequirementsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Description *</label>
+                  <label className="block text-xs font-semibold text-foreground mb-1">Description *</label>
                   <textarea
                     required
                     rows={4}
                     placeholder="Detailed explanation of system behavior and requirements..."
                     value={createDescription}
                     onChange={(e) => setCreateDescription(e.target.value)}
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Acceptance Criteria</label>
+                  <label className="block text-xs font-semibold text-foreground mb-1">Acceptance Criteria</label>
                   <textarea
                     rows={3}
                     placeholder="1. User receives SMS TOTP code&#10;2. Code expires after 3 minutes"
                     value={createCriteria}
                     onChange={(e) => setCreateCriteria(e.target.value)}
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setCreateModalOpen(false)}
-                    className="rounded-lg bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 transition-colors cursor-pointer"
+                    className="rounded-lg border border-border bg-muted/50 px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -917,46 +1048,46 @@ export default function RequirementsPage() {
         {/* EDIT REQUIREMENT MODAL (Creates New Version) */}
         {editModalOpen && selectedReq && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
-            <div className="relative w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 text-slate-100 shadow-2xl p-6 space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Edit3 className="size-5 text-emerald-400" /> Edit Requirement ({selectedReq.requirement_key})
+            <div className="relative w-full max-w-2xl rounded-2xl border border-border bg-card text-foreground shadow-2xl p-6 space-y-5">
+              <div className="flex items-center justify-between border-b border-border pb-4">
+                <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                  <Edit3 className="size-5 text-emerald-500" /> Edit Requirement ({selectedReq.requirement_key})
                 </h3>
-                <button onClick={() => setEditModalOpen(false)} className="text-slate-400 hover:text-white">
+                <button onClick={() => setEditModalOpen(false)} className="text-muted-foreground hover:text-foreground">
                   <X className="size-5" />
                 </button>
               </div>
 
-              <div className="rounded-lg bg-emerald-950/30 border border-emerald-800/40 p-3 text-xs text-emerald-300 flex items-center gap-2">
+              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
                 <History className="size-4 shrink-0" />
                 <span>Saving edits will automatically increment the version to <strong>Version {selectedReq.current_version + 1}</strong>. Historical versions will be preserved.</span>
               </div>
 
               {editError && (
-                <div className="rounded-lg bg-rose-950/40 border border-rose-800/60 p-3 text-xs text-rose-300 flex items-center gap-2">
+                <div className="rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
                   <AlertCircle className="size-4 shrink-0" /> {editError}
                 </div>
               )}
 
               <form onSubmit={handleUpdateRequirement} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Requirement Title *</label>
+                  <label className="block text-xs font-semibold text-foreground mb-1">Requirement Title *</label>
                   <input
                     type="text"
                     required
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Type</label>
+                    <label className="block text-xs font-semibold text-foreground mb-1">Type</label>
                     <select
                       value={editType}
                       onChange={(e) => setEditType(e.target.value)}
-                      className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
                     >
                       <option value="FUNCTIONAL">Functional</option>
                       <option value="NON_FUNCTIONAL">Non-Functional</option>
@@ -964,11 +1095,11 @@ export default function RequirementsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Priority</label>
+                    <label className="block text-xs font-semibold text-foreground mb-1">Priority</label>
                     <select
                       value={editPriority}
                       onChange={(e) => setEditPriority(e.target.value)}
-                      className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
                     >
                       <option value="URGENT">Urgent</option>
                       <option value="HIGH">High</option>
@@ -977,11 +1108,11 @@ export default function RequirementsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Source</label>
+                    <label className="block text-xs font-semibold text-foreground mb-1">Source</label>
                     <select
                       value={editSource}
                       onChange={(e) => setEditSource(e.target.value)}
-                      className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-300 focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
                     >
                       <option value="MANUAL_ENTRY">Manual Entry</option>
                       <option value="SRS">SRS Document</option>
@@ -994,42 +1125,42 @@ export default function RequirementsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Description *</label>
+                  <label className="block text-xs font-semibold text-foreground mb-1">Description *</label>
                   <textarea
                     required
                     rows={4}
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Acceptance Criteria</label>
+                  <label className="block text-xs font-semibold text-foreground mb-1">Acceptance Criteria</label>
                   <textarea
                     rows={3}
                     value={editCriteria}
                     onChange={(e) => setEditCriteria(e.target.value)}
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Change Summary for Version History</label>
+                  <label className="block text-xs font-semibold text-foreground mb-1">Change Summary for Version History</label>
                   <input
                     type="text"
                     placeholder="e.g. Refined security criteria and updated description"
                     value={editChangeSummary}
                     onChange={(e) => setEditChangeSummary(e.target.value)}
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setEditModalOpen(false)}
-                    className="rounded-lg bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 transition-colors cursor-pointer"
+                    className="rounded-lg border border-border bg-muted/50 px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>

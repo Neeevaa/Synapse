@@ -241,7 +241,7 @@ export default function EvaluationsAdminPage() {
   const conditionBadgeStyle = (cond: string) => {
     switch (cond) {
       case "LLM_ONLY":
-        return "bg-slate-800 text-slate-300 border-slate-700";
+        return "bg-muted text-foreground border-border";
       case "RAG_LLM":
         return "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
       case "RAG_LLM_HUMAN":
@@ -253,7 +253,7 @@ export default function EvaluationsAdminPage() {
 
   return (
     <ProtectedShell>
-      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="w-full space-y-6">
         {/* Page Header */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="space-y-1">
@@ -266,7 +266,7 @@ export default function EvaluationsAdminPage() {
               </h1>
             </div>
             <p className="text-xs text-muted-foreground">
-              Empirical quantitative benchmark comparing <code className="text-slate-300">LLM_ONLY</code> vs <code className="text-cyan-400">RAG_LLM</code> vs <code className="text-purple-400">RAG_LLM_HUMAN</code>
+              Empirical quantitative benchmark comparing <code className="text-foreground">LLM_ONLY</code> vs <code className="text-cyan-400">RAG_LLM</code> vs <code className="text-purple-400">RAG_LLM_HUMAN</code>
             </p>
           </div>
 
@@ -296,7 +296,7 @@ export default function EvaluationsAdminPage() {
           <div className="space-y-1">
             <span className="font-bold text-purple-300">Comparative Empirical Design Policy</span>
             <p className="text-purple-200/90 leading-relaxed">
-              To guarantee research integrity, Synapse strictly enforces that intelligence improvement claims are held until both <strong className="text-slate-200 font-mono">Direct Synthesis</strong> and <strong className="text-cyan-300 font-mono">Knowledge-Grounded</strong> experiments are executed side-by-side on identical human-verified evaluation datasets.
+              To guarantee research integrity, Synapse strictly enforces that intelligence improvement claims are held until both <strong className="text-foreground font-mono">Direct Synthesis</strong> and <strong className="text-cyan-300 font-mono">Knowledge-Grounded</strong> experiments are executed side-by-side on identical human-verified evaluation datasets.
             </p>
           </div>
         </div>
@@ -387,8 +387,8 @@ export default function EvaluationsAdminPage() {
                     <th className="py-3 px-4">Prompt</th>
                     <th className="py-3 px-4">Top K</th>
                     <th className="py-3 px-4 font-mono text-purple-400">F1</th>
-                    <th className="py-3 px-4 font-mono text-slate-300">Precision</th>
-                    <th className="py-3 px-4 font-mono text-slate-300">Recall</th>
+                    <th className="py-3 px-4 font-mono text-muted-foreground">Precision</th>
+                    <th className="py-3 px-4 font-mono text-muted-foreground">Recall</th>
                     <th className="py-3 px-4 text-cyan-400">P@K</th>
                     <th className="py-3 px-4 text-emerald-400">Grounding %</th>
                     <th className="py-3 px-4 text-right">Avg Latency</th>
@@ -404,7 +404,7 @@ export default function EvaluationsAdminPage() {
                       </td>
                       <td className="py-3.5 px-4 font-mono font-bold text-foreground">{r.model_name}</td>
                       <td className="py-3.5 px-4 font-mono text-muted-foreground">
-                        {r.embedding_model || <span className="text-slate-600">NULL (LLM_ONLY)</span>}
+                        {r.embedding_model || <span className="text-muted-foreground">NULL (LLM_ONLY)</span>}
                       </td>
                       <td className="py-3.5 px-4 font-mono text-muted-foreground">{r.prompt_version}</td>
                       <td className="py-3.5 px-4 font-mono text-foreground">{r.retrieval_top_k}</td>
@@ -482,7 +482,7 @@ export default function EvaluationsAdminPage() {
 
                     <p className="text-xs text-foreground font-medium leading-relaxed">{c.requirement_text}</p>
                     {c.project_context && (
-                      <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-[0.7rem] font-mono text-slate-300">
+                      <div className="p-2.5 rounded-lg bg-background border border-border text-[0.7rem] font-mono text-foreground">
                         {c.project_context}
                       </div>
                     )}
