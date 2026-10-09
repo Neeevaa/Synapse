@@ -133,8 +133,17 @@ def test_active_sprint_visibility(db_session: Session):
     task_service = TaskService(db_session)
 
     # Active Sprint
-    active_sprint = sprint_service.get_active_sprint(project.id, pm_user)
-    assert active_sprint.status == SprintStatus.ACTIVE
+    active_sprint = Sprint(
+        project_id=project.id,
+        name="Active Sprint 1",
+        status=SprintStatus.ACTIVE,
+    )
+    db_session.add(active_sprint)
+    db_session.commit()
+    db_session.refresh(active_sprint)
+
+    fetched_active = sprint_service.get_active_sprint(project.id, pm_user)
+    assert fetched_active.status == SprintStatus.ACTIVE
 
     # Planned Sprint
     planned_sprint = sprint_service.create_sprint(

@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from app.core.config.database import normalize_database_url
 
 env_path = Path(__file__).resolve().parent.parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
@@ -15,11 +16,15 @@ class JWTSettings:
 
 
 class DatabaseSettings:
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+psycopg://postgres:ryan@localhost:5432/synapse")
+    DATABASE_URL: str = normalize_database_url(
+        os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:postgres@localhost:5432/synapse")
+    )
 
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Synapse"
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", os.getenv("ENV", "development"))
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "") 
     EMBEDDING_DIMENSION: int = int(os.getenv("EMBEDDING_DIMENSION", "1536"))

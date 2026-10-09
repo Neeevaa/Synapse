@@ -24,12 +24,21 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
+from app.core.config.database import normalize_database_url
+
 target_metadata = Base.metadata
 
-# Override sqlalchemy.url with DATABASE_URL environment variable if present
+# Resolve and normalize database URL for migrations
 db_url = os.getenv("DATABASE_URL")
+if not db_url:
+    try:
+        from app.core.config import settings
+        db_url = settings.db.DATABASE_URL
+    except Exception:
+        db_url = config.get_main_option("sqlalchemy.url")
+
 if db_url:
-    config.set_main_option("sqlalchemy.url", db_url)
+    config.set_main_option("sqlalchemy.url", normalize_database_url(db_url))
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

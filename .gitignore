@@ -1,27 +1,43 @@
-python -m venv .venv# Environment variables
+# Environment variables
 .env
 .env.*
+*.env
 !.env.example
+backend/.env
+frontend/.env.local
 
 # Python
 __pycache__/
 *.py[cod]
+*$py.class
 .venv/
 venv/
+ENV/
+env/
 
-# Node
+# SQLite & local database artifacts
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Node / Next.js
 node_modules/
 .next/
 out/
 
-# IDE
+# IDE & Editor
 .idea/
 .vscode/
+*.swp
+*.swo
 
-# Logs
+# Logs, testing & reports
 *.log
-.env
-.env.*
-!.env.example
-node_modules
-node_modules
+.pytest_cache/
+htmlcov/
+.coverage
+testing_report_*.html
+testing_report_*.xml
