@@ -242,8 +242,8 @@ export default function KnowledgeBasePage() {
           <div
             className={`p-4 rounded-xl border flex items-center justify-between text-xs font-medium ${
               notice.type === "success"
-                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                : "bg-destructive/10 border-destructive/20 text-destructive"
+                ? "bg-primary/15 border-primary/25 text-primary"
+                : "bg-destructive/15 border-destructive/25 text-destructive"
             }`}
           >
             <div className="flex items-center gap-2">
@@ -261,7 +261,7 @@ export default function KnowledgeBasePage() {
           <div className="p-5 rounded-2xl border border-border/80 bg-card shadow-2xs hover:shadow-xs transition-shadow space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
               <span>Indexed Artifacts</span>
-              <FileText className="size-4 text-purple-400" />
+              <FileText className="size-4 text-secondary" />
             </div>
             <div className="text-2xl font-extrabold text-foreground">
               {indexStatus?.total_documents_indexed ?? "—"}
@@ -272,7 +272,7 @@ export default function KnowledgeBasePage() {
           <div className="p-5 rounded-2xl border border-border/80 bg-card shadow-2xs hover:shadow-xs transition-shadow space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
               <span>Knowledge Coverage</span>
-              <Layers className="size-4 text-cyan-400" />
+              <Layers className="size-4 text-info" />
             </div>
             <div className="text-2xl font-extrabold text-foreground">
               {indexStatus?.total_chunks_created ?? "—"}
@@ -283,9 +283,9 @@ export default function KnowledgeBasePage() {
           <div className="p-5 rounded-2xl border border-border/80 bg-card shadow-2xs hover:shadow-xs transition-shadow space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
               <span>Index Freshness</span>
-              <CheckCircle2 className="size-4 text-emerald-400" />
+              <CheckCircle2 className="size-4 text-primary" />
             </div>
-            <div className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">
+            <div className="text-xl font-extrabold text-primary">
               {indexStatus ? "Up to Date" : "Sync Ready"}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -427,7 +427,7 @@ export default function KnowledgeBasePage() {
                             </span>
                           )}
                           {res.source_version && (
-                            <span className="px-2.5 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold">
+                            <span className="px-2.5 py-0.5 rounded-md bg-secondary/15 text-secondary border border-secondary/25 text-xs font-semibold">
                               v{res.source_version}
                             </span>
                           )}
@@ -435,7 +435,7 @@ export default function KnowledgeBasePage() {
                         </div>
 
                         <div className="flex items-center gap-3">
-                          <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                          <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/15 px-2.5 py-1 rounded-full border border-primary/25">
                             <Sparkles className="size-3" /> {(res.similarity_score * 100).toFixed(1)}% Match
                           </span>
                           <Link
@@ -558,12 +558,12 @@ export default function KnowledgeBasePage() {
                           <td className="px-4 py-3 font-semibold text-primary">
                             {log.retrieved_chunk_ids?.length || 0}
                           </td>
-                          <td className="px-4 py-3 font-mono text-emerald-700 dark:text-emerald-400">
+                          <td className="px-4 py-3 font-mono text-primary">
                             {log.similarity_scores?.length
                               ? `${(Math.min(...log.similarity_scores) * 100).toFixed(0)}% - ${(Math.max(...log.similarity_scores) * 100).toFixed(0)}%`
                               : "N/A"}
                           </td>
-                          <td className="px-4 py-3 font-semibold text-amber-700 dark:text-amber-400">
+                          <td className="px-4 py-3 font-semibold text-secondary">
                             {log.retrieval_latency_ms} ms
                           </td>
                           <td className="px-4 py-3 text-xs text-muted-foreground">

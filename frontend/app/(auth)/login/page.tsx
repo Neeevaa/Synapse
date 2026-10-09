@@ -184,10 +184,10 @@ function LoginContent() {
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link
-            href="/join"
+            href="/register"
             className="font-medium text-primary hover:underline"
           >
-            Create an account
+            Click here to create an account
           </Link>
         </p>
       </div>

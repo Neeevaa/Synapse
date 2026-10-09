@@ -102,42 +102,56 @@ interface SprintDetail {
 }
 
 const BOARD_COLUMNS = [
-  { key: "TODO", label: "To Do", color: "border-zinc-500/30 text-zinc-600 dark:text-zinc-400" },
-  { key: "IN_PROGRESS", label: "In Progress", color: "border-blue-500/30 text-blue-600 dark:text-blue-400" },
-  { key: "IN_REVIEW", label: "In Review", color: "border-purple-500/30 text-purple-600 dark:text-purple-400" },
-  { key: "DONE", label: "Done", color: "border-emerald-500/30 text-emerald-600 dark:text-emerald-400" },
-  { key: "CANCELLED", label: "Cancelled", color: "border-red-500/30 text-red-600 dark:text-red-400" },
+  { key: "TODO", label: "To Do", color: "text-muted-foreground", isActive: false },
+  { key: "IN_PROGRESS", label: "In Progress", color: "text-secondary font-bold", isActive: true },
+  { key: "IN_REVIEW", label: "In Review", color: "text-info font-bold", isActive: false },
+  { key: "DONE", label: "Done", color: "text-primary font-bold", isActive: false },
+  { key: "CANCELLED", label: "Cancelled", color: "text-muted-foreground/80", isActive: false },
 ];
 
 const WORKSTREAM_BADGES: Record<string, { label: string; style: string }> = {
-  GENERAL: { label: "General", style: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20" },
-  UI_UX: { label: "UI/UX", style: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20" },
-  FRONTEND: { label: "Frontend", style: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" },
-  BACKEND: { label: "Backend", style: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20" },
-  QA: { label: "QA", style: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" },
-  DEVOPS: { label: "DevOps", style: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20" },
-  AI_ML: { label: "AI/ML", style: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
+  GENERAL: { label: "General", style: "bg-muted/60 text-muted-foreground border-border" },
+  UI_UX: { label: "UI/UX", style: "bg-accent/20 text-accent-foreground border-accent/30" },
+  FRONTEND: { label: "Frontend", style: "bg-primary/15 text-primary border-primary/25" },
+  BACKEND: { label: "Backend", style: "bg-secondary/20 text-secondary border-secondary/30" },
+  QA: { label: "QA", style: "bg-warning/15 text-warning border-warning/25" },
+  DEVOPS: { label: "DevOps", style: "bg-info/15 text-info border-info/25" },
+  AI_ML: { label: "AI/ML", style: "bg-primary/15 text-primary border-primary/25" },
 };
 
 function WorkstreamBadge({ workstream }: { workstream?: string | null }) {
   const ws = workstream || "GENERAL";
   const badge = WORKSTREAM_BADGES[ws] || WORKSTREAM_BADGES.GENERAL;
   return (
-    <span className={`px-2 py-0.5 rounded-md text-xs border font-semibold uppercase tracking-wider ${badge.style}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border font-medium uppercase tracking-wider ${badge.style}`}>
       {badge.label}
     </span>
   );
 }
 
 function PriorityBadge({ priority }: { priority: string }) {
-  const colors: Record<string, string> = {
-    LOW: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border-zinc-500/20",
-    MEDIUM: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-    HIGH: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
-    URGENT: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 font-bold",
+  const configs: Record<string, { style: string; dot: string }> = {
+    LOW: {
+      style: "bg-muted/80 text-foreground border-border",
+      dot: "bg-primary",
+    },
+    MEDIUM: {
+      style: "bg-warning/15 text-warning border-warning/25",
+      dot: "bg-warning",
+    },
+    HIGH: {
+      style: "bg-warning/25 text-warning border-warning/35",
+      dot: "bg-destructive",
+    },
+    URGENT: {
+      style: "bg-destructive/15 text-destructive border-destructive/30 font-bold",
+      dot: "bg-destructive",
+    },
   };
+  const cfg = configs[priority] || configs.MEDIUM;
   return (
-    <span className={`px-2 py-0.5 rounded-md text-xs border font-semibold uppercase tracking-wider ${colors[priority] || colors.MEDIUM}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs border font-medium uppercase tracking-wider ${cfg.style}`}>
+      <span className={`size-1.5 rounded-full ${cfg.dot}`} />
       {priority}
     </span>
   );
@@ -545,14 +559,16 @@ export default function SprintBoardPage() {
               return (
                 <div
                   key={col.key}
-                  className="rounded-2xl border border-border/70 bg-card/60 dark:bg-card/40 backdrop-blur-xs p-3.5 flex flex-col min-h-[520px] shadow-2xs"
+                  className={`rounded-2xl border bg-card/75 backdrop-blur-xs p-3.5 flex flex-col min-h-[520px] shadow-2xs transition-colors ${
+                    col.isActive ? "border-primary/40 ring-1 ring-primary/20" : "border-border/80"
+                  }`}
                 >
                   {/* Column Header */}
                   <div className="flex items-center justify-between pb-2.5 border-b border-border/70 mb-3">
-                    <span className={`text-xs font-extrabold uppercase tracking-wider ${col.color}`}>
+                    <span className={`text-xs font-bold uppercase tracking-wider ${col.color}`}>
                       {col.label}
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-muted/80 flex items-center justify-center text-xs font-bold text-foreground border border-border/50">
+                    <span className="px-2 py-0.5 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-foreground border border-border">
                       {colTasks.length}
                     </span>
                   </div>

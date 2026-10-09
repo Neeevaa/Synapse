@@ -293,45 +293,45 @@ export default function RequirementsPage() {
   const getTypeBadgeStyle = (type: string) => {
     switch (type) {
       case "FUNCTIONAL":
-        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+        return "bg-primary/15 text-primary border-primary/25";
       case "NON_FUNCTIONAL":
-        return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
+        return "bg-secondary/20 text-secondary border-secondary/30";
       case "USER_STORY":
-        return "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20";
+        return "bg-info/15 text-info border-info/25";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-muted-foreground border-border";
     }
   };
 
   const getPriorityBadgeStyle = (prio: string) => {
     switch (prio) {
       case "URGENT":
-        return "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30";
+        return "bg-destructive/15 text-destructive border-destructive/30 font-bold";
       case "HIGH":
-        return "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30";
+        return "bg-warning/25 text-warning border-warning/35";
       case "MEDIUM":
-        return "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30";
+        return "bg-warning/15 text-warning border-warning/25";
       case "LOW":
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-foreground border-border";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-foreground border-border";
     }
   };
 
   const getStatusBadgeStyle = (st: string) => {
     switch (st) {
       case "APPROVED":
-        return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
+        return "bg-primary/15 text-primary border-primary/25";
       case "REVIEW":
-        return "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30";
+        return "bg-warning/15 text-warning border-warning/25";
       case "DRAFT":
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-muted-foreground border-border";
       case "REJECTED":
-        return "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30";
+        return "bg-destructive/15 text-destructive border-destructive/30";
       case "ARCHIVED":
-        return "bg-zinc-500/15 text-zinc-600 dark:text-zinc-400 border-zinc-500/30";
+        return "bg-muted/60 text-muted-foreground/80 border-border";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-muted-foreground border-border";
     }
   };
 
@@ -368,13 +368,13 @@ export default function RequirementsPage() {
         {/* Banner Header */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="size-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-              <FileText className="size-6 text-emerald-600 dark:text-emerald-400" />
+            <div className="size-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+              <FileText className="size-6 text-primary" />
             </div>
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-xl font-extrabold text-foreground tracking-tight">Requirements Management</h1>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/25">
                   {totalCount} Total
                 </span>
               </div>
@@ -386,7 +386,7 @@ export default function RequirementsPage() {
 
           <button
             onClick={() => setCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-emerald-500 cursor-pointer shrink-0"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/95 cursor-pointer shrink-0"
           >
             <Plus className="size-4" /> New Requirement
           </button>
@@ -397,7 +397,7 @@ export default function RequirementsPage() {
           <div
             className={`rounded-xl p-4 text-xs font-medium border flex items-center justify-between ${
               actionNotice.type === "success"
-                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                ? "bg-primary/15 text-primary border-primary/25"
                 : "bg-destructive/10 text-destructive border-destructive/20"
             }`}
           >
@@ -418,27 +418,27 @@ export default function RequirementsPage() {
             </span>
             <div className="text-xl font-extrabold text-foreground">{totalCount}</div>
           </div>
-          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 shadow-2xs space-y-1">
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+          <div className="rounded-2xl border border-primary/20 bg-primary/10 p-4 shadow-2xs space-y-1">
+            <span className="text-xs font-semibold text-primary uppercase tracking-wider">
               Approved
             </span>
-            <div className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">
+            <div className="text-xl font-extrabold text-primary">
               {requirements.filter((r) => r.status === "APPROVED").length}
             </div>
           </div>
-          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 shadow-2xs space-y-1">
-            <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+          <div className="rounded-2xl border border-secondary/25 bg-secondary/10 p-4 shadow-2xs space-y-1">
+            <span className="text-xs font-semibold text-secondary uppercase tracking-wider">
               In Review
             </span>
-            <div className="text-xl font-extrabold text-primary">
+            <div className="text-xl font-extrabold text-secondary">
               {requirements.filter((r) => r.status === "REVIEW").length}
             </div>
           </div>
-          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 shadow-2xs space-y-1">
-            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+          <div className="rounded-2xl border border-warning/25 bg-warning/10 p-4 shadow-2xs space-y-1">
+            <span className="text-xs font-semibold text-warning uppercase tracking-wider">
               Draft / Other
             </span>
-            <div className="text-xl font-extrabold text-amber-600 dark:text-amber-400">
+            <div className="text-xl font-extrabold text-warning">
               {requirements.filter((r) => r.status !== "APPROVED" && r.status !== "REVIEW").length}
             </div>
           </div>
@@ -458,7 +458,7 @@ export default function RequirementsPage() {
                   setSearchKeyword(e.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-xl border border-border bg-background pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
               />
             </div>
 
@@ -470,7 +470,7 @@ export default function RequirementsPage() {
                   setTypeFilter(e.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
               >
                 <option value="ALL">All Types</option>
                 <option value="FUNCTIONAL">Functional</option>
@@ -487,7 +487,7 @@ export default function RequirementsPage() {
                   setPriorityFilter(e.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
               >
                 <option value="ALL">All Priorities</option>
                 <option value="URGENT">Urgent</option>
@@ -505,7 +505,7 @@ export default function RequirementsPage() {
                   setStatusFilter(e.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="DRAFT">Draft</option>
@@ -522,11 +522,11 @@ export default function RequirementsPage() {
         <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xs">
           {loading ? (
             <div className="flex flex-col items-center justify-center p-12 text-muted-foreground space-y-3">
-              <Loader2 className="size-8 animate-spin text-emerald-500" />
+              <Loader2 className="size-8 animate-spin text-primary" />
               <p className="text-xs font-medium">Loading project requirements...</p>
             </div>
           ) : error ? (
-            <div className="p-8 text-center text-rose-500 space-y-2">
+            <div className="p-8 text-center text-destructive space-y-2">
               <AlertCircle className="size-8 mx-auto" />
               <p className="text-xs font-semibold">{error}</p>
             </div>
@@ -539,7 +539,7 @@ export default function RequirementsPage() {
               </p>
               <button
                 onClick={() => setCreateModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/95 cursor-pointer"
               >
                 <Plus className="size-3.5" /> Create Requirement
               </button>
@@ -566,7 +566,7 @@ export default function RequirementsPage() {
                       onClick={() => handleOpenDetail(req)}
                       className="hover:bg-muted/40 transition-colors cursor-pointer group"
                     >
-                      <td className="py-3.5 px-4 font-mono font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{req.requirement_key}</td>
+                      <td className="py-3.5 px-4 font-mono font-bold text-primary whitespace-nowrap">{req.requirement_key}</td>
                       <td className="py-3.5 px-4 font-semibold text-foreground group-hover:text-primary transition-colors max-w-xs md:max-w-sm lg:max-w-md xl:max-w-xl truncate" title={req.title}>
                         {req.title}
                       </td>
@@ -595,9 +595,9 @@ export default function RequirementsPage() {
                         <button
                           onClick={() => handleOpenDetail(req, "test-cases")}
                           data-testid={`row-ai-test-cases-btn-${req.id}`}
-                          className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-semibold px-2.5 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors mr-2 cursor-pointer"
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/90 font-semibold px-2.5 py-1 rounded bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors mr-2 cursor-pointer"
                         >
-                          <Sparkles className="size-3 text-emerald-600 dark:text-emerald-400" /> AI Test Cases
+                          <Sparkles className="size-3 text-primary" /> AI Test Cases
                         </button>
                         <button
                           onClick={() => setReviewModalReq(req)}
@@ -634,7 +634,7 @@ export default function RequirementsPage() {
               <div className="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/30">
                 <div className="space-y-1.5 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20">
+                    <span className="font-mono font-bold text-xs text-primary bg-primary/10 px-2.5 py-0.5 rounded border border-primary/20">
                       {selectedReq.requirement_key}
                     </span>
                     <span className={`px-2.5 py-0.5 rounded text-xs font-semibold border ${getTypeBadgeStyle(selectedReq.requirement_type)}`}>
@@ -659,7 +659,7 @@ export default function RequirementsPage() {
                   <button
                     onClick={() => setActiveDetailTab("test-cases")}
                     data-testid="header-generate-test-cases-btn"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-primary hover:bg-primary/95 text-primary-foreground px-3.5 py-2 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                   >
                     <Sparkles className="size-3.5" /> Generate Test Cases with AI
                   </button>
@@ -687,7 +687,7 @@ export default function RequirementsPage() {
                   data-testid="tab-overview"
                   className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
                     activeDetailTab === "overview"
-                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -699,7 +699,7 @@ export default function RequirementsPage() {
                   data-testid="tab-acceptance"
                   className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
                     activeDetailTab === "acceptance"
-                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -711,11 +711,11 @@ export default function RequirementsPage() {
                   data-testid="tab-ai-test-cases"
                   className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
                     activeDetailTab === "test-cases"
-                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <Sparkles className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <Sparkles className="size-3.5 text-primary" />
                   <span>AI Test Cases</span>
                 </button>
 
@@ -724,7 +724,7 @@ export default function RequirementsPage() {
                   data-testid="tab-history"
                   className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
                     activeDetailTab === "history"
-                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -818,14 +818,14 @@ export default function RequirementsPage() {
                               <button
                                 disabled={actionLoading}
                                 onClick={() => handleStatusTransition("APPROVED", "Approved by Project Manager")}
-                                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-3 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
+                                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary hover:bg-primary/95 px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors cursor-pointer"
                               >
                                 <CheckCircle2 className="size-3.5" /> Approve
                               </button>
                               <button
                                 disabled={actionLoading}
                                 onClick={() => handleStatusTransition("REJECTED", "Rejected during review")}
-                                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 px-3 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
+                                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-destructive hover:bg-destructive/90 px-3 py-2 text-xs font-semibold text-destructive-foreground transition-colors cursor-pointer"
                               >
                                 <XCircle className="size-3.5" /> Reject
                               </button>
@@ -856,7 +856,7 @@ export default function RequirementsPage() {
                       </h4>
                       <button
                         onClick={() => setActiveDetailTab("test-cases")}
-                        className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-semibold cursor-pointer"
+                        className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/90 font-semibold cursor-pointer"
                       >
                         <Sparkles className="size-3.5" /> Convert to Test Cases
                       </button>
@@ -877,7 +877,7 @@ export default function RequirementsPage() {
                   <div className="p-6 space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                        <History className="size-3.5 text-emerald-600 dark:text-emerald-400" /> Version History
+                        <History className="size-3.5 text-primary" /> Version History
                       </h4>
                       <span className="text-[11px] text-muted-foreground">{selectedReq.versions.length} versions recorded</span>
                     </div>
@@ -892,15 +892,15 @@ export default function RequirementsPage() {
                             onClick={() => setActiveVersion(ver)}
                             className={`p-4 rounded-xl border text-xs cursor-pointer transition-all ${
                               isSelected
-                                ? "bg-emerald-500/10 border-emerald-500/30 text-foreground"
+                                ? "bg-primary/10 border-primary/30 text-foreground"
                                 : "bg-card border-border text-foreground hover:bg-muted/30"
                             }`}
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                              <span className="font-mono font-bold text-primary flex items-center gap-2">
                                 Version {ver.version_number}{" "}
                                 {isCurrent && (
-                                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                  <span className="text-[10px] text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
                                     Current
                                   </span>
                                 )}
@@ -932,15 +932,15 @@ export default function RequirementsPage() {
             <div className="relative w-full max-w-2xl rounded-2xl border border-border bg-card text-foreground shadow-2xl p-6 space-y-5">
               <div className="flex items-center justify-between border-b border-border pb-4">
                 <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                  <FileText className="size-5 text-emerald-500" /> New Requirement
+                  <FileText className="size-5 text-primary" /> New Requirement
                 </h3>
-                <button onClick={() => setCreateModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <button onClick={() => setCreateModalOpen(false)} className="text-muted-foreground hover:text-foreground cursor-pointer">
                   <X className="size-5" />
                 </button>
               </div>
 
               {createError && (
-                <div className="rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
+                <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-xs text-destructive flex items-center gap-2">
                   <AlertCircle className="size-4 shrink-0" /> {createError}
                 </div>
               )}
@@ -954,7 +954,7 @@ export default function RequirementsPage() {
                     placeholder="e.g. Multi-factor Authentication Support"
                     value={createTitle}
                     onChange={(e) => setCreateTitle(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                   />
                 </div>
 
@@ -964,7 +964,7 @@ export default function RequirementsPage() {
                     <select
                       value={createType}
                       onChange={(e) => setCreateType(e.target.value)}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
                     >
                       <option value="FUNCTIONAL">Functional</option>
                       <option value="NON_FUNCTIONAL">Non-Functional</option>
@@ -976,7 +976,7 @@ export default function RequirementsPage() {
                     <select
                       value={createPriority}
                       onChange={(e) => setCreatePriority(e.target.value)}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
                     >
                       <option value="URGENT">Urgent</option>
                       <option value="HIGH">High</option>
@@ -989,7 +989,7 @@ export default function RequirementsPage() {
                     <select
                       value={createSource}
                       onChange={(e) => setCreateSource(e.target.value)}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
                     >
                       <option value="MANUAL_ENTRY">Manual Entry</option>
                       <option value="SRS">SRS Document</option>
@@ -1009,7 +1009,7 @@ export default function RequirementsPage() {
                     placeholder="Detailed explanation of system behavior and requirements..."
                     value={createDescription}
                     onChange={(e) => setCreateDescription(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                   />
                 </div>
 
@@ -1020,7 +1020,7 @@ export default function RequirementsPage() {
                     placeholder="1. User receives SMS TOTP code&#10;2. Code expires after 3 minutes"
                     value={createCriteria}
                     onChange={(e) => setCreateCriteria(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                   />
                 </div>
 
@@ -1035,7 +1035,7 @@ export default function RequirementsPage() {
                   <button
                     type="submit"
                     disabled={creating}
-                    className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-500 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
                   >
                     {creating && <Loader2 className="size-3.5 animate-spin" />} Create Requirement
                   </button>
@@ -1051,20 +1051,20 @@ export default function RequirementsPage() {
             <div className="relative w-full max-w-2xl rounded-2xl border border-border bg-card text-foreground shadow-2xl p-6 space-y-5">
               <div className="flex items-center justify-between border-b border-border pb-4">
                 <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                  <Edit3 className="size-5 text-emerald-500" /> Edit Requirement ({selectedReq.requirement_key})
+                  <Edit3 className="size-5 text-primary" /> Edit Requirement ({selectedReq.requirement_key})
                 </h3>
                 <button onClick={() => setEditModalOpen(false)} className="text-muted-foreground hover:text-foreground">
                   <X className="size-5" />
                 </button>
               </div>
 
-              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+              <div className="rounded-lg bg-primary/15 border border-primary/25 p-3 text-xs text-primary flex items-center gap-2">
                 <History className="size-4 shrink-0" />
                 <span>Saving edits will automatically increment the version to <strong>Version {selectedReq.current_version + 1}</strong>. Historical versions will be preserved.</span>
               </div>
 
               {editError && (
-                <div className="rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
+                <div className="rounded-lg bg-destructive/15 border border-destructive/25 p-3 text-xs text-destructive flex items-center gap-2">
                   <AlertCircle className="size-4 shrink-0" /> {editError}
                 </div>
               )}
@@ -1077,7 +1077,7 @@ export default function RequirementsPage() {
                     required
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                   />
                 </div>
 
@@ -1087,7 +1087,7 @@ export default function RequirementsPage() {
                     <select
                       value={editType}
                       onChange={(e) => setEditType(e.target.value)}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
                     >
                       <option value="FUNCTIONAL">Functional</option>
                       <option value="NON_FUNCTIONAL">Non-Functional</option>
@@ -1099,7 +1099,7 @@ export default function RequirementsPage() {
                     <select
                       value={editPriority}
                       onChange={(e) => setEditPriority(e.target.value)}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
                     >
                       <option value="URGENT">Urgent</option>
                       <option value="HIGH">High</option>
@@ -1112,7 +1112,7 @@ export default function RequirementsPage() {
                     <select
                       value={editSource}
                       onChange={(e) => setEditSource(e.target.value)}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
                     >
                       <option value="MANUAL_ENTRY">Manual Entry</option>
                       <option value="SRS">SRS Document</option>
@@ -1131,7 +1131,7 @@ export default function RequirementsPage() {
                     rows={4}
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                   />
                 </div>
 
@@ -1141,7 +1141,7 @@ export default function RequirementsPage() {
                     rows={3}
                     value={editCriteria}
                     onChange={(e) => setEditCriteria(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                   />
                 </div>
 
@@ -1152,7 +1152,7 @@ export default function RequirementsPage() {
                     placeholder="e.g. Refined security criteria and updated description"
                     value={editChangeSummary}
                     onChange={(e) => setEditChangeSummary(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
                   />
                 </div>
 
@@ -1167,7 +1167,7 @@ export default function RequirementsPage() {
                   <button
                     type="submit"
                     disabled={updating}
-                    className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-500 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
                   >
                     {updating && <Loader2 className="size-3.5 animate-spin" />} Save New Version (v{selectedReq.current_version + 1})
                   </button>

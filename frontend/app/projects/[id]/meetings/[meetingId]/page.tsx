@@ -699,34 +699,32 @@ export default function MeetingDetailPage() {
   const getTypeBadgeStyle = (type: string) => {
     switch (type) {
       case "PLANNING":
-        return "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20";
-      case "STANDUP":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
-      case "REVIEW":
-        return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20";
-      case "RETROSPECTIVE":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
-      case "REQUIREMENT_DISCUSSION":
-        return "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20";
       case "TECHNICAL":
-        return "bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20";
+        return "bg-secondary/15 text-secondary border-secondary/25";
+      case "STANDUP":
+        return "bg-primary/15 text-primary border-primary/25";
+      case "REVIEW":
+      case "REQUIREMENT_DISCUSSION":
+        return "bg-info/15 text-info border-info/25";
+      case "RETROSPECTIVE":
+        return "bg-warning/15 text-warning border-warning/25";
       case "CLIENT":
-        return "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20";
+        return "bg-accent/20 text-accent-foreground border-accent/30";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-muted-foreground border-border";
     }
   };
 
   const getStatusBadgeStyle = (st: string) => {
     switch (st) {
       case "SCHEDULED":
-        return "bg-sky-500/15 text-sky-700 dark:text-sky-400 border-sky-500/30";
+        return "bg-info/15 text-info border-info/25";
       case "IN_PROGRESS":
-        return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 animate-pulse";
+        return "bg-primary/15 text-primary border-primary/25 animate-pulse";
       case "COMPLETED":
-        return "bg-purple-500/15 text-purple-700 dark:text-purple-400 border-purple-500/30";
+        return "bg-secondary/20 text-secondary border-secondary/30";
       case "CANCELLED":
-        return "bg-zinc-500/20 text-zinc-600 dark:text-zinc-400 border-zinc-500/30";
+        return "bg-muted/80 text-muted-foreground border-border";
       default:
         return "bg-muted text-muted-foreground border-border";
     }
@@ -823,7 +821,7 @@ export default function MeetingDetailPage() {
             {meeting.status === "SCHEDULED" && (
               <button
                 onClick={handleStartMeeting}
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-emerald-500 cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 cursor-pointer"
               >
                 <Play className="size-3.5" /> Start Meeting
               </button>
@@ -832,7 +830,7 @@ export default function MeetingDetailPage() {
             {meeting.status === "IN_PROGRESS" && (
               <button
                 onClick={() => router.push(`/projects/${projectId}/meetings/${meetingId}/room`)}
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-emerald-500 cursor-pointer animate-pulse"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 cursor-pointer animate-pulse"
               >
                 <Video className="size-3.5" /> Join Meeting Room
               </button>
@@ -841,7 +839,7 @@ export default function MeetingDetailPage() {
             {(meeting.status === "SCHEDULED" || meeting.status === "IN_PROGRESS") && (
               <button
                 onClick={() => handleStatusTransition("COMPLETED")}
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-lg bg-secondary px-3.5 py-2 text-xs font-semibold text-secondary-foreground shadow-xs transition-colors hover:bg-secondary/90 cursor-pointer"
               >
                 <CheckCircle2 className="size-3.5" /> Complete Meeting
               </button>
@@ -852,7 +850,7 @@ export default function MeetingDetailPage() {
                 onClick={() => handleStatusTransition("CANCELLED")}
                 className="inline-flex items-center gap-2 rounded-lg bg-background px-3 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground border border-border transition-colors cursor-pointer"
               >
-                <XCircle className="size-3.5 text-rose-500 dark:text-rose-400" /> Cancel
+                <XCircle className="size-3.5 text-destructive" /> Cancel
               </button>
             )}
           </div>
@@ -860,20 +858,20 @@ export default function MeetingDetailPage() {
 
         {/* Active Live Meeting Room Banner */}
         {meeting.status === "IN_PROGRESS" && (
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex items-center justify-between gap-4 shadow-xs">
+          <div className="rounded-xl border border-primary/30 bg-primary/10 p-4 flex items-center justify-between gap-4 shadow-xs">
             <div className="flex items-center gap-3">
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
               </span>
               <div>
-                <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">Meeting is currently LIVE in progress</p>
+                <p className="text-xs font-bold text-primary">Meeting is currently LIVE in progress</p>
                 <p className="text-[11px] text-muted-foreground">The meeting room is open. Enter the room to collaborate with participants.</p>
               </div>
             </div>
             <button
               onClick={() => router.push(`/projects/${projectId}/meetings/${meetingId}/room`)}
-              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-emerald-500 transition-colors shrink-0 cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 cursor-pointer shadow-xs"
             >
               <Video className="size-3.5" /> Enter Room
             </button>
@@ -885,8 +883,8 @@ export default function MeetingDetailPage() {
           <div
             className={`rounded-lg p-4 text-xs font-medium border flex items-center justify-between ${
               notice.type === "success"
-                ? "bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-500/30"
-                : "bg-rose-500/10 text-rose-800 dark:text-rose-300 border-rose-500/30"
+                ? "bg-primary/15 text-primary border-primary/25"
+                : "bg-destructive/15 text-destructive border-destructive/25"
             }`}
           >
             <span className="flex items-center gap-2">
@@ -904,7 +902,7 @@ export default function MeetingDetailPage() {
             onClick={() => setActiveTab("notes")}
             className={`pb-3 text-xs font-semibold transition-colors border-b-2 cursor-pointer flex items-center gap-2 ${
               activeTab === "notes"
-                ? "border-cyan-500 text-cyan-700 dark:text-cyan-400"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -914,7 +912,7 @@ export default function MeetingDetailPage() {
             onClick={() => setActiveTab("participants")}
             className={`pb-3 text-xs font-semibold transition-colors border-b-2 cursor-pointer flex items-center gap-2 ${
               activeTab === "participants"
-                ? "border-cyan-500 text-cyan-700 dark:text-cyan-400"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -924,7 +922,7 @@ export default function MeetingDetailPage() {
             onClick={() => setActiveTab("agenda")}
             className={`pb-3 text-xs font-semibold transition-colors border-b-2 cursor-pointer flex items-center gap-2 ${
               activeTab === "agenda"
-                ? "border-cyan-500 text-cyan-700 dark:text-cyan-400"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -934,7 +932,7 @@ export default function MeetingDetailPage() {
             onClick={() => setActiveTab("transcript")}
             className={`pb-3 text-xs font-semibold transition-colors border-b-2 cursor-pointer flex items-center gap-2 ${
               activeTab === "transcript"
-                ? "border-cyan-500 text-cyan-700 dark:text-cyan-400"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -944,7 +942,7 @@ export default function MeetingDetailPage() {
             onClick={() => setActiveTab("actions")}
             className={`pb-3 text-xs font-semibold transition-colors border-b-2 cursor-pointer flex items-center gap-2 ${
               activeTab === "actions"
-                ? "border-cyan-500 text-cyan-700 dark:text-cyan-400"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -954,13 +952,13 @@ export default function MeetingDetailPage() {
             onClick={() => setActiveTab("intelligence")}
             className={`pb-3 text-xs font-semibold transition-colors border-b-2 cursor-pointer flex items-center gap-2 ${
               activeTab === "intelligence"
-                ? "border-emerald-500 text-emerald-700 dark:text-emerald-400"
+                ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Sparkles className="size-4 text-emerald-600 dark:text-emerald-400" /> Intelligence
+            <Sparkles className="size-4 text-primary" /> Intelligence
             {latestAnalysis && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono">
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-primary/20 text-primary font-mono">
                 AI
               </span>
             )}
@@ -978,7 +976,7 @@ export default function MeetingDetailPage() {
               <button
                 onClick={handleSaveNotes}
                 disabled={savingNotes}
-                className="inline-flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
               >
                 {savingNotes ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />} Save Structured Notes
               </button>
@@ -1157,7 +1155,7 @@ export default function MeetingDetailPage() {
                 <button
                   onClick={handleSaveTranscript}
                   disabled={savingTranscript}
-                  className="inline-flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
                 >
                   {savingTranscript ? <Loader2 className="size-3.5 animate-spin" /> : <Save className="size-3.5" />} Save Source Transcript
                 </button>
@@ -1177,7 +1175,7 @@ export default function MeetingDetailPage() {
 
               <button
                 onClick={() => setActionModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
               >
                 <Plus className="size-4" /> Add Action Item
               </button>
@@ -1214,13 +1212,13 @@ export default function MeetingDetailPage() {
                             </span>
                           </td>
                           <td className="py-3.5 px-4">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-secondary/15 text-secondary border border-secondary/25">
                               {ai.status}
                             </span>
                           </td>
                           <td className="py-3.5 px-4 font-mono">
                             {ai.requirement_key ? (
-                              <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                              <span className="inline-flex items-center gap-1 text-primary bg-primary/15 px-2 py-0.5 rounded border border-primary/25">
                                 <FileText className="size-3" /> {ai.requirement_key}
                               </span>
                             ) : (
@@ -1263,12 +1261,12 @@ export default function MeetingDetailPage() {
               {latestAnalysis && (
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs font-mono text-muted-foreground border border-border bg-muted/30 px-2.5 py-1 rounded-lg">
-                    Analysis: <strong className="text-emerald-700 dark:text-emerald-400">Synapse AI</strong>
+                    Analysis: <strong className="text-primary">Synapse AI</strong>
                   </span>
                   <button
                     onClick={handleRunAnalysis}
                     disabled={analyzing || !hasTranscript}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/15 hover:bg-primary/25 text-primary border border-primary/25 text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {analyzing ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
                     <span>Re-run Analysis</span>
@@ -1295,11 +1293,11 @@ export default function MeetingDetailPage() {
                     <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider block">
                       Decisions
                     </span>
-                    <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">
+                    <p className="text-xl font-bold text-primary mt-0.5">
                       {latestAnalysis.decisions?.length || 0}
                     </p>
                   </div>
-                  <div className="size-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                  <div className="size-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                     <CheckCircle2 className="size-5" />
                   </div>
                 </div>
@@ -1309,11 +1307,11 @@ export default function MeetingDetailPage() {
                     <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider block">
                       Project Risks
                     </span>
-                    <p className="text-xl font-bold text-amber-700 dark:text-amber-400 mt-0.5">
+                    <p className="text-xl font-bold text-warning mt-0.5">
                       {latestAnalysis.risks?.length || 0}
                     </p>
                   </div>
-                  <div className="size-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                  <div className="size-9 rounded-lg bg-warning/15 border border-warning/25 flex items-center justify-center text-warning">
                     <AlertTriangle className="size-5" />
                   </div>
                 </div>
@@ -1323,11 +1321,11 @@ export default function MeetingDetailPage() {
                     <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider block">
                       Action Items
                     </span>
-                    <p className="text-xl font-bold text-cyan-700 dark:text-cyan-400 mt-0.5">
+                    <p className="text-xl font-bold text-secondary mt-0.5">
                       {meeting.action_items?.length || 0}
                     </p>
                   </div>
-                  <div className="size-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                  <div className="size-9 rounded-lg bg-secondary/15 border border-secondary/25 flex items-center justify-center text-secondary">
                     <CheckSquare className="size-5" />
                   </div>
                 </div>
@@ -1346,7 +1344,7 @@ export default function MeetingDetailPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="size-9 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                  <div className="size-9 rounded-lg bg-info/15 border border-info/25 flex items-center justify-center text-info">
                     <Sliders className="size-5" />
                   </div>
                 </div>

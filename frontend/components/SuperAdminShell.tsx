@@ -204,7 +204,7 @@ export default function SuperAdminShell({ children, pageTitle }: SuperAdminShell
               <div className="text-xs font-bold text-foreground">
                 {user?.first_name} {user?.last_name}
               </div>
-              <div className="text-[12px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 uppercase">
+              <div className="text-[12px] font-bold tracking-wider text-primary uppercase">
                 Super Admin
               </div>
             </div>
@@ -237,7 +237,7 @@ export default function SuperAdminShell({ children, pageTitle }: SuperAdminShell
               <Server className="size-6 text-primary" />
               {pageTitle}
             </h1>
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary/15 text-primary border border-primary/25 flex items-center gap-1.5">
               <Activity className="size-3.5 animate-pulse" /> Platform Active
             </span>
           </div>

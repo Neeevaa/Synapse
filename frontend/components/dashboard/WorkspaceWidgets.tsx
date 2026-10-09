@@ -88,7 +88,7 @@ export interface DashboardContextData {
 /* ─── HELPER BADGES ─── */
 export function FormatBadge({ label, colorClass }: { label: string; colorClass: string }) {
   return (
-    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border ${colorClass}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide border ${colorClass}`}>
       {label}
     </span>
   );
@@ -97,15 +97,15 @@ export function FormatBadge({ label, colorClass }: { label: string; colorClass: 
 export function WorkstreamBadge({ workstream }: { workstream: string | null }) {
   const ws = workstream || "GENERAL";
   const styles: Record<string, { label: string; style: string }> = {
-    GENERAL: { label: "General", style: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20" },
-    DESIGN: { label: "UI/UX", style: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20" },
-    UI_UX: { label: "UI/UX", style: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20" },
-    FRONTEND: { label: "Frontend", style: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" },
-    BACKEND: { label: "Backend", style: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20" },
-    QA: { label: "QA", style: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" },
-    QA_TESTING: { label: "QA", style: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" },
-    DEVOPS: { label: "DevOps", style: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20" },
-    AI_ML: { label: "AI/ML", style: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
+    GENERAL: { label: "General", style: "bg-muted/60 text-muted-foreground border-border" },
+    DESIGN: { label: "UI/UX", style: "bg-accent/20 text-accent-foreground border-accent/30" },
+    UI_UX: { label: "UI/UX", style: "bg-accent/20 text-accent-foreground border-accent/30" },
+    FRONTEND: { label: "Frontend", style: "bg-primary/15 text-primary border-primary/25" },
+    BACKEND: { label: "Backend", style: "bg-secondary/20 text-secondary border-secondary/30" },
+    QA: { label: "QA", style: "bg-warning/15 text-warning border-warning/25" },
+    QA_TESTING: { label: "QA", style: "bg-warning/15 text-warning border-warning/25" },
+    DEVOPS: { label: "DevOps", style: "bg-info/15 text-info border-info/25" },
+    AI_ML: { label: "AI/ML", style: "bg-primary/15 text-primary border-primary/25" },
   };
   const target = styles[ws] || styles.GENERAL;
   return <FormatBadge label={target.label} colorClass={target.style} />;
@@ -143,11 +143,13 @@ export function MyActiveTasksWidget({ tasks, projectId }: { tasks: TaskItem[]; p
                 <div className="flex items-center gap-2 flex-wrap">
                   <WorkstreamBadge workstream={task.workstream} />
                   <span
-                    className={`px-2 py-0.5 rounded text-xs font-extrabold uppercase border ${
-                      task.priority === "URGENT"
-                        ? "bg-destructive/10 text-destructive border-destructive/20"
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${
+                      task.priority === "URGENT" || task.priority === "CRITICAL"
+                        ? "bg-destructive/15 text-destructive border-destructive/30"
                         : task.priority === "HIGH"
-                        ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                        ? "bg-warning/15 text-warning border-warning/30"
+                        : task.priority === "MEDIUM"
+                        ? "bg-warning/10 text-warning border-warning/20"
                         : "bg-primary/10 text-primary border-primary/20"
                     }`}
                   >
@@ -161,10 +163,10 @@ export function MyActiveTasksWidget({ tasks, projectId }: { tasks: TaskItem[]; p
               </div>
 
               <div className="flex items-center gap-3 shrink-0">
-                <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-muted text-muted-foreground border border-border">
+                <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/30">
                   {task.status}
                 </span>
-                <span className="text-xs font-extrabold px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-muted/80 text-foreground border border-border">
                   {task.story_points !== null ? `${task.story_points} pts` : "Unestimated"}
                 </span>
               </div>
@@ -181,9 +183,9 @@ export function CurrentSprintWidget({ metrics, projectId }: { metrics: Dashboard
     <div className="rounded-2xl border border-border bg-card p-6 shadow-2xs space-y-4">
       <div className="flex items-center justify-between border-b border-border pb-3">
         <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-          <Zap className="size-5 text-emerald-500" /> Active Sprint Workstation
+          <Zap className="size-5 text-primary" /> Active Sprint Workstation
         </h3>
-        <span className="text-xs font-extrabold px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/25">
           {metrics.active_sprint_name || "No Active Sprint"}
         </span>
       </div>
@@ -249,12 +251,12 @@ export function SpecializationWidgetContainer({
   switch (spec) {
     case "FRONTEND":
       return (
-        <div className="rounded-2xl border border-blue-500/20 bg-card p-6 shadow-2xs space-y-4">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-2xs space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-              <Code2 className="size-5 text-blue-500" /> Frontend Engineering Workstation
+              <Code2 className="size-5 text-primary" /> Frontend Engineering Workstation
             </h3>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 border border-blue-500/20">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/25">
               {specTasks.length} Frontend Tasks
             </span>
           </div>
@@ -266,7 +268,7 @@ export function SpecializationWidgetContainer({
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">API Dependency Status</span>
-              <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">Endpoints Ready</span>
+              <span className="text-lg font-extrabold text-accent">Endpoints Ready</span>
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">Code Review Queue</span>
@@ -281,7 +283,7 @@ export function SpecializationWidgetContainer({
                 {specTasks.slice(0, 4).map((t) => (
                   <div key={t.id} className="p-3 rounded-xl border border-border bg-background flex items-center justify-between text-xs">
                     <span className="font-bold text-foreground truncate">{t.title}</span>
-                    <span className="font-extrabold text-blue-600 dark:text-blue-400">{t.status}</span>
+                    <span className="font-semibold text-primary">{t.status}</span>
                   </div>
                 ))}
               </div>
@@ -292,12 +294,12 @@ export function SpecializationWidgetContainer({
 
     case "BACKEND":
       return (
-        <div className="rounded-2xl border border-purple-500/20 bg-card p-6 shadow-2xs space-y-4">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-2xs space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-              <Database className="size-5 text-purple-500" /> Backend Systems Workstation
+              <Database className="size-5 text-secondary" /> Backend Systems Workstation
             </h3>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-600 border border-purple-500/20">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/25">
               {specTasks.length} Backend Tasks
             </span>
           </div>
@@ -309,7 +311,7 @@ export function SpecializationWidgetContainer({
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">Database Migrations</span>
-              <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">Database Schema Synced</span>
+              <span className="text-lg font-extrabold text-accent">Database Schema Synced</span>
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">PR & Code Reviews</span>
@@ -324,7 +326,7 @@ export function SpecializationWidgetContainer({
                 {specTasks.slice(0, 4).map((t) => (
                   <div key={t.id} className="p-3 rounded-xl border border-border bg-background flex items-center justify-between text-xs">
                     <span className="font-bold text-foreground truncate">{t.title}</span>
-                    <span className="font-extrabold text-purple-600 dark:text-purple-400">{t.status}</span>
+                    <span className="font-semibold text-secondary">{t.status}</span>
                   </div>
                 ))}
               </div>
@@ -335,12 +337,12 @@ export function SpecializationWidgetContainer({
 
     case "AI_ML":
       return (
-        <div className="rounded-2xl border border-emerald-500/20 bg-card p-6 shadow-2xs space-y-4">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-2xs space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-              <Cpu className="size-5 text-emerald-500" /> AI / ML Engineering Workstation
+              <Cpu className="size-5 text-primary" /> AI / ML Engineering Workstation
             </h3>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/25">
               {specTasks.length} AI Tasks
             </span>
           </div>
@@ -352,7 +354,7 @@ export function SpecializationWidgetContainer({
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">Intelligence Engine</span>
-              <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">AI Engine Operational</span>
+              <span className="text-lg font-extrabold text-accent">AI Engine Operational</span>
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">Evaluation Pipeline</span>
@@ -364,12 +366,12 @@ export function SpecializationWidgetContainer({
 
     case "QA_TESTING":
       return (
-        <div className="rounded-2xl border border-amber-500/20 bg-card p-6 shadow-2xs space-y-4">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-2xs space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-              <CheckCircle2 className="size-5 text-amber-500" /> Quality Assurance & Testing Workstation
+              <CheckCircle2 className="size-5 text-warning" /> Quality Assurance & Testing Workstation
             </h3>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-600 border border-amber-500/20">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/25">
               {specTasks.length} Test Tasks
             </span>
           </div>
@@ -381,7 +383,7 @@ export function SpecializationWidgetContainer({
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">Regression Testing Status</span>
-              <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">Test Matrix Passing</span>
+              <span className="text-lg font-extrabold text-accent">Test Matrix Passing</span>
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">Verification Suite</span>
@@ -393,12 +395,12 @@ export function SpecializationWidgetContainer({
 
     case "DEVOPS":
       return (
-        <div className="rounded-2xl border border-cyan-500/20 bg-card p-6 shadow-2xs space-y-4">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-2xs space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-              <Terminal className="size-5 text-cyan-500" /> DevOps & Infrastructure Workstation
+              <Terminal className="size-5 text-info" /> DevOps & Infrastructure Workstation
             </h3>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-600 border border-cyan-500/20">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-info/15 text-info border border-info/25">
               {specTasks.length} Infrastructure Tasks
             </span>
           </div>
@@ -410,7 +412,7 @@ export function SpecializationWidgetContainer({
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">Environment Status</span>
-              <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">Production Operational</span>
+              <span className="text-lg font-extrabold text-accent">Production Operational</span>
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">Build Pipelines</span>
@@ -422,12 +424,12 @@ export function SpecializationWidgetContainer({
 
     case "DESIGN":
       return (
-        <div className="rounded-2xl border border-pink-500/20 bg-card p-6 shadow-2xs space-y-4">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-2xs space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-              <Palette className="size-5 text-pink-500" /> UI / UX Design Workstation
+              <Palette className="size-5 text-accent-foreground" /> UI / UX Design Workstation
             </h3>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-600 border border-pink-500/20">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-accent/20 text-accent-foreground border border-accent/30">
               {specTasks.length} Design Tasks
             </span>
           </div>
@@ -439,7 +441,7 @@ export function SpecializationWidgetContainer({
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">Design System Palette</span>
-              <span className="text-lg font-extrabold text-foreground">Ocean Slate Active</span>
+              <span className="text-lg font-extrabold text-foreground">Ocean Forest Active</span>
             </div>
             <div className="p-4 rounded-xl bg-background border border-border space-y-1">
               <span className="text-xs font-bold text-muted-foreground uppercase block">UX Prototype Reviews</span>
@@ -500,7 +502,7 @@ export function ViewerWorkspaceView({ context }: { context: DashboardContextData
           </div>
           <div className="p-4 rounded-xl bg-background border border-border">
             <span className="text-xs font-bold text-muted-foreground uppercase block">Completed Tasks</span>
-            <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 block">
+            <span className="text-lg font-extrabold text-primary mt-1 block">
               {context.metrics.completed_project_tasks}
             </span>
           </div>
@@ -523,7 +525,7 @@ export function TeamLeadWorkspaceView({ context, tasks }: { context: DashboardCo
 
         <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs">
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Sprint Progress</span>
-          <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 block">
+          <span className="text-2xl font-extrabold text-primary mt-1 block">
             {context.metrics.sprint_progress_percent}% Complete
           </span>
         </div>
@@ -557,14 +559,14 @@ export function ProjectManagerWorkspaceView({ context }: { context: DashboardCon
 
         <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs">
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Active Sprint Progress</span>
-          <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 block">
+          <span className="text-2xl font-extrabold text-primary mt-1 block">
             {context.metrics.sprint_progress_percent}%
           </span>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs">
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Pending Invitations</span>
-          <span className="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1 block">
+          <span className="text-2xl font-extrabold text-warning mt-1 block">
             {context.metrics.pending_invitations_count}
           </span>
         </div>
@@ -608,7 +610,7 @@ export function OwnerAdminWorkspaceView({ context }: { context: DashboardContext
 
         <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs">
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Organization Status</span>
-          <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 block">100% Operational</span>
+          <span className="text-2xl font-extrabold text-accent mt-1 block">100% Operational</span>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs">

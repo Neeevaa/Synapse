@@ -225,7 +225,7 @@ export default function UnifiedDashboardPage() {
                       {projectRole && (
                         <FormatBadge
                           label={`Role: ${projectRole}`}
-                          colorClass="bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                          colorClass="bg-secondary/15 text-secondary border-secondary/25"
                         />
                       )}
 

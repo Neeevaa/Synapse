@@ -174,13 +174,13 @@ export default function RequirementReviewModal({
   const severityBadgeClass = (severity: string) => {
     switch (severity) {
       case "CRITICAL":
-        return "bg-rose-500/10 text-rose-500 border-rose-500/20";
+        return "bg-destructive/15 text-destructive border-destructive/30 font-bold";
       case "HIGH":
-        return "bg-amber-500/10 text-amber-500 border-amber-500/20";
+        return "bg-warning/25 text-warning border-warning/35";
       case "MEDIUM":
-        return "bg-blue-500/10 text-blue-400 border-blue-500/20";
+        return "bg-warning/15 text-warning border-warning/25";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-muted-foreground border-border";
     }
   };
 
@@ -195,10 +195,10 @@ export default function RequirementReviewModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-500/20">
+                <span className="text-xs font-mono font-bold text-info bg-info/10 px-2 py-0.5 rounded-md border border-info/20">
                   {requirementKey}
                 </span>
-                <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                <span className="text-xs font-semibold text-secondary bg-secondary/15 px-2 py-0.5 rounded-md border border-secondary/25">
                   v{versionNumber}
                 </span>
                 <h2 className="text-lg font-bold text-foreground">AI Requirement Review</h2>
@@ -211,7 +211,7 @@ export default function RequirementReviewModal({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
           >
             <X className="size-5" />
           </button>
@@ -245,18 +245,18 @@ export default function RequirementReviewModal({
                   <div className="text-xl font-extrabold text-foreground">{findings.length}</div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl border border-rose-500/20 bg-rose-500/5 shadow-2xs space-y-1">
-                  <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider">
+                <div className="p-3.5 rounded-2xl border border-destructive/30 bg-destructive/10 shadow-2xs space-y-1">
+                  <span className="text-xs font-semibold text-destructive uppercase tracking-wider">
                     Critical / High
                   </span>
-                  <div className="text-xl font-extrabold text-rose-500">{criticalHighCount}</div>
+                  <div className="text-xl font-extrabold text-destructive">{criticalHighCount}</div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl border border-blue-500/20 bg-blue-500/5 shadow-2xs space-y-1">
-                  <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">
+                <div className="p-3.5 rounded-2xl border border-warning/30 bg-warning/10 shadow-2xs space-y-1">
+                  <span className="text-xs font-semibold text-warning uppercase tracking-wider">
                     Medium
                   </span>
-                  <div className="text-xl font-extrabold text-blue-400">{mediumCount}</div>
+                  <div className="text-xl font-extrabold text-warning">{mediumCount}</div>
                 </div>
 
                 <div className="p-3.5 rounded-2xl border border-border bg-card shadow-2xs space-y-1">
@@ -271,10 +271,10 @@ export default function RequirementReviewModal({
               <div
                 className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                   criticalHighCount > 0
-                    ? "bg-rose-500/10 border-rose-500/20 text-rose-300"
+                    ? "bg-destructive/10 border-destructive/30 text-destructive"
                     : mediumCount > 0
-                    ? "bg-amber-500/10 border-amber-500/20 text-amber-300"
-                    : "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
+                    ? "bg-warning/10 border-warning/30 text-warning"
+                    : "bg-primary/10 border-primary/30 text-primary"
                 }`}
               >
                 <div className="space-y-0.5">
@@ -326,17 +326,17 @@ export default function RequirementReviewModal({
 
                           {/* Evidence Status Badge */}
                           {f.evidence_status === "GROUNDED" ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/25 text-xs font-semibold">
                               ✓ Grounded in Project Context
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-semibold">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-warning/15 text-warning border border-warning/25 text-xs font-semibold">
                               <HelpCircle className="size-3" /> Insufficient Context (Observation)
                             </span>
                           )}
 
                           {f.human_decision === "MODIFIED" && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 text-xs font-semibold">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/15 text-secondary border border-secondary/25 text-xs font-semibold">
                               <UserCheck className="size-3" /> Human Modified
                             </span>
                           )}
@@ -345,17 +345,17 @@ export default function RequirementReviewModal({
                         {/* Decision Status Pill */}
                         <div>
                           {f.human_decision === "ACCEPTED" && (
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/15 px-3 py-1 rounded-full border border-primary/25">
                               <Check className="size-3.5" /> Accepted
                             </span>
                           )}
                           {f.human_decision === "REJECTED" && (
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-destructive bg-destructive/15 px-3 py-1 rounded-full border border-destructive/25">
                               <X className="size-3.5" /> Rejected
                             </span>
                           )}
                           {f.human_decision === "MODIFIED" && (
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-secondary bg-secondary/15 px-3 py-1 rounded-full border border-secondary/25">
                               <Edit3 className="size-3.5" /> Modified
                             </span>
                           )}

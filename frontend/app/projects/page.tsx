@@ -54,11 +54,11 @@ interface ProjectItem {
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
     ACTIVE:
-      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+      "bg-primary/15 text-primary border-primary/25",
     COMPLETED:
-      "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+      "bg-info/15 text-info border-info/25",
     ARCHIVED:
-      "bg-zinc-500/10 text-zinc-500 dark:text-zinc-400 border-zinc-500/20",
+      "bg-muted text-muted-foreground border-border",
   };
   return (
     <span

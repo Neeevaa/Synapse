@@ -75,18 +75,18 @@ const PRIORITY_OPTIONS = [
 ];
 
 const PRIORITY_COLORS: Record<string, string> = {
-  LOW: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border-zinc-500/20",
-  MEDIUM: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-  HIGH: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
-  URGENT: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
+  LOW: "bg-muted/80 text-foreground border-border",
+  MEDIUM: "bg-warning/15 text-warning border-warning/25",
+  HIGH: "bg-warning/25 text-warning border-warning/35",
+  URGENT: "bg-destructive/15 text-destructive border-destructive/30 font-bold",
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  TODO: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border-zinc-500/20",
-  IN_PROGRESS: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-  IN_REVIEW: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
-  DONE: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
-  CANCELLED: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
+  TODO: "bg-muted/80 text-muted-foreground border-border",
+  IN_PROGRESS: "bg-secondary/15 text-secondary border-secondary/25",
+  IN_REVIEW: "bg-info/15 text-info border-info/25",
+  DONE: "bg-primary/15 text-primary border-primary/25",
+  CANCELLED: "bg-destructive/10 text-destructive/80 border-destructive/20",
 };
 
 const WORKSTREAM_OPTIONS = [
@@ -100,13 +100,13 @@ const WORKSTREAM_OPTIONS = [
 ];
 
 const WORKSTREAM_COLORS: Record<string, string> = {
-  GENERAL: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20",
-  UI_UX: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20",
-  FRONTEND: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-  BACKEND: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
-  QA: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
-  DEVOPS: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
-  AI_ML: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+  GENERAL: "bg-muted/60 text-muted-foreground border-border",
+  UI_UX: "bg-accent/20 text-accent-foreground border-accent/30",
+  FRONTEND: "bg-primary/15 text-primary border-primary/25",
+  BACKEND: "bg-secondary/20 text-secondary border-secondary/30",
+  QA: "bg-warning/15 text-warning border-warning/25",
+  DEVOPS: "bg-info/15 text-info border-info/25",
+  AI_ML: "bg-primary/15 text-primary border-primary/25",
 };
 
 /* ─── Inline Edit Field ─── */

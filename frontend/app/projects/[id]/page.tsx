@@ -110,11 +110,11 @@ interface TaskItem {
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
     ACTIVE:
-      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+      "bg-primary/15 text-primary border-primary/25",
     COMPLETED:
-      "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+      "bg-info/15 text-info border-info/25",
     ARCHIVED:
-      "bg-zinc-500/10 text-zinc-500 dark:text-zinc-400 border-zinc-500/20",
+      "bg-muted text-muted-foreground border-border",
   };
   return (
     <span
@@ -648,7 +648,7 @@ export default function ProjectDetailPage() {
                           <Zap className="size-4" /> Sprint Overview
                         </span>
                         {activeSprint ? (
-                          <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider bg-primary/15 text-primary border border-primary/25">
                             Active
                           </span>
                         ) : (
@@ -736,10 +736,10 @@ export default function ProjectDetailPage() {
                   <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs hover:shadow-xs transition-shadow space-y-4 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-500 flex items-center gap-1.5">
+                        <span className="text-xs font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
                           <FileText className="size-4" /> Requirements & Review
                         </span>
-                        <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-primary/15 text-primary border border-primary/25">
                           {requirements.length} Requirements
                         </span>
                       </div>
@@ -747,13 +747,13 @@ export default function ProjectDetailPage() {
                       <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
                         <div className="rounded-xl bg-background/60 p-3 border border-border/60">
                           <span className="text-xs text-muted-foreground uppercase font-semibold block">Approved</span>
-                          <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+                          <span className="text-sm font-bold text-primary mt-0.5 block">
                             {requirements.filter((r) => r.status === "APPROVED" || r.status === "VALIDATED").length} Docs
                           </span>
                         </div>
                         <div className="rounded-xl bg-background/60 p-3 border border-border/60">
                           <span className="text-xs text-muted-foreground uppercase font-semibold block">In Review / Draft</span>
-                          <span className="text-sm font-bold text-amber-500 mt-0.5 block">
+                          <span className="text-sm font-bold text-warning mt-0.5 block">
                             {requirements.filter((r) => r.status === "IN_REVIEW" || r.status === "DRAFT" || !r.status).length} Docs
                           </span>
                         </div>
@@ -764,7 +764,7 @@ export default function ProjectDetailPage() {
                       <span className="text-muted-foreground font-medium">AI Requirement Review Active</span>
                       <Link
                         href={`/projects/${project.id}/requirements`}
-                        className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                        className="inline-flex items-center gap-1 font-bold text-primary hover:underline"
                       >
                         View Requirements & Review <ArrowRight className="size-3.5" />
                       </Link>
@@ -775,10 +775,10 @@ export default function ProjectDetailPage() {
                   <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs hover:shadow-xs transition-shadow space-y-4 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-extrabold uppercase tracking-wider text-cyan-500 flex items-center gap-1.5">
+                        <span className="text-xs font-extrabold uppercase tracking-wider text-secondary flex items-center gap-1.5">
                           <Video className="size-4" /> Meetings & Notes
                         </span>
-                        <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                        <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-secondary/15 text-secondary border border-secondary/25">
                           {meetings.length} Meetings
                         </span>
                       </div>
@@ -786,7 +786,7 @@ export default function ProjectDetailPage() {
                       <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
                         <div className="rounded-xl bg-background/60 p-3 border border-border/60">
                           <span className="text-xs text-muted-foreground uppercase font-semibold block">Scheduled</span>
-                          <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400 mt-0.5 block">
+                          <span className="text-sm font-bold text-secondary mt-0.5 block">
                             {meetings.filter((m) => m.status === "SCHEDULED").length} Upcoming
                           </span>
                         </div>
@@ -803,7 +803,7 @@ export default function ProjectDetailPage() {
                       <span className="text-muted-foreground font-medium">AI Meeting Intelligence</span>
                       <Link
                         href={`/projects/${project.id}/meetings`}
-                        className="inline-flex items-center gap-1 font-bold text-cyan-600 dark:text-cyan-400 hover:underline"
+                        className="inline-flex items-center gap-1 font-bold text-secondary hover:underline"
                       >
                         View Meetings & Notes <ArrowRight className="size-3.5" />
                       </Link>
@@ -814,7 +814,7 @@ export default function ProjectDetailPage() {
                   <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs hover:shadow-xs transition-shadow space-y-4 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-extrabold uppercase tracking-wider text-cyan-500 flex items-center gap-1.5">
+                        <span className="text-xs font-extrabold uppercase tracking-wider text-primary flex items-center gap-1.5">
                           <Users className="size-4" /> Team Breakdown
                         </span>
                         <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-muted text-foreground border border-border">
@@ -864,7 +864,7 @@ export default function ProjectDetailPage() {
                         </div>
                         <div className="rounded-xl bg-background/60 p-3 border border-border/60">
                           <span className="text-xs text-muted-foreground uppercase font-semibold block">Traceability Matrix</span>
-                          <span className="text-sm font-bold text-amber-500 mt-0.5 block">Configured</span>
+                          <span className="text-sm font-bold text-secondary mt-0.5 block">Configured</span>
                         </div>
                       </div>
                     </div>
@@ -878,7 +878,7 @@ export default function ProjectDetailPage() {
                       </Link>
                       <Link
                         href={`/projects/${project.id}/traceability`}
-                        className="font-bold text-amber-500 hover:underline inline-flex items-center gap-1"
+                        className="font-bold text-secondary hover:underline inline-flex items-center gap-1"
                       >
                         Traceability Matrix <ArrowRight className="size-3" />
                       </Link>
@@ -932,8 +932,8 @@ export default function ProjectDetailPage() {
                   <div
                     className={`rounded-xl p-4 text-xs font-medium border ${
                       inviteNotice.type === "pending"
-                        ? "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:text-amber-300"
-                        : "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-300"
+                        ? "bg-warning/15 text-warning border-warning/25"
+                        : "bg-primary/15 text-primary border-primary/25"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -946,7 +946,7 @@ export default function ProjectDetailPage() {
                           onClick={() => handleCopyLink(inviteNotice.joinUrl!)}
                           className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-background border border-border text-foreground hover:bg-muted font-mono text-[0.7rem] cursor-pointer"
                         >
-                          {copiedLink ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
+                          {copiedLink ? <Check className="size-3 text-primary" /> : <Copy className="size-3" />}
                           {copiedLink ? "Copied Link!" : "Copy Join Link"}
                         </button>
                       )}
@@ -1136,7 +1136,7 @@ export default function ProjectDetailPage() {
                   <h3 className="text-base font-bold text-foreground mb-4">Edit Project Settings</h3>
 
                   {updateSuccess && (
-                    <div className="mb-4 flex items-center gap-2 rounded-lg bg-emerald-500/10 p-3 text-xs text-emerald-600 dark:text-emerald-400">
+                    <div className="mb-4 flex items-center gap-2 rounded-lg bg-primary/15 border border-primary/25 p-3 text-xs text-primary">
                       <UserCheck className="size-4" />
                       <span>Project settings saved successfully.</span>
                     </div>

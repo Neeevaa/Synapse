@@ -152,13 +152,13 @@ export default function TraceabilityMatrixPage({
                 href={`/projects/${projectId}/requirements`}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border bg-background text-xs font-bold text-foreground hover:bg-muted transition-colors cursor-pointer"
               >
-                <FileText className="size-4 text-emerald-500" /> Requirements
+                <FileText className="size-4 text-primary" /> Requirements
               </Link>
               <Link
                 href={`/projects/${projectId}/meetings`}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border bg-background text-xs font-bold text-foreground hover:bg-muted transition-colors cursor-pointer"
               >
-                <Video className="size-4 text-cyan-500" /> Meetings
+                <Video className="size-4 text-secondary" /> Meetings
               </Link>
               <Link
                 href={`/projects/${projectId}/board`}
@@ -209,7 +209,7 @@ export default function TraceabilityMatrixPage({
                     <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
                       Total Meetings Logged
                     </span>
-                    <span className="text-2xl font-extrabold text-cyan-600 dark:text-cyan-400 mt-1 block">
+                    <span className="text-2xl font-extrabold text-info mt-1 block">
                       {graph.total_meetings}
                     </span>
                   </div>
@@ -225,14 +225,14 @@ export default function TraceabilityMatrixPage({
 
                   <div className={`p-5 rounded-2xl border shadow-2xs ${
                     coverageGaps > 0
-                      ? "border-amber-500/30 bg-amber-500/5"
-                      : "border-emerald-500/30 bg-emerald-500/5"
+                      ? "border-warning/30 bg-warning/10"
+                      : "border-primary/30 bg-primary/10"
                   }`}>
                     <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
                       Attention / Coverage
                     </span>
                     <span className={`text-2xl font-extrabold mt-1 block ${
-                      coverageGaps > 0 ? "text-amber-500" : "text-emerald-500"
+                      coverageGaps > 0 ? "text-warning" : "text-primary"
                     }`}>
                       {coverageGaps > 0 ? `${coverageGaps} Uncovered` : "100% Linked"}
                     </span>
@@ -249,7 +249,7 @@ export default function TraceabilityMatrixPage({
               {/* Left Column: Requirements Node List (5 Cols) */}
               <div className="lg:col-span-5 rounded-2xl border border-border bg-card p-5 shadow-2xs space-y-4">
                 <h3 className="text-sm font-bold text-foreground border-b border-border pb-3 flex items-center gap-2">
-                  <FileText className="size-4 text-emerald-500" /> Traceability Nodes ({graph.nodes.length})
+                  <FileText className="size-4 text-primary" /> Traceability Nodes ({graph.nodes.length})
                 </h3>
 
                 {graph.nodes.length === 0 ? (
@@ -271,12 +271,12 @@ export default function TraceabilityMatrixPage({
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                            <span className="font-mono font-bold text-primary">
                               {node.requirement_key}
                             </span>
                             <div className="flex items-center gap-1.5">
                               {node.tasks_count === 0 && (
-                                <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-warning/15 text-warning border border-warning/25">
                                   No Tasks
                                 </span>
                               )}
@@ -290,7 +290,7 @@ export default function TraceabilityMatrixPage({
 
                           <div className="flex items-center gap-3 text-muted-foreground pt-1 text-xs font-medium">
                             <span className="flex items-center gap-1">
-                              <Video className="size-3 text-cyan-500" /> {node.meetings_count} Meetings
+                              <Video className="size-3 text-info" /> {node.meetings_count} Meetings
                             </span>
                             <span className="flex items-center gap-1">
                               <CheckSquare className="size-3 text-primary" /> {node.tasks_count} Tasks
@@ -315,13 +315,13 @@ export default function TraceabilityMatrixPage({
                 {!detailLoading && reqDetail && (
                   <div className="space-y-6">
                     {/* Node Requirement Banner */}
-                    <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 space-y-2">
+                    <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-2">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-mono font-extrabold text-xs text-emerald-600 dark:text-emerald-400">
+                        <span className="font-mono font-extrabold text-xs text-primary">
                           {reqDetail.requirement.requirement_key}
                         </span>
                         <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                          <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-primary/15 text-primary border border-primary/25">
                             {reqDetail.requirement.requirement_type}
                           </span>
                           <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-muted text-muted-foreground border border-border">
@@ -335,7 +335,7 @@ export default function TraceabilityMatrixPage({
                     {/* Linked Meetings & Discussion Context */}
                     <div className="space-y-3">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                        <Video className="size-4 text-cyan-500" /> Linked Meetings ({reqDetail.linked_meetings.length})
+                        <Video className="size-4 text-info" /> Linked Meetings ({reqDetail.linked_meetings.length})
                       </h4>
 
                       {reqDetail.linked_meetings.length === 0 ? (
@@ -352,7 +352,7 @@ export default function TraceabilityMatrixPage({
                               </div>
                               <Link
                                 href={`/projects/${projectId}/meetings`}
-                                className="font-bold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1"
+                                className="font-bold text-info hover:underline flex items-center gap-1"
                               >
                                 View Meeting <ExternalLink className="size-3" />
                               </Link>
@@ -365,7 +365,7 @@ export default function TraceabilityMatrixPage({
                     {/* Linked Action Items */}
                     <div className="space-y-3">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                        <CheckSquare className="size-4 text-amber-500" /> Linked Action Items ({reqDetail.linked_action_items.length})
+                        <CheckSquare className="size-4 text-warning" /> Linked Action Items ({reqDetail.linked_action_items.length})
                       </h4>
 
                       {reqDetail.linked_action_items.length === 0 ? (

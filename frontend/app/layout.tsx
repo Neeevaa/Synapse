@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Synapse — AI-Powered Project Management",
-  description: "Manage projects, sprints, and tasks with AI-powered insights.",
+  metadataBase: new URL("https://synapse.engineering"),
+  title: "Synapse — AI-Powered Project Intelligence",
+  description: "Synapse connects project planning, requirements, collaboration and AI-powered intelligence in one workspace for modern software teams.",
   icons: {
     icon: [
       { url: "/logo.png", type: "image/png" },
@@ -23,6 +24,12 @@ export const metadata: Metadata = {
     ],
     shortcut: "/logo.png",
     apple: "/logo.png",
+  },
+  openGraph: {
+    title: "Synapse — AI-Powered Project Intelligence",
+    description: "Synapse connects project planning, requirements, collaboration and AI-powered intelligence in one workspace for modern software teams.",
+    siteName: "Synapse",
+    images: [{ url: "/logo.png" }],
   },
 };
 
@@ -40,13 +47,17 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/logo.png" type="image/png" sizes="any" />
         <link rel="apple-touch-icon" href="/logo.png" />
-        {/* Inline script: apply dark class before first paint to prevent flash */}
+        {/* Inline script: apply theme before first paint to prevent flash */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const theme = localStorage.getItem('synapse_theme');
-                if (theme === 'dark') {
+                const stored = localStorage.getItem('synapse_theme');
+                if (stored === 'dark') {
+                  document.documentElement.classList.add('dark');
+                } else if (stored === 'light') {
+                  document.documentElement.classList.remove('dark');
+                } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
                   document.documentElement.classList.add('dark');
                 }
               } catch(e) {}

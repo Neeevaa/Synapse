@@ -146,45 +146,45 @@ export default function RequirementDetailPage() {
   const getTypeBadgeStyle = (type: string) => {
     switch (type) {
       case "FUNCTIONAL":
-        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+        return "bg-primary/15 text-primary border-primary/25";
       case "NON_FUNCTIONAL":
-        return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
+        return "bg-secondary/20 text-secondary border-secondary/30";
       case "USER_STORY":
-        return "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20";
+        return "bg-info/15 text-info border-info/25";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-muted-foreground border-border";
     }
   };
 
   const getPriorityBadgeStyle = (prio: string) => {
     switch (prio) {
       case "URGENT":
-        return "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30";
+        return "bg-destructive/15 text-destructive border-destructive/30 font-bold";
       case "HIGH":
-        return "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30";
+        return "bg-warning/25 text-warning border-warning/35";
       case "MEDIUM":
-        return "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30";
+        return "bg-warning/15 text-warning border-warning/25";
       case "LOW":
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-foreground border-border";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-foreground border-border";
     }
   };
 
   const getStatusBadgeStyle = (st: string) => {
     switch (st) {
       case "APPROVED":
-        return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
+        return "bg-primary/15 text-primary border-primary/25";
       case "REVIEW":
-        return "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30";
+        return "bg-warning/15 text-warning border-warning/25";
       case "DRAFT":
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-muted-foreground border-border";
       case "REJECTED":
-        return "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30";
+        return "bg-destructive/15 text-destructive border-destructive/30";
       case "ARCHIVED":
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/60 text-muted-foreground/80 border-border";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-muted-foreground border-border";
     }
   };
 
@@ -226,8 +226,8 @@ export default function RequirementDetailPage() {
           <div
             className={`rounded-xl p-4 text-xs font-medium border flex items-center justify-between ${
               actionNotice.type === "success"
-                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                ? "bg-primary/15 text-primary border-primary/25"
+                : "bg-destructive/10 text-destructive border-destructive/20"
             }`}
           >
             <span className="flex items-center gap-2">
@@ -241,7 +241,7 @@ export default function RequirementDetailPage() {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center p-16 text-muted-foreground space-y-3 rounded-2xl border border-border bg-card">
-            <Loader2 className="size-8 animate-spin text-emerald-500" />
+            <Loader2 className="size-8 animate-spin text-primary" />
             <p className="text-xs font-medium">Loading requirement details...</p>
           </div>
         ) : error || !requirement ? (
@@ -261,7 +261,7 @@ export default function RequirementDetailPage() {
             <div className="rounded-2xl border border-border bg-card p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-2 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20">
+                  <span className="font-mono font-bold text-xs text-primary bg-primary/10 px-2.5 py-0.5 rounded border border-primary/20">
                     {requirement.requirement_key}
                   </span>
                   <span
@@ -302,7 +302,7 @@ export default function RequirementDetailPage() {
                 <button
                   onClick={() => setActiveTab("test-cases")}
                   data-testid="header-generate-test-cases-btn"
-                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary hover:bg-primary/95 px-4 py-2.5 text-xs font-semibold text-primary-foreground shadow-xs transition-colors cursor-pointer"
                 >
                   <Sparkles className="size-4" /> Generate Test Cases with AI
                 </button>
@@ -317,7 +317,7 @@ export default function RequirementDetailPage() {
                   data-testid="tab-overview"
                   className={`px-4 py-3 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
                     activeTab === "overview"
-                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -329,7 +329,7 @@ export default function RequirementDetailPage() {
                   data-testid="tab-acceptance"
                   className={`px-4 py-3 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
                     activeTab === "acceptance"
-                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -341,11 +341,11 @@ export default function RequirementDetailPage() {
                   data-testid="tab-ai-test-cases"
                   className={`px-4 py-3 text-xs font-semibold border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
                     activeTab === "test-cases"
-                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <Sparkles className="size-3.5 text-emerald-500" />
+                  <Sparkles className="size-3.5 text-primary" />
                   <span>AI Test Cases</span>
                 </button>
 
@@ -354,7 +354,7 @@ export default function RequirementDetailPage() {
                   data-testid="tab-history"
                   className={`px-4 py-3 text-xs font-semibold border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
                     activeTab === "history"
-                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
+                      ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -462,7 +462,7 @@ export default function RequirementDetailPage() {
                                   onClick={() =>
                                     handleStatusTransition("APPROVED", "Approved by Project Manager")
                                   }
-                                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-3 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
+                                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary hover:bg-primary/95 px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors cursor-pointer"
                                 >
                                   <CheckCircle2 className="size-3.5" /> Approve
                                 </button>
@@ -471,7 +471,7 @@ export default function RequirementDetailPage() {
                                   onClick={() =>
                                     handleStatusTransition("REJECTED", "Rejected during review")
                                   }
-                                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 px-3 py-2 text-xs font-semibold text-white transition-colors cursor-pointer"
+                                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-destructive hover:bg-destructive/90 px-3 py-2 text-xs font-semibold text-destructive-foreground transition-colors cursor-pointer"
                                 >
                                   <XCircle className="size-3.5" /> Reject
                                 </button>
@@ -504,7 +504,7 @@ export default function RequirementDetailPage() {
                       </h4>
                       <button
                         onClick={() => setActiveTab("test-cases")}
-                        className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold cursor-pointer"
+                        className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-semibold cursor-pointer"
                       >
                         <Sparkles className="size-3.5" /> Convert into Test Cases
                       </button>
@@ -527,7 +527,7 @@ export default function RequirementDetailPage() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                        <History className="size-3.5 text-emerald-500" /> Version History
+                        <History className="size-3.5 text-primary" /> Version History
                       </h4>
                       <span className="text-[11px] text-muted-foreground">
                         {requirement.versions?.length || 0} versions recorded
@@ -544,15 +544,15 @@ export default function RequirementDetailPage() {
                             onClick={() => setActiveVersion(ver)}
                             className={`p-4 rounded-xl border text-xs cursor-pointer transition-all ${
                               isSelected
-                                ? "bg-emerald-500/10 border-emerald-500/40 text-foreground"
+                                ? "bg-primary/10 border-primary/40 text-foreground"
                                 : "bg-card border-border text-foreground hover:border-muted-foreground/30"
                             }`}
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                              <span className="font-mono font-bold text-primary flex items-center gap-2">
                                 Version {ver.version_number}{" "}
                                 {isCurrent && (
-                                  <span className="text-[10px] text-emerald-600 dark:text-emerald-300 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                  <span className="text-[10px] text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
                                     Current
                                   </span>
                                 )}

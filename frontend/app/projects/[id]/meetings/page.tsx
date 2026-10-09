@@ -257,36 +257,34 @@ export default function MeetingsListPage() {
   const getTypeBadgeStyle = (type: string) => {
     switch (type) {
       case "PLANNING":
-        return "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20";
-      case "STANDUP":
-        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
-      case "REVIEW":
-        return "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
-      case "RETROSPECTIVE":
-        return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
-      case "REQUIREMENT_DISCUSSION":
-        return "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20";
       case "TECHNICAL":
-        return "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20";
+        return "bg-secondary/15 text-secondary border-secondary/25";
+      case "STANDUP":
+        return "bg-primary/15 text-primary border-primary/25";
+      case "REVIEW":
+      case "REQUIREMENT_DISCUSSION":
+        return "bg-info/15 text-info border-info/25";
+      case "RETROSPECTIVE":
+        return "bg-warning/15 text-warning border-warning/25";
       case "CLIENT":
-        return "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20";
+        return "bg-accent/20 text-accent-foreground border-accent/30";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-muted-foreground border-border";
     }
   };
 
   const getStatusBadgeStyle = (st: string) => {
     switch (st) {
       case "SCHEDULED":
-        return "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30";
+        return "bg-info/15 text-info border-info/25";
       case "IN_PROGRESS":
-        return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 animate-pulse";
+        return "bg-primary/15 text-primary border-primary/25";
       case "COMPLETED":
-        return "bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30";
+        return "bg-secondary/20 text-secondary border-secondary/30";
       case "CANCELLED":
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-muted-foreground border-border";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/80 text-muted-foreground border-border";
     }
   };
 

@@ -7,38 +7,63 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-heading: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
+
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+    "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo,
+    Monaco, Consolas, monospace;
+
+  --font-heading: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+    "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Synapse brand palette */
+  --color-synapse-green: var(--synapse-green);
+  --color-synapse-green-light: var(--synapse-green-light);
+  --color-synapse-dark: var(--synapse-dark);
+  --color-synapse-dark-card: var(--synapse-dark-card);
+  --color-synapse-light: var(--synapse-light);
+  --color-synapse-accent: var(--synapse-accent);
+
+  /* Semantic UI colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Charts */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Radius scale */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -48,95 +73,323 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* =========================================================
+LIGHT THEME — PASTEL OCEAN
+Brighter, fresher, more vibrant Synapse light theme
+========================================================= */
+
 :root {
-  /* Synapse Primary Green & White/Black Theme - Pure white surfaces, deep black text, signature green primary */
-  --background: oklch(0.975 0.003 162); /* #F6F8F7 Calm natural off-white */
-  --foreground: oklch(0.18 0.02 200);   /* #111827 Deep black/slate */
-  --card: oklch(1 0 0);                 /* #FFFFFF Pure white */
-  --card-foreground: oklch(0.18 0.02 200);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 200);
-  --primary: rgba(66, 121, 142);     /* Signature Synapse Green (#2D7A5B) */
-  --primary-foreground: oklch(1 0 0);   /* Pure White */
-  --secondary: rgba(118, 167, 151);    /* #7AA79A Soft Sage Green */
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.95 0.006 160);
-  --muted-foreground: oklch(57.218% 0.01547 196.961);
-  --accent: oklch(0.94 0.015 154);
-  --accent-foreground: oklch(0.18 0.02 200);
-  --destructive: oklch(0.569 0.163 19.3);
-  --border: oklch(0.89 0.008 160);      /* #DCE5E2 Subtle border */
-  --input: oklch(0.89 0.008 160);
-  --ring: oklch(0.55 0.13 154);         /* Signature Green focus ring */
-  --chart-1: oklch(0.55 0.13 154);
-  --chart-2: oklch(0.68 0.05 165);
-  --chart-3: oklch(0.62 0.12 154);
-  --chart-4: oklch(0.601 0.116 157.9);
-  --chart-5: oklch(0.725 0.149 76.5);
-  --radius: 0.75rem;
-  --sidebar: oklch(1 0 0);              /* Pure White Sidebar in Light Mode */
-  --sidebar-foreground: oklch(0.18 0.02 200);
-  --sidebar-primary: oklch(0.55 0.13 154); /* Signature Green */
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.95 0.012 154);
-  --sidebar-accent-foreground: oklch(0.18 0.02 200);
-  --sidebar-border: oklch(0.89 0.008 160);
-  --sidebar-ring: oklch(0.55 0.13 154);
+color-scheme: light;
+
+/* Brand */
+--synapse-green: #258663;
+--synapse-green-light: #A8D6CF;
+--synapse-accent: #B5E0C9;
+--synapse-dark: #173D3A;
+--synapse-dark-card: #FFFFFF;
+--synapse-light: #F4FAF7;
+
+/* Page and surfaces */
+--background: #F4FAF7;
+--foreground: #173D3A;
+--card: #FFFFFF;
+--card-foreground: #173D3A;
+--popover: #FFFFFF;
+--popover-foreground: #173D3A;
+
+/* Buttons */
+--primary: #258663;
+--primary-foreground: #FFFFFF;
+--secondary: #D5EEE4;
+--secondary-foreground: #174D40;
+
+/* Muted elements */
+--muted: #E8F4EF;
+--muted-foreground: #526F67;
+
+/* Hover and selection */
+--accent: #D0E8CF;
+--accent-foreground: #173D3A;
+
+/* Feedback */
+--destructive: #C83F4D;
+--success: #25845A;
+--warning: #A96B12;
+--info: #347D91;
+
+/* Borders and focus */
+--border: #D2E7DF;
+--input: #DCECE5;
+--ring: #258663;
+
+/* Charts */
+--chart-1: #258663;
+--chart-2: #55A995;
+--chart-3: #80BFA0;
+--chart-4: #4B91A1;
+--chart-5: #7C9A70;
+
+/* Sidebar */
+--sidebar: #FFFFFF;
+--sidebar-foreground: #173D3A;
+--sidebar-primary: #258663;
+--sidebar-primary-foreground: #FFFFFF;
+--sidebar-accent: #DDF1E7;
+--sidebar-accent-foreground: #174D40;
+--sidebar-border: #D2E7DF;
+--sidebar-ring: #258663;
+
+/* Shape */
+--radius: 0.75rem;
+
+/* Additional semantic tokens */
+--surface-hover: #E8F4EF;
+--surface-elevated: #FFFFFF;
+--button-hover: #1C6F51;
+--button-secondary-hover: #BFE4D5;
+--link: #197653;
+--link-hover: #12573D;
+--selection: #B5E0C9;
+--scrollbar-thumb: #A8D6CF;
+--scrollbar-thumb-hover: #6DB5A2;
 }
 
+/* =========================================================
+   DARK THEME — OCEAN FOREST
+   Reference palette:
+   #092328 #12544F #2A835F #8BBB92
+   ========================================================= */
+
 .dark {
-  /* Synapse Dark Mode - Deep black surfaces, pure white text, luminous signature green accents */
-  --background: oklch(0.12 0.015 200); /* #0B1015 Deep black canvas */
-  --foreground: oklch(0.98 0.004 150); /* #FFFFFF Pure white text */
-  --card: oklch(0.16 0.018 200);       /* #121820 Deep black layered card */
-  --card-foreground: oklch(0.98 0.004 150);
-  --popover: oklch(0.16 0.018 200);
-  --popover-foreground: oklch(0.98 0.004 150);
-  --primary: rgb(66, 114, 132);      /* #3F9B73 Signature Synapse Green */
-  --primary-foreground: oklch(0.10 0.02 154);
-  --secondary: rgba(45, 96, 114);    /* #7AA79A Soft Sage Green */
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.20 0.018 200);
-  --muted-foreground: oklch(0.68 0.015 200);
-  --accent: oklch(0.22 0.022 154);
-  --accent-foreground: oklch(0.98 0.004 150);
-  --destructive: oklch(0.569 0.163 19.3);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.66 0.14 154);
-  --chart-1: oklch(0.66 0.14 154);
-  --chart-2: oklch(0.68 0.05 165);
-  --chart-3: oklch(0.55 0.13 154);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.10 0.015 200);     /* Deep black sidebar */
-  --sidebar-foreground: oklch(0.98 0.004 150);
-  --sidebar-primary: oklch(0.66 0.14 154);
-  --sidebar-primary-foreground: oklch(0.10 0.02 154);
-  --sidebar-accent: oklch(0.18 0.02 154);
-  --sidebar-accent-foreground: oklch(0.98 0.004 150);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.66 0.14 154);
+  color-scheme: dark;
+
+  /* Brand */
+  --synapse-green: #12544F;
+  --synapse-green-light: #2A835F;
+  --synapse-accent: #8BBB92;
+  --synapse-dark: #092328;
+  --synapse-dark-card: #103A38;
+  --synapse-light: #E8F1EE;
+
+  /* Page and surfaces */
+  --background: #092328;
+  --foreground: #E8F1EE;
+
+  --card: #103A38;
+  --card-foreground: #E8F1EE;
+
+  --popover: #123E3A;
+  --popover-foreground: #E8F1EE;
+
+  /* Buttons */
+  --primary: #2A835F;
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #12544F;
+  --secondary-foreground: #E8F1EE;
+
+  /* Muted elements */
+  --muted: #153633;
+  --muted-foreground: #B1C9BF;
+
+  /* Hover and selection */
+  --accent: #194B42;
+  --accent-foreground: #E8F1EE;
+
+  /* Feedback */
+  --destructive: #F07171;
+  --success: #8BBB92;
+  --warning: #E7BD72;
+  --info: #80C4D4;
+
+  /* Borders and focus */
+  --border: #28504A;
+  --input: #315B53;
+  --ring: #8BBB92;
+
+  /* Charts */
+  --chart-1: #8BBB92;
+  --chart-2: #2A835F;
+  --chart-3: #62B79B;
+  --chart-4: #6BA5B0;
+  --chart-5: #E7BD72;
+
+  /* Sidebar */
+  --sidebar: #0B2D30;
+  --sidebar-foreground: #E8F1EE;
+  --sidebar-primary: #8BBB92;
+  --sidebar-primary-foreground: #092328;
+  --sidebar-accent: #153F3B;
+  --sidebar-accent-foreground: #E8F1EE;
+  --sidebar-border: #234641;
+  --sidebar-ring: #8BBB92;
+
+  /* Additional semantic tokens */
+  --surface-hover: #153F3B;
+  --surface-elevated: #123431;
+  --button-hover: #35946C;
+  --button-secondary-hover: #236D5A;
+  --link: #A8D7B0;
+  --link-hover: #C0E5C5;
+  --selection: #285A4D;
+  --scrollbar-thumb: #326B5A;
+  --scrollbar-thumb-hover: #8BBB92;
 }
+
+/* =========================================================
+   BASE STYLES
+   ========================================================= */
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   html {
-    font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+      "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial,
+      sans-serif;
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
+
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+      "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial,
+      sans-serif;
     letter-spacing: -0.011em;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
+  }
+
+  ::selection {
+    background: var(--selection);
+    color: var(--foreground);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  a {
+    transition: color 150ms ease;
   }
 }
 
-/* Enforce minimum text size of 12px across all micro-label classes (no tiny unreadable labels) */
+/* =========================================================
+   SHARED INTERACTION UTILITIES
+   ========================================================= */
+
+/* Use these utilities when components need explicit hover behavior. */
+
+@layer utilities {
+  .bg-synapse {
+    background-color: var(--synapse-green);
+  }
+
+  .text-synapse {
+    color: var(--synapse-green);
+  }
+
+  .bg-synapse-accent {
+    background-color: var(--synapse-accent);
+  }
+
+  .text-synapse-accent {
+    color: var(--synapse-accent);
+  }
+
+  .surface-hover {
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .surface-hover:hover {
+    background-color: var(--surface-hover);
+  }
+
+  .synapse-link {
+    color: var(--link);
+    text-underline-offset: 3px;
+  }
+
+  .synapse-link:hover {
+    color: var(--link-hover);
+  }
+
+  .synapse-primary-button {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    transition:
+      background-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .synapse-primary-button:hover {
+    background-color: var(--button-hover);
+  }
+
+  .synapse-secondary-button {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    transition:
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .synapse-secondary-button:hover {
+    background-color: var(--button-secondary-hover);
+  }
+}
+
+/* =========================================================
+   SCROLLBARS
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+
+/* Hide scrollbar utility */
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* =========================================================
+   READABLE MICRO-LABELS
+   ========================================================= */
+
 .text-xs,
 .text-\[0\.6rem\],
 .text-\[0\.62rem\],
@@ -148,27 +401,16 @@
   line-height: 1.3333 !important;
 }
 
-/* macOS-inspired desktop scrollbar */
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: oklch(0.5 0.01 240 / 25%);
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.5 0.01 240 / 45%);
-}
+/* Respect users who prefer reduced motion */
 
-/* Hide scrollbar utility */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
