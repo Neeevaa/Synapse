@@ -74,166 +74,187 @@
 }
 
 /* =========================================================
-LIGHT THEME — PASTEL OCEAN
-Brighter, fresher, more vibrant Synapse light theme
-========================================================= */
+   LIGHT THEME — WARM IVORY & BURGUNDY
+   Exact Brand Palette:
+   - Primary Burgundy: #9f1722 (Refined brand accent)
+   - Warm Sand: #E5D3AF
+   - Soft Ivory: #F5EFE1
+   - Dusty Blue: #AEC4D4
+   ========================================================= */
 
 :root {
-color-scheme: light;
+  color-scheme: light;
 
-/* Brand */
---synapse-green: #258663;
---synapse-green-light: #A8D6CF;
---synapse-accent: #B5E0C9;
---synapse-dark: #173D3A;
---synapse-dark-card: #FFFFFF;
---synapse-light: #F4FAF7;
+  /* Brand Tokens */
+  --synapse-green: #9f1722;
+  --synapse-green-light: #AEC4D4;
+  --synapse-accent: #E5D3AF;
+  --synapse-dark: #2B181B;
+  --synapse-dark-card: #FAF6ED;
+  --synapse-light: #F5EFE1;
 
-/* Page and surfaces */
---background: #F4FAF7;
---foreground: #173D3A;
---card: #FFFFFF;
---card-foreground: #173D3A;
---popover: #FFFFFF;
---popover-foreground: #173D3A;
+  /* Page and surfaces */
+  --background: #F5EFE1;
+  --foreground: #2B181B;
+  --card: #FAF6ED;
+  --card-foreground: #2B181B;
+  --popover: #FAF6ED;
+  --popover-foreground: #2B181B;
 
-/* Buttons */
---primary: #258663;
---primary-foreground: #FFFFFF;
---secondary: #D5EEE4;
---secondary-foreground: #174D40;
+  /* Buttons */
+  --primary: #9f1722;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E5D3AF;
+  --secondary-foreground: #4A3539;
 
-/* Muted elements */
---muted: #E8F4EF;
---muted-foreground: #526F67;
+  /* Muted elements */
+  --muted: #EDE5D5;
+  --muted-foreground: #6E565A;
 
-/* Hover and selection */
---accent: #D0E8CF;
---accent-foreground: #173D3A;
+  /* Hover and selection */
+  --accent: #EAE0CE;
+  --accent-foreground: #2B181B;
 
-/* Feedback */
---destructive: #C83F4D;
---success: #25845A;
---warning: #A96B12;
---info: #347D91;
+  /* Feedback */
+  --destructive: #9f1722;
+  --success: #2A7E56;
+  --warning: #B26A14;
+  --info: #354854;
 
-/* Borders and focus */
---border: #D2E7DF;
---input: #DCECE5;
---ring: #258663;
+  /* Borders and focus */
+  --border: #E5D3AF;
+  --input: #E5D3AF;
+  --ring: #9f1722;
 
-/* Charts */
---chart-1: #258663;
---chart-2: #55A995;
---chart-3: #80BFA0;
---chart-4: #4B91A1;
---chart-5: #7C9A70;
+  /* Charts */
+  --chart-1: #9f1722;
+  --chart-2: #E5D3AF;
+  --chart-3: #AEC4D4;
+  --chart-4: #354854;
+  --chart-5: #6E565A;
 
-/* Sidebar */
---sidebar: #FFFFFF;
---sidebar-foreground: #173D3A;
---sidebar-primary: #258663;
---sidebar-primary-foreground: #FFFFFF;
---sidebar-accent: #DDF1E7;
---sidebar-accent-foreground: #174D40;
---sidebar-border: #D2E7DF;
---sidebar-ring: #258663;
+  /* Sidebar */
+  --sidebar: #FAF6ED;
+  --sidebar-foreground: #2B181B;
+  --sidebar-primary: #9f1722;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #EDE5D5;
+  --sidebar-accent-foreground: #4A3539;
+  --sidebar-border: #E5D3AF;
+  --sidebar-ring: #9f1722;
 
-/* Shape */
---radius: 0.75rem;
+  /* Radius scale */
+  --radius: 0.75rem;
 
-/* Additional semantic tokens */
---surface-hover: #E8F4EF;
---surface-elevated: #FFFFFF;
---button-hover: #1C6F51;
---button-secondary-hover: #BFE4D5;
---link: #197653;
---link-hover: #12573D;
---selection: #B5E0C9;
---scrollbar-thumb: #A8D6CF;
---scrollbar-thumb-hover: #6DB5A2;
+  /* Additional semantic tokens */
+  --surface-hover: #EDE5D5;
+  --surface-elevated: #FFFFFF;
+  --button-hover: #85121b;
+  --button-secondary-hover: #D6C29B;
+  --link: #9f1722;
+  --link-hover: #630A11;
+  --selection: #E5D3AF;
+  --scrollbar-thumb: #D6C29B;
+  --scrollbar-thumb-hover: #9f1722;
+
+  /* Frame & Canvas tokens */
+  --frame-bg: #23171A;
+  --canvas-bg: #F5EFE1;
+  --canvas-ink: #2B181B;
 }
 
 /* =========================================================
-   DARK THEME — OCEAN FOREST
-   Reference palette:
-   #092328 #12544F #2A835F #8BBB92
+   DARK THEME — WARM CHARCOAL & LOW-GLARE
+   Exact Brand Palette:
+   - Primary Burgundy: #790D16 / #9f1722
+   - Elevated Charcoal: #403034
+   - Nested Surfaces: #49363A
+   - Main Background: #302326
+   - Warm Borders: #62464A
+   - Text Ivory: #F5EFE1
+   - Text Secondary: #D4C3BB
+   - Cool Information Surface: #354854
+   - Dusty Blue: #AEC4D4
    ========================================================= */
 
 .dark {
   color-scheme: dark;
 
-  /* Brand */
-  --synapse-green: #12544F;
-  --synapse-green-light: #2A835F;
-  --synapse-accent: #8BBB92;
-  --synapse-dark: #092328;
-  --synapse-dark-card: #103A38;
-  --synapse-light: #E8F1EE;
+  /* Brand Tokens */
+  --synapse-green: #9f1722;
+  --synapse-green-light: #790D16;
+  --synapse-accent: #E5D3AF;
+  --synapse-dark: #302326;
+  --synapse-dark-card: #403034;
+  --synapse-light: #F5EFE1;
 
   /* Page and surfaces */
-  --background: #092328;
-  --foreground: #E8F1EE;
+  --background: #302326;
+  --foreground: #F5EFE1;
 
-  --card: #103A38;
-  --card-foreground: #E8F1EE;
+  --card: #403034;
+  --card-foreground: #F5EFE1;
 
-  --popover: #123E3A;
-  --popover-foreground: #E8F1EE;
+  --popover: #403034;
+  --popover-foreground: #F5EFE1;
 
   /* Buttons */
-  --primary: #2A835F;
-  --primary-foreground: #FFFFFF;
+  --primary: #9f1722;
+  --primary-foreground: #F5EFE1;
 
-  --secondary: #12544F;
-  --secondary-foreground: #E8F1EE;
+  --secondary: #49363A;
+  --secondary-foreground: #E5D3AF;
 
   /* Muted elements */
-  --muted: #153633;
-  --muted-foreground: #B1C9BF;
+  --muted: #392B2E;
+  --muted-foreground: #D4C3BB;
 
   /* Hover and selection */
-  --accent: #194B42;
-  --accent-foreground: #E8F1EE;
+  --accent: #49363A;
+  --accent-foreground: #F5EFE1;
 
   /* Feedback */
-  --destructive: #F07171;
-  --success: #8BBB92;
-  --warning: #E7BD72;
-  --info: #80C4D4;
+  --destructive: #C83F4D;
+  --success: #3D9E6E;
+  --warning: #E5A84B;
+  --info: #AEC4D4;
 
   /* Borders and focus */
-  --border: #28504A;
-  --input: #315B53;
-  --ring: #8BBB92;
+  --border: #62464A;
+  --input: #62464A;
+  --ring: #E5D3AF;
 
   /* Charts */
-  --chart-1: #8BBB92;
-  --chart-2: #2A835F;
-  --chart-3: #62B79B;
-  --chart-4: #6BA5B0;
-  --chart-5: #E7BD72;
+  --chart-1: #9f1722;
+  --chart-2: #E5D3AF;
+  --chart-3: #AEC4D4;
+  --chart-4: #354854;
+  --chart-5: #D4C3BB;
 
   /* Sidebar */
-  --sidebar: #0B2D30;
-  --sidebar-foreground: #E8F1EE;
-  --sidebar-primary: #8BBB92;
-  --sidebar-primary-foreground: #092328;
-  --sidebar-accent: #153F3B;
-  --sidebar-accent-foreground: #E8F1EE;
-  --sidebar-border: #234641;
-  --sidebar-ring: #8BBB92;
+  --sidebar: #302326;
+  --sidebar-foreground: #F5EFE1;
+  --sidebar-primary: #9f1722;
+  --sidebar-primary-foreground: #F5EFE1;
+  --sidebar-accent: #403034;
+  --sidebar-accent-foreground: #E5D3AF;
+  --sidebar-border: #62464A;
+  --sidebar-ring: #E5D3AF;
 
   /* Additional semantic tokens */
-  --surface-hover: #153F3B;
-  --surface-elevated: #123431;
-  --button-hover: #35946C;
-  --button-secondary-hover: #236D5A;
-  --link: #A8D7B0;
-  --link-hover: #C0E5C5;
-  --selection: #285A4D;
-  --scrollbar-thumb: #326B5A;
-  --scrollbar-thumb-hover: #8BBB92;
+  --surface-hover: #49363A;
+  --surface-elevated: #403034;
+  --button-hover: #B51C29;
+  --button-secondary-hover: #563D42;
+  --link: #E5D3AF;
+  --link-hover: #F5EFE1;
+  --selection: #62464A;
+  --scrollbar-thumb: #62464A;
+  --scrollbar-thumb-hover: #E5D3AF;
+
+  /* Frame & Canvas tokens */
+  --canvas-bg-dark: #302326;
+  --canvas-ink-dark: #F5EFE1;
 }
 
 /* =========================================================

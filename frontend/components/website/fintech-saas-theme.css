@@ -1,0 +1,130 @@
+/* =========================================================
+   SYNAPSE SAAS LANDING PAGE THEME STYLES
+   Inspired by 21st.dev Fintech SaaS Landing Page Template
+   ========================================================= */
+
+@keyframes mfl-run {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -1000; }
+}
+
+@keyframes mfl-satin-a {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.08) rotate(3deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes mfl-satin-b {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.06) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes mfl-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes mfl-rise {
+  0% { opacity: 0; transform: translateY(18px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mfl-pulse-slow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.04); }
+}
+
+@keyframes mfl-glow {
+  0%, 100% { opacity: 0.6; filter: blur(30px); }
+  50% { opacity: 0.95; filter: blur(40px); }
+}
+
+/* Outer frame container */
+.syn-frame {
+  position: relative;
+  background-color: var(--frame-bg, #071716);
+  padding: 12px 12px 0;
+  overflow-x: clip;
+  min-height: 100vh;
+}
+
+@media (min-width: 768px) {
+  .syn-frame {
+    padding: 16px 16px 0;
+  }
+}
+
+/* Inner canvas paper */
+.syn-canvas {
+  position: relative;
+  background-color: var(--canvas-bg, #F4FAF7);
+  color: var(--canvas-ink, #173D3A);
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(37, 134, 99, 0.12), 0 25px 60px -15px rgba(0, 0, 0, 0.4);
+}
+
+.dark .syn-canvas {
+  background-color: var(--canvas-bg-dark, #0B2220);
+  color: var(--canvas-ink-dark, #F4FAF7);
+  box-shadow: 0 0 0 1px rgba(37, 134, 99, 0.25), 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+}
+
+/* Circuit lines */
+.circuit-trace {
+  fill: none;
+  stroke: currentColor;
+  stroke-opacity: 0.14;
+  stroke-width: 1.4;
+}
+
+.circuit-pulse {
+  fill: none;
+  stroke: var(--synapse-green, #258663);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-dasharray: 60 940;
+  animation: mfl-run 7s linear infinite;
+}
+
+/* Satin ribbon elements */
+.satin-anim-a {
+  animation: mfl-satin-a 20s ease-in-out infinite alternate;
+  transform-origin: 50% 50%;
+}
+
+.satin-anim-b {
+  animation: mfl-satin-b 16s ease-in-out infinite alternate;
+  transform-origin: 0% 50%;
+}
+
+.satin-anim-c {
+  animation: mfl-satin-b 18s ease-in-out infinite alternate-reverse;
+  transform-origin: 100% 50%;
+}
+
+/* 3D squircle perspective */
+.device-perspective {
+  perspective: 900px;
+}
+
+.device-float {
+  animation: mfl-float 6s ease-in-out infinite;
+}
+
+/* Entrance rise */
+.animate-rise {
+  animation: mfl-rise 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .circuit-pulse,
+  .satin-anim-a,
+  .satin-anim-b,
+  .satin-anim-c,
+  .device-float,
+  .animate-rise {
+    animation: none !important;
+  }
+}

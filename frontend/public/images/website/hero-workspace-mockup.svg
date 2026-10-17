@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" fill="none">
+  <!-- Background Canvas -->
+  <rect width="1200" height="675" rx="20" fill="#302326" stroke="#62464A" stroke-width="2"/>
+  
+  <!-- Subtle Grid Pattern -->
+  <defs>
+    <pattern id="grid-hero" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#62464A" stroke-width="0.75" stroke-opacity="0.4"/>
+    </pattern>
+    <linearGradient id="burgundy-glow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#790D16" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#302326" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#grid-hero)"/>
+  <rect width="1200" height="675" fill="url(#burgundy-glow)"/>
+
+  <!-- Window Header -->
+  <rect x="0" y="0" width="1200" height="48" rx="20" fill="#403034" stroke="#62464A" stroke-width="1"/>
+  <circle cx="32" cy="24" r="6" fill="#790D16"/>
+  <circle cx="52" cy="24" r="6" fill="#E5D3AF" fill-opacity="0.8"/>
+  <circle cx="72" cy="24" r="6" fill="#AEC4D4" fill-opacity="0.8"/>
+  <text x="100" y="28" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#D4C3BB" letter-spacing="1">SYNAPSE // WORKSPACE // SPRINT-24-OVERVIEW</text>
+
+  <!-- Left Sidebar Mock -->
+  <rect x="24" y="68" width="220" height="580" rx="12" fill="#403034" stroke="#62464A" stroke-width="1"/>
+  <rect x="44" y="92" width="120" height="14" rx="4" fill="#E5D3AF" fill-opacity="0.7"/>
+  <rect x="44" y="124" width="180" height="10" rx="3" fill="#D4C3BB" fill-opacity="0.4"/>
+  <rect x="44" y="148" width="160" height="10" rx="3" fill="#D4C3BB" fill-opacity="0.4"/>
+  <rect x="44" y="172" width="140" height="10" rx="3" fill="#D4C3BB" fill-opacity="0.4"/>
+  
+  <rect x="44" y="220" width="80" height="10" rx="3" fill="#790D16" fill-opacity="0.9"/>
+  <rect x="44" y="244" width="170" height="10" rx="3" fill="#D4C3BB" fill-opacity="0.4"/>
+  <rect x="44" y="268" width="150" height="10" rx="3" fill="#D4C3BB" fill-opacity="0.4"/>
+
+  <!-- Top KPI Cards -->
+  <rect x="264" y="68" width="280" height="100" rx="12" fill="#403034" stroke="#62464A" stroke-width="1"/>
+  <text x="284" y="96" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#D4C3BB" letter-spacing="1">SPRINT VELOCITY</text>
+  <text x="284" y="136" font-family="system-ui, sans-serif" font-size="28" font-weight="700" fill="#F5EFE1">48 / 52 pts</text>
+  <rect x="440" y="84" width="84" height="22" rx="11" fill="#790D16" fill-opacity="0.3" stroke="#790D16" stroke-width="1"/>
+  <text x="482" y="99" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#E5D3AF">ON TRACK</text>
+
+  <rect x="564" y="68" width="280" height="100" rx="12" fill="#403034" stroke="#62464A" stroke-width="1"/>
+  <text x="584" y="96" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#D4C3BB" letter-spacing="1">AI SPEC HEALTH</text>
+  <text x="584" y="136" font-family="system-ui, sans-serif" font-size="28" font-weight="700" fill="#AEC4D4">94.8%</text>
+
+  <rect x="864" y="68" width="312" height="100" rx="12" fill="#354854" stroke="#AEC4D4" stroke-opacity="0.3" stroke-width="1"/>
+  <text x="884" y="96" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#AEC4D4" letter-spacing="1">PREDICTIVE BOTTLENECK</text>
+  <text x="884" y="126" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="#F5EFE1">Auth API schema migration</text>
+  <text x="884" y="146" font-family="system-ui, sans-serif" font-size="11" fill="#D4C3BB">Affects: Client SDK, Billing</text>
+
+  <!-- Sprint Board Columns Mock -->
+  <rect x="264" y="188" width="280" height="460" rx="12" fill="#403034" stroke="#62464A" stroke-width="1"/>
+  <text x="284" y="214" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#F5EFE1">TODO (4)</text>
+  <rect x="280" y="232" width="248" height="88" rx="8" fill="#49363A" stroke="#62464A" stroke-width="1"/>
+  <rect x="296" y="250" width="140" height="12" rx="3" fill="#F5EFE1"/>
+  <rect x="296" y="272" width="180" height="8" rx="2" fill="#D4C3BB" fill-opacity="0.6"/>
+  <rect x="296" y="292" width="60" height="16" rx="4" fill="#790D16" fill-opacity="0.6"/>
+
+  <rect x="564" y="188" width="280" height="460" rx="12" fill="#403034" stroke="#62464A" stroke-width="1"/>
+  <text x="584" y="214" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#F5EFE1">IN PROGRESS (3)</text>
+  <rect x="580" y="232" width="248" height="98" rx="8" fill="#49363A" stroke="#790D16" stroke-width="1.5"/>
+  <rect x="596" y="250" width="160" height="12" rx="3" fill="#E5D3AF"/>
+  <rect x="596" y="272" width="200" height="8" rx="2" fill="#D4C3BB" fill-opacity="0.6"/>
+  <rect x="596" y="296" width="70" height="16" rx="4" fill="#AEC4D4" fill-opacity="0.3"/>
+
+  <rect x="864" y="188" width="312" height="460" rx="12" fill="#403034" stroke="#62464A" stroke-width="1"/>
+  <text x="884" y="214" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#F5EFE1">COMPLETED (8)</text>
+  <rect x="880" y="232" width="280" height="80" rx="8" fill="#49363A" stroke="#62464A" stroke-width="1"/>
+  <rect x="896" y="250" width="170" height="12" rx="3" fill="#AEC4D4"/>
+  <rect x="896" y="272" width="220" height="8" rx="2" fill="#D4C3BB" fill-opacity="0.5"/>
+
+  <!-- Centered Floating Placeholder Identification Badge -->
+  <g filter="drop-shadow(0px 8px 24px rgba(0,0,0,0.6))">
+    <rect x="360" y="340" width="480" height="110" rx="16" fill="#302326" stroke="#E5D3AF" stroke-width="2"/>
+    <rect x="372" y="352" width="456" height="86" rx="12" fill="#403034"/>
+    
+    <!-- Camera/Image Icon -->
+    <circle cx="410" cy="395" r="22" fill="#790D16"/>
+    <path d="M 402 390 L 406 386 H 414 L 418 390 H 422 C 424 390 425 391 425 393 V 403 C 425 405 424 406 422 406 H 398 C 396 406 395 405 395 403 V 393 C 395 391 396 390 398 390 Z" fill="#F5EFE1"/>
+    <circle cx="410" cy="398" r="4" fill="#790D16"/>
+
+    <text x="444" y="386" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#F5EFE1">
+      PLACEHOLDER: hero-workspace-mockup.svg
+    </text>
+    <text x="444" y="406" font-family="monospace" font-size="12" font-weight="500" fill="#E5D3AF">
+      public/images/website/hero-workspace-mockup.svg
+    </text>
+    <text x="444" y="424" font-family="system-ui, sans-serif" font-size="11" fill="#D4C3BB">
+      Dimensions: 1200 x 675 px (16:9 ratio) • Replace with actual product screenshot
+    </text>
+  </g>
+</svg>

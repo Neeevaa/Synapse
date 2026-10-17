@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" fill="none">
+  <!-- Background Canvas -->
+  <rect width="800" height="500" rx="16" fill="#302326" stroke="#62464A" stroke-width="2"/>
+  
+  <!-- Subtle Gradient Glow -->
+  <defs>
+    <linearGradient id="req-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#790D16" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#302326" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" rx="16" fill="url(#req-grad)"/>
+
+  <!-- Top bar -->
+  <rect x="0" y="0" width="800" height="42" rx="16" fill="#403034" stroke="#62464A" stroke-width="1"/>
+  <circle cx="28" cy="21" r="5" fill="#790D16"/>
+  <circle cx="44" cy="21" r="5" fill="#E5D3AF"/>
+  <circle cx="60" cy="21" r="5" fill="#AEC4D4"/>
+  <text x="84" y="25" font-family="monospace" font-size="11" font-weight="600" fill="#D4C3BB">PRD_ANALYSIS // AUDIT_REPORT_V2.JSON</text>
+
+  <!-- Left Score Gauge & Findings -->
+  <rect x="24" y="60" width="280" height="300" rx="12" fill="#403034" stroke="#62464A" stroke-width="1"/>
+  <text x="44" y="88" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#E5D3AF" letter-spacing="1">SPEC QUALITY SCORE</text>
+  <circle cx="164" cy="180" r="60" stroke="#62464A" stroke-width="10" fill="none"/>
+  <circle cx="164" cy="180" r="60" stroke="#790D16" stroke-width="10" stroke-dasharray="280 100" fill="none"/>
+  <text x="164" y="188" text-anchor="middle" font-family="system-ui, sans-serif" font-size="28" font-weight="800" fill="#F5EFE1">94%</text>
+  <text x="164" y="208" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#AEC4D4">HIGH FIDELITY</text>
+  <text x="44" y="290" font-family="system-ui, sans-serif" font-size="12" fill="#D4C3BB">• 14 Testable User Stories</text>
+  <text x="44" y="314" font-family="system-ui, sans-serif" font-size="12" fill="#D4C3BB">• 2 Ambiguity Warnings Flagged</text>
+  <text x="44" y="338" font-family="system-ui, sans-serif" font-size="12" fill="#D4C3BB">• 0 Missing Security Contracts</text>
+
+  <!-- Right Parsed Items List -->
+  <rect x="320" y="60" width="456" height="300" rx="12" fill="#403034" stroke="#62464A" stroke-width="1"/>
+  <text x="340" y="88" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#E5D3AF" letter-spacing="1">PARSED ACCEPTANCE CRITERIA</text>
+  
+  <rect x="336" y="104" width="424" height="64" rx="8" fill="#49363A" stroke="#62464A" stroke-width="1"/>
+  <text x="352" y="128" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#F5EFE1">AC-01: OAuth2 Session Expiry Handling</text>
+  <text x="352" y="150" font-family="system-ui, sans-serif" font-size="11" fill="#AEC4D4">Status: Verified with 4 synthetic test cases generated</text>
+
+  <rect x="336" y="180" width="424" height="64" rx="8" fill="#49363A" stroke="#790D16" stroke-width="1.5"/>
+  <text x="352" y="204" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#E5D3AF">AC-02: Tenant Rate Limiter Edge Cases</text>
+  <text x="352" y="226" font-family="system-ui, sans-serif" font-size="11" fill="#D4C3BB">Warning: Concurrent burst limit requires explicit fallback quota</text>
+
+  <rect x="336" y="256" width="424" height="64" rx="8" fill="#49363A" stroke="#62464A" stroke-width="1"/>
+  <text x="352" y="280" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#F5EFE1">AC-03: Webhook Retry Idempotency</text>
+  <text x="352" y="302" font-family="system-ui, sans-serif" font-size="11" fill="#AEC4D4">Status: Deduplication key validation criteria verified</text>
+
+  <!-- Bottom Floating Placeholder Label -->
+  <rect x="24" y="380" width="752" height="96" rx="12" fill="#403034" stroke="#E5D3AF" stroke-width="1.5"/>
+  <circle cx="64" cy="428" r="20" fill="#790D16"/>
+  <path d="M 58 424 L 62 420 H 66 L 70 424 H 74 C 75 424 76 425 76 426 V 434 C 76 435 75 436 74 436 H 54 C 53 436 52 435 52 434 V 426 C 52 425 53 424 54 424 Z" fill="#F5EFE1"/>
+  <circle cx="64" cy="430" r="3" fill="#790D16"/>
+  <text x="96" y="420" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#F5EFE1">
+    PLACEHOLDER: requirements-analysis-card.svg
+  </text>
+  <text x="96" y="438" font-family="monospace" font-size="11" fill="#E5D3AF">
+    public/images/website/requirements-analysis-card.svg • 800 x 500 px
+  </text>
+  <text x="96" y="456" font-family="system-ui, sans-serif" font-size="10" fill="#D4C3BB">
+    Shows AI requirement analysis, PRD completeness gauge, and testable acceptance criteria breakdown.
+  </text>
+</svg>

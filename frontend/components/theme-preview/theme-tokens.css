@@ -1,0 +1,110 @@
+/* ==========================================================================
+   Synapse Exploratory Theme Tokens (ISOLATED TO .synapse-theme-preview ONLY)
+   Exact Brand Palette:
+     - Burgundy:   #790D16
+     - Warm Sand:  #E5D3AF
+     - Soft Ivory: #F5EFE1
+     - Dusty Blue: #AEC4D4
+   ========================================================================== */
+
+/* LIGHT THEME (Warm Ivory & Burgundy Foundation) */
+.synapse-theme-preview[data-theme="light"] {
+  --tp-bg-canvas: #F5EFE1;           /* Soft Ivory primary background */
+  --tp-bg-surface: #FAF6ED;          /* Elevated light ivory card */
+  --tp-bg-elevated: #EDE5D5;         /* Warm Sand tinted surface */
+  --tp-bg-card-nested: #FFFFFF;      /* Clean crisp white inner card */
+  --tp-bg-accent-soft: rgba(121, 13, 22, 0.08); /* Muted burgundy wash */
+  
+  --tp-border-subtle: #E5D3AF;       /* Warm Sand border */
+  --tp-border-strong: #D6C29B;       /* Defined sand border */
+  --tp-border-focus: #9f1722;        /* Primary Burgundy active border */
+
+  --tp-brand-primary: #9f1722;       /* Primary Burgundy CTA & headers */
+  --tp-brand-hover: #85121b;         /* Deeper Burgundy hover */
+  --tp-brand-contrast: #FFFFFF;      /* Text on burgundy */
+  
+  --tp-sand-surface: #E5D3AF;        /* Warm Sand badge & secondary cards */
+  --tp-sand-text: #4A3539;           /* Charcoal on sand */
+
+  --tp-dusty-blue: #AEC4D4;          /* Dusty Blue accent */
+  --tp-dusty-blue-surface: #E3ECF2;  /* Light Dusty Blue tint for info panels */
+  --tp-dusty-blue-text: #203B4C;     /* High-contrast slate text on blue */
+  --tp-dusty-blue-border: #92B1C6;   /* Defined blue border */
+
+  --tp-text-primary: #2B181B;        /* Deep warm charcoal */
+  --tp-text-secondary: #574145;      /* Balanced secondary reading text */
+  --tp-text-muted: #7E6569;          /* Tertiary note text */
+
+  --tp-shadow-sm: 0 1px 3px rgba(43, 24, 27, 0.05);
+  --tp-shadow-md: 0 4px 12px rgba(43, 24, 27, 0.08);
+  --tp-shadow-lg: 0 12px 32px rgba(43, 24, 27, 0.12);
+}
+
+/* DARK THEME (Warm Charcoal & Low-Glare Eye Comfort) */
+.synapse-theme-preview[data-theme="dark"] {
+  --tp-bg-canvas: #302326;           /* Main background (warm charcoal) */
+  --tp-bg-surface: #403034;          /* Elevated surfaces */
+  --tp-bg-elevated: #49363A;         /* Nested cards */
+  --tp-bg-card-nested: #392B2E;      /* Recessed card interior */
+  --tp-bg-accent-soft: rgba(121, 13, 22, 0.25); /* Subtle burgundy glow */
+
+  --tp-border-subtle: #62464A;       /* Refined warm border */
+  --tp-border-strong: #78565B;       /* Highlighted border */
+  --tp-border-focus: #E5D3AF;        /* Warm sand focus outline */
+
+  --tp-brand-primary: #790D16;       /* Primary Burgundy (accentuated by sand text) */
+  --tp-brand-hover: #96121D;         /* Lighter Burgundy for dark mode hover */
+  --tp-brand-contrast: #F5EFE1;      /* Ivory text on burgundy */
+
+  --tp-sand-surface: rgba(229, 211, 175, 0.12); /* Subtle sand surface glow */
+  --tp-sand-text: #E5D3AF;           /* Warm Sand highlight text */
+
+  --tp-dusty-blue: #AEC4D4;          /* Dusty Blue accent icon & lines */
+  --tp-dusty-blue-surface: #354854;  /* Cool information surfaces */
+  --tp-dusty-blue-text: #F5EFE1;     /* Ivory text on blue */
+  --tp-dusty-blue-border: rgba(174, 196, 212, 0.35); /* Dusty blue border */
+
+  --tp-text-primary: #F5EFE1;        /* Primary text (Soft Ivory) */
+  --tp-text-secondary: #D4C3BB;      /* Secondary text (Muted sand-charcoal) */
+  --tp-text-muted: #A38E88;          /* Tertiary text */
+
+  --tp-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.3);
+  --tp-shadow-md: 0 6px 20px rgba(0, 0, 0, 0.45);
+  --tp-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Base Wrapper Styles */
+.synapse-theme-preview {
+  background-color: var(--tp-bg-canvas);
+  color: var(--tp-text-primary);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  min-height: 100vh;
+}
+
+/* Image Placeholder Container */
+.tp-placeholder-box {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1.5px dashed var(--tp-border-strong);
+  background-color: var(--tp-bg-surface);
+  transition: all 0.2s ease;
+}
+
+.tp-placeholder-box:hover {
+  border-color: var(--tp-brand-primary);
+  box-shadow: var(--tp-shadow-md);
+}
+
+.tp-placeholder-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: var(--tp-bg-elevated);
+  border-top: 1px solid var(--tp-border-subtle);
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--tp-text-secondary);
+}
