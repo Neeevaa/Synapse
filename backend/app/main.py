@@ -51,13 +51,15 @@ cors_origins = [
     "http://localhost:3001",
     "http://127.0.0.1:3001",
 ]
-if settings.FRONTEND_URL and settings.FRONTEND_URL.strip() not in cors_origins:
-    cors_origins.append(settings.FRONTEND_URL.strip())
+if settings.FRONTEND_URL:
+    clean_frontend = settings.FRONTEND_URL.strip().rstrip("/")
+    if clean_frontend and clean_frontend not in cors_origins:
+        cors_origins.append(clean_frontend)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?|https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

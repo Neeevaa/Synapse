@@ -1,8 +1,15 @@
 import axios from "axios";
 import { sanitizeErrorMessage } from "./utils";
 
+const rawBaseUrl =
+  process.env.NEXT_PUBLIC_API ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://127.0.0.1:8000";
+
+export const API_BASE_URL = rawBaseUrl.replace(/\/+$/, "");
+
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API || "http://127.0.0.1:8000",
+  baseURL: API_BASE_URL,
 });
 
 let isRefreshing = false;
@@ -94,7 +101,7 @@ api.interceptors.response.use(
 
       try {
         const refreshResponse = await axios.post(
-          `${process.env.NEXT_PUBLIC_API || "http://127.0.0.1:8000"}/auth/refresh`,
+          `${API_BASE_URL}/auth/refresh`,
           { refresh_token: refreshToken }
         );
         
