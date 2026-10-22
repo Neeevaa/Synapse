@@ -402,7 +402,7 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
         onFocusCapture={handleFocus}
         onBlurCapture={handleBlur}
         onDoubleClick={handleDoubleClick}
-        className={`fixed left-3 top-3 bottom-3 z-50 rounded-[34px] border border-sidebar-border/80 bg-sidebar/95 backdrop-blur-md shadow-xl lg:shadow-2xl flex flex-col justify-between select-none transition-[width,transform] duration-200 ease-in-out ${isExpanded ? "w-[212px]" : "w-[68px]"
+        className={`fixed left-3 top-3 bottom-3 z-50 rounded-[34px] border border-sidebar-border bg-sidebar shadow-xl lg:shadow-2xl flex flex-col justify-between select-none transition-[width,transform] duration-200 ease-in-out ${isExpanded ? "w-[212px]" : "w-[68px]"
           } ${sidebarOpen
             ? "translate-x-0"
             : "-translate-x-[calc(100%+24px)] lg:translate-x-0"
@@ -410,14 +410,14 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
       >
         <div className="flex flex-col flex-1 min-h-0">
           {/* Top Brand Logo Circular Badge */}
-          <div className="flex items-center p-2 py-3 border-b border-sidebar-border/60 shrink-0">
+          <div className="flex items-center p-2 py-3 border-b border-sidebar-border shrink-0">
             <Link
               href="/dashboard"
               onClick={() => setSidebarOpen(false)}
-              className="flex items-center group outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
+              className="flex items-center group outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring rounded-full"
             >
               <div className="w-[52px] flex items-center justify-center shrink-0">
-                <div className="size-10 rounded-full bg-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform overflow-hidden p-1 border border-sidebar-border/80">
+                <div className="size-10 rounded-full bg-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform overflow-hidden p-1 border border-sidebar-border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/logo.png" alt="Synapse" className="size-full object-contain" />
                 </div>
@@ -428,10 +428,10 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
                   : "opacity-0 max-w-0 ml-0 pointer-events-none"
                   }`}
               >
-                <span className="text-sm font-extrabold tracking-wider text-sidebar-foreground group-hover:text-primary transition-colors">
+                <span className="text-sm font-extrabold tracking-wider text-sidebar-foreground group-hover:text-sidebar-primary transition-colors">
                   SYNAPSE
                 </span>
-                <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest leading-none">
+                <span className="text-[9px] text-sidebar-foreground/75 uppercase font-bold tracking-widest leading-none">
                   Workspace
                 </span>
               </div>
@@ -439,7 +439,7 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
             {sidebarOpen && (
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="lg:hidden ml-auto text-sidebar-foreground hover:opacity-80 p-1 cursor-pointer"
+                className="lg:hidden ml-auto text-sidebar-foreground hover:text-sidebar-primary p-1 cursor-pointer transition-colors"
               >
                 <X className="size-4" />
               </button>
@@ -450,16 +450,28 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
           <nav className="p-2 space-y-1 overflow-y-auto flex-1 no-scrollbar">
             {navItems.map((item) => {
               const Icon = item.icon;
+              const isDisabled = (item as { disabled?: boolean }).disabled;
               return (
                 <Link
                   key={item.name}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
+                  href={isDisabled ? "#" : item.href}
+                  onClick={(e) => {
+                    if (isDisabled) {
+                      e.preventDefault();
+                      return;
+                    }
+                    setSidebarOpen(false);
+                  }}
                   title={!isExpanded ? item.name : undefined}
-                  className={`group relative flex items-center h-10 w-full rounded-xl text-xs transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-primary ${item.isActive
-                    ? "bg-primary text-primary-foreground shadow-md font-bold"
-                    : "text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground font-medium"
-                    }`}
+                  aria-disabled={isDisabled}
+                  tabIndex={isDisabled ? -1 : undefined}
+                  className={`group relative flex items-center h-10 w-full rounded-xl text-xs transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring ${
+                    isDisabled
+                      ? "opacity-45 cursor-not-allowed pointer-events-none text-sidebar-foreground/45 select-none"
+                      : item.isActive
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md font-bold hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium"
+                  }`}
                 >
                   <div className="w-[52px] h-10 flex items-center justify-center shrink-0">
                     <Icon className="size-4.5 shrink-0" />
@@ -480,27 +492,39 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
             {/* Project Sub-navigation Section when inside active project */}
             {projectNavItems.length > 0 && (
               <>
-                <div className="my-2 border-t border-sidebar-border/60 mx-1 shrink-0" />
+                <div className="my-2 border-t border-sidebar-border mx-1 shrink-0" />
 
                 {isExpanded && (
-                  <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-1.5 truncate">
-                    <FolderKanban className="size-3 shrink-0 text-primary" />
+                  <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/75 flex items-center gap-1.5 truncate">
+                    <FolderKanban className="size-3 shrink-0 text-sidebar-primary" />
                     <span className="truncate">{activeProject?.name || "Project Workspace"}</span>
                   </div>
                 )}
 
                 {projectNavItems.map((item) => {
                   const Icon = item.icon;
+                  const isDisabled = (item as { disabled?: boolean }).disabled;
                   return (
                     <Link
                       key={item.href}
-                      href={item.href}
-                      onClick={() => setSidebarOpen(false)}
+                      href={isDisabled ? "#" : item.href}
+                      onClick={(e) => {
+                        if (isDisabled) {
+                          e.preventDefault();
+                          return;
+                        }
+                        setSidebarOpen(false);
+                      }}
                       title={!isExpanded ? item.name : undefined}
-                      className={`group relative flex items-center h-10 w-full rounded-xl text-xs transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-primary ${item.isActive
-                        ? "bg-primary text-primary-foreground shadow-md font-bold"
-                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground font-medium"
-                        }`}
+                      aria-disabled={isDisabled}
+                      tabIndex={isDisabled ? -1 : undefined}
+                      className={`group relative flex items-center h-10 w-full rounded-xl text-xs transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring ${
+                        isDisabled
+                          ? "opacity-45 cursor-not-allowed pointer-events-none text-sidebar-foreground/45 select-none"
+                          : item.isActive
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md font-bold hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium"
+                      }`}
                     >
                       <div className="w-[52px] h-10 flex items-center justify-center shrink-0">
                         <Icon className="size-4.5 shrink-0" />
@@ -514,7 +538,13 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
                       >
                         <span className="truncate whitespace-nowrap">{item.name}</span>
                         {item.badge && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary-foreground font-bold border border-primary-foreground/20 ml-1.5 shrink-0">
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-1.5 shrink-0 transition-colors ${
+                              item.isActive
+                                ? "bg-sidebar-primary-foreground/15 text-sidebar-primary-foreground border border-sidebar-primary-foreground/25"
+                                : "bg-white/15 text-sidebar-foreground border border-white/20 group-hover:bg-sidebar-accent-foreground/15 group-hover:text-sidebar-accent-foreground group-hover:border-sidebar-accent-foreground/25"
+                            }`}
+                          >
                             {item.badge}
                           </span>
                         )}
@@ -531,16 +561,16 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
         <div
           className={`transition-all duration-200 overflow-hidden shrink-0 ${
             isExpanded
-              ? "p-2 border-t border-sidebar-border/60 opacity-100 max-h-24"
+              ? "p-2 border-t border-sidebar-border opacity-100 max-h-24"
               : "max-h-0 opacity-0 pointer-events-none p-0 border-0"
           }`}
         >
-          <div className="p-2 rounded-xl bg-sidebar-accent/50 border border-sidebar-border/80">
+          <div className="p-2 rounded-xl bg-black/20 border border-sidebar-border">
             <div className="flex items-center gap-1.5 text-xs font-bold text-sidebar-foreground">
-              <Bot className="size-3.5 text-primary shrink-0" />
+              <Bot className="size-3.5 text-sidebar-primary shrink-0" />
               <span className="truncate">AI Copilot</span>
             </div>
-            <p className="mt-0.5 text-[10px] text-muted-foreground leading-tight truncate">
+            <p className="mt-0.5 text-[10px] text-sidebar-foreground/75 leading-tight truncate">
               Monitoring dependencies
             </p>
           </div>

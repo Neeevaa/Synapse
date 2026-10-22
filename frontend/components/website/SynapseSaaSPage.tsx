@@ -5,7 +5,7 @@ import './fintech-saas-theme.css';
 import { SynapseSaaSNavbar } from './SynapseSaaSNavbar';
 import { SynapseHeroCircuit } from './SynapseHeroCircuit';
 import { SynapseProductPreview } from './SynapseProductPreview';
-import { SynapseSatinFeatures } from './SynapseSatinFeatures';
+import { RadialOrbitalTimeline } from '@/components/ui/radial-orbital-timeline';
 import { SynapseWorkflowSection } from './SynapseWorkflowSection';
 import { SynapseWhySection } from './SynapseWhySection';
 import { SynapsePricingSection } from './SynapsePricingSection';
@@ -25,8 +25,8 @@ export function SynapseSaaSPage() {
         {/* Section C: Product Preview - Interactive Workspace */}
         <SynapseProductPreview />
 
-        {/* Section D: Core Capabilities with Satin Wave Ribbon & Bento Cards */}
-        <SynapseSatinFeatures />
+        {/* Section D: Interactive Rotating Orbital Feature Explorer */}
+        <RadialOrbitalTimeline />
 
         {/* Section E: How Synapse Works - 5-Step Connected Workflow */}
         <SynapseWorkflowSection />

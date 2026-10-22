@@ -52,7 +52,7 @@ export function SynapseSaaSNavbar() {
 
   const navLinks = [
     { label: "Product", href: "#preview" },
-    { label: "Capabilities", href: "#capabilities" },
+    { label: "Ecosystem", href: "#ecosystem" },
     { label: "Workflow", href: "#workflow" },
     { label: "Why Synapse", href: "#why" },
     { label: "Pricing", href: "#pricing" },

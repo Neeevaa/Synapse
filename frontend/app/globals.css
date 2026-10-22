@@ -4,6 +4,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* =========================================================
+   TAILWIND THEME MAPPING
+   ========================================================= */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -18,7 +22,7 @@
   --font-heading: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
     "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-  /* Synapse brand palette */
+  /* Synapse brand tokens */
   --color-synapse-green: var(--synapse-green);
   --color-synapse-green-light: var(--synapse-green-light);
   --color-synapse-dark: var(--synapse-dark);
@@ -26,25 +30,44 @@
   --color-synapse-light: var(--synapse-light);
   --color-synapse-accent: var(--synapse-accent);
 
-  /* Semantic UI colors */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Semantic UI */
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+
+  /* Extended blue palette */
+  --color-blue-50: var(--blue-50);
+  --color-blue-100: var(--blue-100);
+  --color-blue-200: var(--blue-200);
+  --color-blue-300: var(--blue-300);
+  --color-blue-400: var(--blue-400);
+  --color-blue-500: var(--blue-500);
+  --color-blue-600: var(--blue-600);
+  --color-blue-700: var(--blue-700);
+  --color-blue-800: var(--blue-800);
+  --color-blue-900: var(--blue-900);
 
   /* Charts */
   --color-chart-1: var(--chart-1);
@@ -63,7 +86,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Radius scale */
+  /* Existing radius scale — unchanged */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -74,191 +97,237 @@
 }
 
 /* =========================================================
-   LIGHT THEME — WARM IVORY & BURGUNDY
-   Exact Brand Palette:
-   - Primary Burgundy: #9f1722 (Refined brand accent)
-   - Warm Sand: #E5D3AF
-   - Soft Ivory: #F5EFE1
-   - Dusty Blue: #AEC4D4
+   LIGHT THEME — PERPETUITY
    ========================================================= */
 
 :root {
   color-scheme: light;
 
-  /* Brand Tokens */
-  --synapse-green: #9f1722;
-  --synapse-green-light: #AEC4D4;
-  --synapse-accent: #E5D3AF;
-  --synapse-dark: #2B181B;
-  --synapse-dark-card: #FAF6ED;
-  --synapse-light: #F5EFE1;
+  /* Brand */
+  --synapse-green: #06858E;
+  --synapse-green-light: #1E9EA6;
+  --synapse-accent: #C9E5E7;
+  --synapse-dark: #0A4A55;
+  --synapse-dark-card: #F2F7F7;
+  --synapse-light: #E8F0F0;
 
   /* Page and surfaces */
-  --background: #F5EFE1;
-  --foreground: #2B181B;
-  --card: #FAF6ED;
-  --card-foreground: #2B181B;
-  --popover: #FAF6ED;
-  --popover-foreground: #2B181B;
+  --background: #E8F0F0;
+  --foreground: #0A4A55;
+
+  --card: #F2F7F7;
+  --card-foreground: #0A4A55;
+
+  --popover: #F2F7F7;
+  --popover-foreground: #0A4A55;
 
   /* Buttons */
-  --primary: #9f1722;
+  --primary: #06858E;
   --primary-foreground: #FFFFFF;
-  --secondary: #E5D3AF;
-  --secondary-foreground: #4A3539;
 
-  /* Muted elements */
-  --muted: #EDE5D5;
-  --muted-foreground: #6E565A;
+  --secondary: #20404A;
 
-  /* Hover and selection */
-  --accent: #EAE0CE;
-  --accent-foreground: #2B181B;
+  /* Light text on the dark surface */
+  --secondary-foreground: #E5F3F5;
+
+  /* Muted */
+  --muted: #E0EAEA;
+  --muted-foreground: #427A7E;
+
+  /* Accent */
+  --accent: #C9E5E7;
+  --accent-foreground: #0A4A55;
 
   /* Feedback */
-  --destructive: #9f1722;
-  --success: #2A7E56;
-  --warning: #B26A14;
-  --info: #354854;
+  --destructive: #D13838;
+  --success: #21805A;
+  --warning: #9A6415;
+  --info: #176A91;
 
   /* Borders and focus */
-  --border: #E5D3AF;
-  --input: #E5D3AF;
-  --ring: #9f1722;
+  --border: #CDE0E2;
+  --input: #D9EAEA;
+  --ring: #06858E;
 
   /* Charts */
-  --chart-1: #9f1722;
-  --chart-2: #E5D3AF;
-  --chart-3: #AEC4D4;
-  --chart-4: #354854;
-  --chart-5: #6E565A;
+  --chart-1: #06858E;
+  --chart-2: #1E9EA6;
+  --chart-3: #37B6BE;
+  --chart-4: #5DC7CE;
+  --chart-5: #8AD8DD;
 
   /* Sidebar */
-  --sidebar: #FAF6ED;
-  --sidebar-foreground: #2B181B;
-  --sidebar-primary: #9f1722;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #EDE5D5;
-  --sidebar-accent-foreground: #4A3539;
-  --sidebar-border: #E5D3AF;
-  --sidebar-ring: #9f1722;
+  --sidebar: #DAEBED;
+  --sidebar-foreground: #0A4A55;
 
-  /* Radius scale */
+  --sidebar-primary: #06858E;
+  --sidebar-primary-foreground: #FFFFFF;
+
+  --sidebar-accent: #C9E5E7;
+  --sidebar-accent-foreground: #0A4A55;
+
+  --sidebar-border: #CDE0E2;
+  --sidebar-ring: #06858E;
+
+  /* Blue palette */
+  --blue-50: #F0F8FC;
+  --blue-100: #DCEFF7;
+  --blue-200: #B8DDEB;
+  --blue-300: #8BC5DE;
+  --blue-400: #5BAACB;
+  --blue-500: #328CB2;
+  --blue-600: #246F94;
+  --blue-700: #205A78;
+  --blue-800: #204B63;
+  --blue-900: #1D3F52;
+
+  /* Additional surfaces and interactions */
+  --surface-hover: #DCEBEC;
+  --surface-elevated: #F8FBFB;
+
+  --button-hover: #056F77;
+  --button-secondary-hover: #C4DFE2;
+
+  --link: #087B91;
+  --link-hover: #075D70;
+
+  --selection: #C9E5E7;
+
+  --scrollbar-thumb: #B7D3D7;
+  --scrollbar-thumb-hover: #06858E;
+
+  /* Frame and canvas */
+  --frame-bg: #D4E5E7;
+  --canvas-bg: #E8F0F0;
+  --canvas-ink: #0A4A55;
+
+  /* Preserve existing geometry and shadows */
   --radius: 0.75rem;
 
-  /* Additional semantic tokens */
-  --surface-hover: #EDE5D5;
-  --surface-elevated: #FFFFFF;
-  --button-hover: #85121b;
-  --button-secondary-hover: #D6C29B;
-  --link: #9f1722;
-  --link-hover: #630A11;
-  --selection: #E5D3AF;
-  --scrollbar-thumb: #D6C29B;
-  --scrollbar-thumb-hover: #9f1722;
-
-  /* Frame & Canvas tokens */
-  --frame-bg: #23171A;
-  --canvas-bg: #F5EFE1;
-  --canvas-ink: #2B181B;
+  --shadow-blur: 2px;
+  --shadow-color: hsl(185 70% 30% / 0.15);
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.15;
+  --shadow-offset-x: 1px;
+  --shadow-offset-y: 1px;
 }
 
 /* =========================================================
-   DARK THEME — WARM CHARCOAL & LOW-GLARE
-   Exact Brand Palette:
-   - Primary Burgundy: #790D16 / #9f1722
-   - Elevated Charcoal: #403034
-   - Nested Surfaces: #49363A
-   - Main Background: #302326
-   - Warm Borders: #62464A
-   - Text Ivory: #F5EFE1
-   - Text Secondary: #D4C3BB
-   - Cool Information Surface: #354854
-   - Dusty Blue: #AEC4D4
+   DARK THEME — DEEP OCEAN
    ========================================================= */
 
 .dark {
   color-scheme: dark;
 
-  /* Brand Tokens */
-  --synapse-green: #9f1722;
-  --synapse-green-light: #790D16;
-  --synapse-accent: #E5D3AF;
-  --synapse-dark: #302326;
-  --synapse-dark-card: #403034;
-  --synapse-light: #F5EFE1;
+  /* Brand */
+  --synapse-green: #37B6BE;
+  --synapse-green-light: #5DC7CE;
+  --synapse-accent: #20454E;
+  --synapse-dark: #0B1C24;
+  --synapse-dark-card: #142A34;
+  --synapse-light: #E5F3F5;
 
   /* Page and surfaces */
-  --background: #302326;
-  --foreground: #F5EFE1;
+  --background: #0B1C24;
+  --foreground: #E5F3F5;
 
-  --card: #403034;
-  --card-foreground: #F5EFE1;
+  --card: #142A34;
+  --card-foreground: #E5F3F5;
 
-  --popover: #403034;
-  --popover-foreground: #F5EFE1;
+  --popover: #18313C;
+  --popover-foreground: #E5F3F5;
 
   /* Buttons */
-  --primary: #9f1722;
-  --primary-foreground: #F5EFE1;
+  --primary: #37B6BE;
+  --primary-foreground: #08282D;
 
-  --secondary: #49363A;
-  --secondary-foreground: #E5D3AF;
+  --secondary: #20404A;
+  --secondary-foreground: #D6EEF0;
 
-  /* Muted elements */
-  --muted: #392B2E;
-  --muted-foreground: #D4C3BB;
+  /* Muted */
+  --muted: #19313B;
+  --muted-foreground: #A5C5CC;
 
-  /* Hover and selection */
-  --accent: #49363A;
-  --accent-foreground: #F5EFE1;
+  /* Accent */
+  --accent: #20454E;
+  --accent-foreground: #E5F3F5;
 
   /* Feedback */
-  --destructive: #C83F4D;
-  --success: #3D9E6E;
-  --warning: #E5A84B;
-  --info: #AEC4D4;
+  --destructive: #F07878;
+  --success: #65D6A0;
+  --warning: #F0C16A;
+  --info: #78C7ED;
 
   /* Borders and focus */
-  --border: #62464A;
-  --input: #62464A;
-  --ring: #E5D3AF;
+  --border: #294A55;
+  --input: #315663;
+  --ring: #5DC7CE;
 
   /* Charts */
-  --chart-1: #9f1722;
-  --chart-2: #E5D3AF;
-  --chart-3: #AEC4D4;
-  --chart-4: #354854;
-  --chart-5: #D4C3BB;
+  --chart-1: #5DC7CE;
+  --chart-2: #37B6BE;
+  --chart-3: #5BAACB;
+  --chart-4: #8BC5DE;
+  --chart-5: #A4A9F5;
 
   /* Sidebar */
-  --sidebar: #302326;
-  --sidebar-foreground: #F5EFE1;
-  --sidebar-primary: #9f1722;
-  --sidebar-primary-foreground: #F5EFE1;
-  --sidebar-accent: #403034;
-  --sidebar-accent-foreground: #E5D3AF;
-  --sidebar-border: #62464A;
-  --sidebar-ring: #E5D3AF;
+  --sidebar: #102630;
+  --sidebar-foreground: #E5F3F5;
 
-  /* Additional semantic tokens */
-  --surface-hover: #49363A;
-  --surface-elevated: #403034;
-  --button-hover: #B51C29;
-  --button-secondary-hover: #563D42;
-  --link: #E5D3AF;
-  --link-hover: #F5EFE1;
-  --selection: #62464A;
-  --scrollbar-thumb: #62464A;
-  --scrollbar-thumb-hover: #E5D3AF;
+  --sidebar-primary: #37B6BE;
+  --sidebar-primary-foreground: #08282D;
 
-  /* Frame & Canvas tokens */
-  --canvas-bg-dark: #302326;
-  --canvas-ink-dark: #F5EFE1;
+  --sidebar-accent: #20454E;
+  --sidebar-accent-foreground: #E5F3F5;
+
+  --sidebar-border: #294A55;
+  --sidebar-ring: #5DC7CE;
+
+  /* Blue palette */
+  --blue-50: #EAF7FC;
+  --blue-100: #D1EDF8;
+  --blue-200: #A7D9EF;
+  --blue-300: #78C3E4;
+  --blue-400: #51A9D2;
+  --blue-500: #328CB2;
+  --blue-600: #28769A;
+  --blue-700: #245F7A;
+  --blue-800: #204B63;
+  --blue-900: #183747;
+
+  /* Additional surfaces and interactions */
+  --surface-hover: #1D3944;
+  --surface-elevated: #18313C;
+
+  --button-hover: #5DC7CE;
+  --button-secondary-hover: #2B5360;
+
+  --link: #78D8E0;
+  --link-hover: #A4E9ED;
+
+  --selection: #24525C;
+
+  --scrollbar-thumb: #315663;
+  --scrollbar-thumb-hover: #5DC7CE;
+
+  /* Frame and canvas */
+  --frame-bg: #07151C;
+  --canvas-bg-dark: #0B1C24;
+  --canvas-ink-dark: #E5F3F5;
+
+  /* Preserve existing geometry and shadows */
+  --radius: 0.75rem;
+
+  --shadow-blur: 2px;
+  --shadow-color: hsl(185 70% 30% / 0.15);
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.15;
+  --shadow-offset-x: 1px;
+  --shadow-offset-y: 1px;
 }
 
 /* =========================================================
-   BASE STYLES
+   BASE STYLES — PRESERVED
    ========================================================= */
 
 @layer base {
@@ -270,6 +339,7 @@
     font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
       "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial,
       sans-serif;
+
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -278,10 +348,13 @@
 
   body {
     @apply bg-background text-foreground;
+
     font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
       "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial,
       sans-serif;
+
     letter-spacing: -0.011em;
+
     transition:
       background-color 200ms ease,
       color 200ms ease;
@@ -303,10 +376,8 @@
 }
 
 /* =========================================================
-   SHARED INTERACTION UTILITIES
+   SYNAPSE UTILITIES — EXISTING STYLES PRESERVED
    ========================================================= */
-
-/* Use these utilities when components need explicit hover behavior. */
 
 @layer utilities {
   .bg-synapse {
@@ -348,6 +419,7 @@
   .synapse-primary-button {
     background-color: var(--primary);
     color: var(--primary-foreground);
+
     transition:
       background-color 180ms ease,
       box-shadow 180ms ease,
@@ -361,6 +433,7 @@
   .synapse-secondary-button {
     background-color: var(--secondary);
     color: var(--secondary-foreground);
+
     transition:
       background-color 180ms ease,
       box-shadow 180ms ease;
@@ -369,10 +442,50 @@
   .synapse-secondary-button:hover {
     background-color: var(--button-secondary-hover);
   }
+
+  /* =======================================================
+     BADGE CONTRAST FIX
+
+     Corrects the exact problematic combination:
+     bg-secondary/20 text-secondary
+
+     Only applies when both classes appear on the same
+     element. Other text-secondary uses remain unchanged.
+     ======================================================= */
+
+  .bg-secondary\/20.text-secondary {
+    color: var(--secondary-foreground);
+  }
+
+  /* Semantic status text */
+  .text-success {
+    color: var(--success);
+  }
+
+  .text-warning {
+    color: var(--warning);
+  }
+
+  .text-info {
+    color: var(--info);
+  }
+
+  /* Semantic status backgrounds */
+  .bg-success {
+    background-color: color-mix(in srgb, var(--success) 14%, transparent);
+  }
+
+  .bg-warning {
+    background-color: color-mix(in srgb, var(--warning) 14%, transparent);
+  }
+
+  .bg-info {
+    background-color: color-mix(in srgb, var(--info) 14%, transparent);
+  }
 }
 
 /* =========================================================
-   SCROLLBARS
+   SCROLLBARS — PRESERVED
    ========================================================= */
 
 ::-webkit-scrollbar {
@@ -408,7 +521,7 @@
 }
 
 /* =========================================================
-   READABLE MICRO-LABELS
+   READABLE MICRO-LABELS — PRESERVED
    ========================================================= */
 
 .text-xs,
@@ -422,7 +535,9 @@
   line-height: 1.3333 !important;
 }
 
-/* Respect users who prefer reduced motion */
+/* =========================================================
+   REDUCED MOTION — PRESERVED
+   ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
 
