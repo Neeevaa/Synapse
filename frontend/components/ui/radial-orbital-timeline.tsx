@@ -277,8 +277,11 @@ export function RadialOrbitalTimeline({
         "relative py-16 sm:py-24 px-4 sm:px-6 lg:px-10 overflow-hidden",
         className
       )}
-      aria-label="Explore the Synapse Ecosystem"
+      aria-label="A workspace that connects every layer"
     >
+      {/* Anchor for #preview navigation links */}
+      <div id="preview" className="absolute -top-24" />
+
       {/* Background ambient lighting gradients */}
       <div
         className="absolute top-1/2 left-1/4 -translate-y-1/2 -translate-x-1/2 w-[520px] h-[520px] rounded-full pointer-events-none opacity-20 dark:opacity-15 blur-[90px]"
@@ -301,13 +304,11 @@ export function RadialOrbitalTimeline({
         {/* SECTION HEADER */}
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-foreground leading-[1.15] mb-4">
-            Explore the Synapse Ecosystem
+            A workspace that connects every layer.
           </h2>
 
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-            One connected workspace. Intelligent assistance throughout the
-            software development lifecycle. Click any capability node to inspect
-            its architecture, real problem statement, and how Synapse assists.
+            Explore how Synapse unifies requirements, sprint planning, and contextual intelligence in one coherent interface.
           </p>
 
           {/* Quick Category Filter Pills */}

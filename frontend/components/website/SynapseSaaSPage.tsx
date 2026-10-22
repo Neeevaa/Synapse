@@ -3,8 +3,7 @@
 import React from 'react';
 import './fintech-saas-theme.css';
 import { SynapseSaaSNavbar } from './SynapseSaaSNavbar';
-import { SynapseHeroCircuit } from './SynapseHeroCircuit';
-import { SynapseProductPreview } from './SynapseProductPreview';
+import { SynapseNeuralHero } from '@/components/home/SynapseNeuralHero';
 import { RadialOrbitalTimeline } from '@/components/ui/radial-orbital-timeline';
 import { SynapseWorkflowSection } from './SynapseWorkflowSection';
 import { SynapseWhySection } from './SynapseWhySection';
@@ -19,13 +18,10 @@ export function SynapseSaaSPage() {
         {/* Floating pill navigation */}
         <SynapseSaaSNavbar />
 
-        {/* Hero with circuit traces, 3D squircle node & telemetry cards */}
-        <SynapseHeroCircuit />
+        {/* Hero with interactive 3D Synapse Brain nucleus & connected neural modules */}
+        <SynapseNeuralHero />
 
-        {/* Section C: Product Preview - Interactive Workspace */}
-        <SynapseProductPreview />
-
-        {/* Section D: Interactive Rotating Orbital Feature Explorer */}
+        {/* Interactive Rotating Orbital Feature Explorer */}
         <RadialOrbitalTimeline />
 
         {/* Section E: How Synapse Works - 5-Step Connected Workflow */}
