@@ -13,14 +13,16 @@ import {
   Bell,
   Sparkles,
   ArrowRight,
-  ShieldCheck,
   X,
   Check,
   Zap,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import RazorpayCheckoutModal from "@/components/billing/RazorpayCheckoutModal";
 import EnterpriseConfigModal from "@/components/billing/EnterpriseConfigModal";
+import { AuthBackgroundLayout } from "@/components/auth/auth-background-layout";
 import {
   PLANS_LIST,
   PLAN_DEFINITIONS,
@@ -78,6 +80,7 @@ interface RegistrationResult {
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Plan Selection & Payment States
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlanId>("FREE");
@@ -249,8 +252,8 @@ export default function RegisterPage() {
     const planName = PLAN_DEFINITIONS[registrationSuccess.plan]?.name || registrationSuccess.plan;
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 dark:bg-background">
-        <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-8 shadow-xl text-center space-y-6">
+      <AuthBackgroundLayout cardMaxWidth="lg">
+        <div className="text-center space-y-6">
           <div className="flex justify-center">
             {isPaid ? (
               <div className="size-16 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
@@ -325,326 +328,344 @@ export default function RegisterPage() {
             </Link>
           </div>
         </div>
-      </div>
+      </AuthBackgroundLayout>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 dark:bg-background">
-      <div className="w-full max-w-xl rounded-2xl border border-border bg-card p-8 shadow-xl dark:bg-card">
-        {/* Brand Header */}
-        <div className="flex flex-col items-center text-center">
-          <div className="flex items-center gap-2.5 mb-2">
-            <div className="size-9 rounded-xl bg-white border border-border flex items-center justify-center shadow-xs overflow-hidden p-1">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Synapse" className="size-full object-contain" />
-            </div>
-            <span className="text-xl font-extrabold tracking-wider text-foreground">SYNAPSE</span>
+    <AuthBackgroundLayout cardMaxWidth="xl">
+      {/* Brand Header */}
+      <div className="flex flex-col items-center text-center">
+        <div className="flex items-center gap-2.5 mb-2.5">
+          <div className="size-10 rounded-2xl bg-white dark:bg-card border border-border flex items-center justify-center shadow-xs overflow-hidden p-1.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Synapse" className="size-full object-contain" />
           </div>
-          <h2 className="text-2xl font-black text-foreground tracking-tight">
-            Create your organization account
-          </h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Empower your engineering team with autonomous AI workflows & project intelligence.
-          </p>
+          <span className="text-xl font-bold tracking-tight text-foreground font-mono">
+            SYNAPSE
+          </span>
         </div>
-
-        {/* Google Sign-Up */}
-        <div className="mt-6">
-          <GoogleSignInButton context="signup" />
-        </div>
-
-        {/* Divider */}
-        <div className="relative mt-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground font-medium">or register with email</span>
-          </div>
-        </div>
-
-        {errorMsg && (
-          <div className="mt-6 flex items-start gap-2.5 rounded-xl bg-destructive/10 p-3.5 text-xs text-destructive border border-destructive/20 leading-relaxed">
-            <AlertCircle className="size-4 shrink-0 mt-0.5" />
-            <span>{errorMsg}</span>
-          </div>
-        )}
-
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-              Company / Organization Name
-            </label>
-            <input
-              type="text"
-              {...register("company_name")}
-              placeholder="e.g. Acme Technologies"
-              suppressHydrationWarning
-              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-            {errors.company_name && (
-              <p className="mt-1 text-xs text-destructive">
-                {errors.company_name.message}
-              </p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                First Name
-              </label>
-              <input
-                type="text"
-                {...register("first_name")}
-                placeholder="Jane"
-                suppressHydrationWarning
-                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-              {errors.first_name && (
-                <p className="mt-1 text-xs text-destructive">
-                  {errors.first_name.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                Last Name
-              </label>
-              <input
-                type="text"
-                {...register("last_name")}
-                placeholder="Doe"
-                suppressHydrationWarning
-                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-              {errors.last_name && (
-                <p className="mt-1 text-xs text-destructive">
-                  {errors.last_name.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-              Work Email Address
-            </label>
-            <input
-              type="email"
-              {...register("email")}
-              placeholder="jane.doe@acme.com"
-              suppressHydrationWarning
-              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-            {errors.email && (
-              <p className="mt-1 text-xs text-destructive">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              {...register("password")}
-              placeholder="••••••••"
-              suppressHydrationWarning
-              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-            {errors.password && (
-              <p className="mt-1 text-xs text-destructive">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-              Designation / Job Title (Optional)
-            </label>
-            <input
-              type="text"
-              {...register("designation")}
-              placeholder="e.g. Chief Technology Officer (CTO)"
-              suppressHydrationWarning
-              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-            {errors.designation && (
-              <p className="mt-1 text-xs text-destructive">
-                {errors.designation.message}
-              </p>
-            )}
-          </div>
-
-          {/* 2. SUBSCRIPTION PLAN SELECTION */}
-          <div className="pt-2">
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-foreground">
-                  Select Subscription Plan
-                </label>
-                <span className="text-[0.7rem] text-muted-foreground">
-                  Choose a tier for your organization. You can pay now or pay later.
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {PLANS_LIST.map((plan) => {
-                const isSelected = selectedPlan === plan.id;
-                return (
-                  <button
-                    key={plan.id}
-                    type="button"
-                    onClick={() => handlePlanCardClick(plan)}
-                    className={`relative flex flex-col items-center justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                      isSelected
-                        ? "border-primary bg-primary/5 ring-2 ring-primary/20 shadow-xs"
-                        : "border-border bg-muted/20 hover:border-primary/50 hover:bg-muted/40"
-                    }`}
-                  >
-                    {plan.is_popular && (
-                      <span className="absolute -top-2.5 px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-wider bg-primary text-primary-foreground rounded-full shadow-xs">
-                        Popular
-                      </span>
-                    )}
-                    <div className="text-center w-full">
-                      <span className="text-xs font-extrabold text-foreground block">
-                        {plan.name}
-                      </span>
-                      <span className="text-[0.75rem] font-black text-primary block mt-0.5">
-                        {plan.price}
-                      </span>
-                    </div>
-                    <span className="text-[0.65rem] text-muted-foreground text-center mt-1.5 line-clamp-2 leading-tight">
-                      {plan.description}
-                    </span>
-                    {isSelected && (
-                      <div className="mt-2 size-4 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-                        <Check className="size-2.5" />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Selected Plan Status & Payment Mode Indicator */}
-            {selectedPlan === "ENTERPRISE" && enterpriseConfig && (
-              <div className="mt-3 p-3.5 rounded-xl border border-primary/30 bg-primary/5 flex items-center justify-between gap-3 text-xs animate-in fade-in duration-200">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-foreground">
-                      Enterprise Custom Plan Configured
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase tracking-wider bg-primary/20 text-primary">
-                      Custom Quotas
-                    </span>
-                  </div>
-                  <div className="text-[0.7rem] text-muted-foreground flex flex-wrap gap-x-2.5 gap-y-0.5">
-                    <span>
-                      Seats:{" "}
-                      <strong>
-                        {enterpriseConfig.requested_resources?.max_users === -1
-                          ? "Unlimited"
-                          : enterpriseConfig.requested_resources?.max_users}
-                      </strong>
-                    </span>
-                    <span>
-                      Storage:{" "}
-                      <strong>
-                        {enterpriseConfig.requested_resources?.max_storage_bytes === -1
-                          ? "Unlimited"
-                          : `${Math.round(
-                              (enterpriseConfig.requested_resources?.max_storage_bytes || 0) /
-                                (1024 * 1024 * 1024)
-                            )} GB`}
-                      </strong>
-                    </span>
-                    <span>
-                      Capabilities:{" "}
-                      <strong>{enterpriseConfig.requested_capabilities?.length || 0} active</strong>
-                    </span>
-                  </div>
-                  <p className="text-[0.7rem] text-primary font-medium">
-                    No immediate payment required. Super Admin will review and provide dynamic pricing.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setEnterpriseModalOpen(true)}
-                  className="shrink-0 text-xs font-bold text-primary hover:underline cursor-pointer"
-                >
-                  Edit
-                </button>
-              </div>
-            )}
-
-            {selectedPlan !== "FREE" && selectedPlan !== "ENTERPRISE" && (
-              <div className="mt-3 p-3 rounded-xl border border-primary/30 bg-primary/5 flex items-center justify-between gap-3 text-xs animate-in fade-in duration-200">
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-foreground">
-                      {PLAN_DEFINITIONS[selectedPlan].name} Plan Selected
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase tracking-wider bg-primary/20 text-primary">
-                      {paymentPreference === "PROCEED" ? "Pay Now" : "Pay Later"}
-                    </span>
-                  </div>
-                  <p className="text-[0.7rem] text-muted-foreground">
-                    {paymentPreference === "PROCEED"
-                      ? "Secure payment checkout will launch upon registration."
-                      : "A reminder notification will be sent to your account to pay subscription fee later."}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPendingPlan(PLAN_DEFINITIONS[selectedPlan]);
-                    setPlanPopupOpen(true);
-                  }}
-                  className="shrink-0 text-[0.7rem] font-bold text-primary hover:underline cursor-pointer"
-                >
-                  Change
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            suppressHydrationWarning
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/95 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:pointer-events-none disabled:opacity-50 cursor-pointer shadow-md mt-6"
-          >
-            {isLoading && <Loader2 className="size-4 animate-spin" />}
-            <span>
-              {selectedPlan === "ENTERPRISE"
-                ? "Register & Submit Enterprise Request"
-                : selectedPlan !== "FREE" && paymentPreference === "PROCEED"
-                ? "Register & Proceed to Payment"
-                : "Register Organization"}
-            </span>
-            {!isLoading && <ArrowRight className="size-4" />}
-          </button>
-        </form>
-
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="font-bold text-primary hover:underline"
-          >
-            Sign In
-          </Link>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+          Create your Synapse account
+        </h1>
+        <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground max-w-sm">
+          Empower your engineering team with contextual AI workflows & lifecycle governance.
         </p>
       </div>
+
+      {/* Google Sign-Up */}
+      <div className="mt-6">
+        <GoogleSignInButton context="signup" />
+      </div>
+
+      {/* Divider */}
+      <div className="relative mt-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-border/80" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-card px-3 text-muted-foreground font-mono text-[11px]">
+            or register with email
+          </span>
+        </div>
+      </div>
+
+      {errorMsg && (
+        <div className="mt-5 flex items-start gap-2.5 rounded-xl bg-destructive/10 p-3.5 text-xs text-destructive border border-destructive/20 leading-relaxed animate-in fade-in duration-200">
+          <AlertCircle className="size-4 shrink-0 mt-0.5" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      <form className="mt-6 space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+            Company / Organization Name
+          </label>
+          <input
+            type="text"
+            {...register("company_name")}
+            placeholder="e.g. Acme Technologies"
+            suppressHydrationWarning
+            className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          />
+          {errors.company_name && (
+            <p className="mt-1 text-xs text-destructive">
+              {errors.company_name.message}
+            </p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              First Name
+            </label>
+            <input
+              type="text"
+              {...register("first_name")}
+              placeholder="Jane"
+              suppressHydrationWarning
+              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+            {errors.first_name && (
+              <p className="mt-1 text-xs text-destructive">
+                {errors.first_name.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              Last Name
+            </label>
+            <input
+              type="text"
+              {...register("last_name")}
+              placeholder="Doe"
+              suppressHydrationWarning
+              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+            {errors.last_name && (
+              <p className="mt-1 text-xs text-destructive">
+                {errors.last_name.message}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+            Work Email Address
+          </label>
+          <input
+            type="email"
+            {...register("email")}
+            placeholder="jane.doe@acme.com"
+            autoComplete="email"
+            suppressHydrationWarning
+            className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          />
+          {errors.email && (
+            <p className="mt-1 text-xs text-destructive">
+              {errors.email.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+            Password (min 8 characters)
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              {...register("password")}
+              placeholder="••••••••"
+              autoComplete="new-password"
+              suppressHydrationWarning
+              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 pr-10 text-sm text-foreground transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 cursor-pointer"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="size-4" />
+              ) : (
+                <Eye className="size-4" />
+              )}
+            </button>
+          </div>
+          {errors.password && (
+            <p className="mt-1 text-xs text-destructive">
+              {errors.password.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+            Designation / Job Title (Optional)
+          </label>
+          <input
+            type="text"
+            {...register("designation")}
+            placeholder="e.g. Chief Technology Officer (CTO)"
+            suppressHydrationWarning
+            className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground transition-all placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          />
+          {errors.designation && (
+            <p className="mt-1 text-xs text-destructive">
+              {errors.designation.message}
+            </p>
+          )}
+        </div>
+
+        {/* 2. SUBSCRIPTION PLAN SELECTION */}
+        <div className="pt-2">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-foreground">
+                Select Subscription Plan
+              </label>
+              <span className="text-[0.7rem] text-muted-foreground">
+                Choose a tier for your organization. You can pay now or pay later.
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            {PLANS_LIST.map((plan) => {
+              const isSelected = selectedPlan === plan.id;
+              return (
+                <button
+                  key={plan.id}
+                  type="button"
+                  onClick={() => handlePlanCardClick(plan)}
+                  className={`relative flex flex-col items-center justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                    isSelected
+                      ? "border-primary bg-primary/10 ring-2 ring-primary/20 shadow-xs"
+                      : "border-border bg-muted/20 hover:border-primary/50 hover:bg-muted/40"
+                  }`}
+                >
+                  {plan.is_popular && (
+                    <span className="absolute -top-2.5 px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-wider bg-primary text-primary-foreground rounded-full shadow-xs">
+                      Popular
+                    </span>
+                  )}
+                  <div className="text-center w-full">
+                    <span className="text-xs font-extrabold text-foreground block">
+                      {plan.name}
+                    </span>
+                    <span className="text-[0.75rem] font-black text-primary block mt-0.5">
+                      {plan.price}
+                    </span>
+                  </div>
+                  <span className="text-[0.65rem] text-muted-foreground text-center mt-1.5 line-clamp-2 leading-tight">
+                    {plan.description}
+                  </span>
+                  {isSelected && (
+                    <div className="mt-2 size-4 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+                      <Check className="size-2.5" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Selected Plan Status & Payment Mode Indicator */}
+          {selectedPlan === "ENTERPRISE" && enterpriseConfig && (
+            <div className="mt-3 p-3.5 rounded-xl border border-primary/30 bg-primary/5 flex items-center justify-between gap-3 text-xs animate-in fade-in duration-200">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-foreground">
+                    Enterprise Custom Plan Configured
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase tracking-wider bg-primary/20 text-primary">
+                    Custom Quotas
+                  </span>
+                </div>
+                <div className="text-[0.7rem] text-muted-foreground flex flex-wrap gap-x-2.5 gap-y-0.5">
+                  <span>
+                    Seats:{" "}
+                    <strong>
+                      {enterpriseConfig.requested_resources?.max_users === -1
+                        ? "Unlimited"
+                        : enterpriseConfig.requested_resources?.max_users}
+                    </strong>
+                  </span>
+                  <span>
+                    Storage:{" "}
+                    <strong>
+                      {enterpriseConfig.requested_resources?.max_storage_bytes === -1
+                        ? "Unlimited"
+                        : `${Math.round(
+                            (enterpriseConfig.requested_resources?.max_storage_bytes || 0) /
+                              (1024 * 1024 * 1024)
+                          )} GB`}
+                    </strong>
+                  </span>
+                  <span>
+                    Capabilities:{" "}
+                    <strong>{enterpriseConfig.requested_capabilities?.length || 0} active</strong>
+                  </span>
+                </div>
+                <p className="text-[0.7rem] text-primary font-medium">
+                  No immediate payment required. Super Admin will review and provide dynamic pricing.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEnterpriseModalOpen(true)}
+                className="shrink-0 text-xs font-bold text-primary hover:underline cursor-pointer"
+              >
+                Edit
+              </button>
+            </div>
+          )}
+
+          {selectedPlan !== "FREE" && selectedPlan !== "ENTERPRISE" && (
+            <div className="mt-3 p-3 rounded-xl border border-primary/30 bg-primary/5 flex items-center justify-between gap-3 text-xs animate-in fade-in duration-200">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-foreground">
+                    {PLAN_DEFINITIONS[selectedPlan].name} Plan Selected
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase tracking-wider bg-primary/20 text-primary">
+                    {paymentPreference === "PROCEED" ? "Pay Now" : "Pay Later"}
+                  </span>
+                </div>
+                <p className="text-[0.7rem] text-muted-foreground">
+                  {paymentPreference === "PROCEED"
+                    ? "Secure payment checkout will launch upon registration."
+                    : "A reminder notification will be sent to your account to pay subscription fee later."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setPendingPlan(PLAN_DEFINITIONS[selectedPlan]);
+                  setPlanPopupOpen(true);
+                }}
+                className="shrink-0 text-[0.7rem] font-bold text-primary hover:underline cursor-pointer"
+              >
+                Change
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          suppressHydrationWarning
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/95 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:pointer-events-none disabled:opacity-50 cursor-pointer shadow-md shadow-primary/20 mt-6"
+        >
+          {isLoading && <Loader2 className="size-4 animate-spin" />}
+          <span>
+            {selectedPlan === "ENTERPRISE"
+              ? "Register & Submit Enterprise Request"
+              : selectedPlan !== "FREE" && paymentPreference === "PROCEED"
+              ? "Register & Proceed to Payment"
+              : "Register Organization"}
+          </span>
+          {!isLoading && <ArrowRight className="size-4" />}
+        </button>
+      </form>
+
+      <p className="mt-6 text-center text-xs text-muted-foreground">
+        Already have an account?{" "}
+        <Link
+          href="/login"
+          className="font-semibold text-primary hover:underline"
+        >
+          Sign In
+        </Link>
+      </p>
 
       {/* 3. POPUP MODAL: PROCEED WITH PAYMENT OR PAY LATER */}
       {planPopupOpen && pendingPlan && (
@@ -794,6 +815,6 @@ export default function RegisterPage() {
             : undefined
         }
       />
-    </div>
+    </AuthBackgroundLayout>
   );
 }

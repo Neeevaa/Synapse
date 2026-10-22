@@ -284,7 +284,7 @@ export function RadialOrbitalTimeline({
         className="absolute top-1/2 left-1/4 -translate-y-1/2 -translate-x-1/2 w-[520px] h-[520px] rounded-full pointer-events-none opacity-20 dark:opacity-15 blur-[90px]"
         style={{
           background:
-            "radial-gradient(circle, var(--primary, #9f1722) 0%, transparent 70%)",
+            "radial-gradient(circle, var(--primary, #0a4a55) 0%, transparent 70%)",
         }}
         aria-hidden="true"
       />
@@ -354,7 +354,7 @@ export function RadialOrbitalTimeline({
                 aria-hidden="true"
               >
                 <defs>
-                  {/* Crimson to Beige Gradient */}
+                  {/* Teal to Beige Gradient */}
                   <linearGradient
                     id={`${gradId}-orbit-accent`}
                     x1="0%"
@@ -362,7 +362,7 @@ export function RadialOrbitalTimeline({
                     x2="100%"
                     y2="100%"
                   >
-                    <stop offset="0%" stopColor="#9f1722" stopOpacity="0.8" />
+                    <stop offset="0%" stopColor="#0a4a55" stopOpacity="0.8" />
                     <stop offset="50%" stopColor="#E5D3AF" stopOpacity="0.6" />
                     <stop offset="100%" stopColor="#AEC4D4" stopOpacity="0.8" />
                   </linearGradient>
@@ -375,7 +375,7 @@ export function RadialOrbitalTimeline({
                     x2="100%"
                     y2="100%"
                   >
-                    <stop offset="0%" stopColor="#9f1722" stopOpacity="1" />
+                    <stop offset="0%" stopColor="#0a4a55" stopOpacity="1" />
                     <stop offset="100%" stopColor="#E5D3AF" stopOpacity="0.9" />
                   </linearGradient>
 
@@ -508,7 +508,7 @@ export function RadialOrbitalTimeline({
                 <div className="absolute inset-0 -m-3 rounded-full bg-primary/20 blur-md animate-pulse pointer-events-none" />
 
                 {/* Central squircle button */}
-                <div className="relative size-18 sm:size-20 rounded-2xl bg-gradient-to-br from-[#9f1722] to-[#6b0f17] text-white flex flex-col items-center justify-center p-2 shadow-xl shadow-primary/30 border border-[#E5D3AF]/40 transition-transform duration-300 group-hover:scale-105 active:scale-95">
+                <div className="relative size-18 sm:size-20 rounded-2xl bg-gradient-to-br from-[#0a4a55] to-[#06858e] text-white flex flex-col items-center justify-center p-2 shadow-xl shadow-primary/30 border border-[#E5D3AF]/40 transition-transform duration-300 group-hover:scale-105 active:scale-95">
                   <Bot className="size-6 sm:size-7 text-[#E5D3AF] mb-0.5" />
                   <span className="text-[10px] sm:text-[11px] font-semibold tracking-wide text-white uppercase font-mono">
                     Synapse AI
