@@ -11,6 +11,7 @@ class CreateTaskRequest(BaseModel):
     workstream: str | None = Field(default="GENERAL", description="TaskWorkstream Enum: UI_UX, FRONTEND, BACKEND, QA, DEVOPS, AI_ML, GENERAL")
     sprint_id: UUID | None = None
     assignee_id: UUID | None = None
+    due_date: datetime | None = Field(None, description="Optional deadline / due date for the task")
     story_points: int | None = Field(None, ge=0, le=100, description="Estimated story points")
     position: int | None = Field(None, description="Order position in backlog")
 
@@ -24,6 +25,7 @@ class UpdateTaskRequest(BaseModel):
     sprint_id: UUID | None = None
     clear_sprint: bool = Field(default=False, description="Set to true to unassign task from sprint and move to backlog")
     assignee_id: UUID | None = None
+    due_date: datetime | None = None
     story_points: int | None = Field(None, ge=0, le=100)
     position: int | None = None
 
@@ -49,10 +51,12 @@ class TaskResponse(BaseModel):
     position: int = 0
     assignee_id: UUID | None = None
     assignee_name: str | None = None
+    due_date: datetime | None = None
     created_by: UUID | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
 
 
 class TaskListResponse(BaseModel):

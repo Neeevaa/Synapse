@@ -1,4 +1,5 @@
-from sqlalchemy import Enum, ForeignKey, String, Text, Integer
+from datetime import datetime
+from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -13,6 +14,12 @@ class Task(BaseModel):
         ForeignKey("projects.id", ondelete="CASCADE"),
         nullable=False,
     )
+
+    due_date: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
 
     sprint_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("sprints.id", ondelete="CASCADE"),

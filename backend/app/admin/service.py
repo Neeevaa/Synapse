@@ -42,6 +42,8 @@ from app.admin.schemas import (
     AnalyticsSubscriptionsResponse,
     AnalyticsAIUsageResponse,
     TimeSeriesDataPoint,
+    MonthlyMetricPoint,
+    AnalyticsMonthlyResponse,
 )
 from app.common.exceptions import ResourceNotFound, BaseBusinessException
 
@@ -951,6 +953,156 @@ class AdminService:
             failed_jobs=failed_jobs,
             executions_by_type=by_type,
             executions_this_month=executions_this_month,
+        )
+
+    def get_analytics_monthly(self, months: int = 12) -> AnalyticsMonthlyResponse:
+        months = max(1, min(months, 36))
+        now = datetime.now(timezone.utc)
+        current_year = now.year
+        current_month = now.month
+
+        # Generate (year, month) pairs for the last `months` periods in chronological order
+        year_months: list[tuple[int, int]] = []
+        for i in range(months - 1, -1, -1):
+            m = current_month - i
+            y = current_year
+            while m <= 0:
+                m += 12
+                y -= 1
+            year_months.append((y, m))
+
+        points: list[MonthlyMetricPoint] = []
+        month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+        for y, m in year_months:
+            m_start = datetime(y, m, 1, 0, 0, 0, tzinfo=timezone.utc)
+            if m == 12:
+                m_end = datetime(y + 1, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+            else:
+                m_end = datetime(y, m + 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+
+            m_key = f"{y:04d}-{m:02d}"
+            m_label = f"{month_names[m - 1]} '{str(y)[2:]}"
+
+            # Total companies up to this month end
+            tot_companies = self.db.scalar(
+                select(func.count(Company.id)).filter(Company.created_at < m_end)
+            ) or 0
+
+            # New companies registered in this month
+            new_companies = self.db.scalar(
+                select(func.count(Company.id)).filter(
+                    Company.created_at >= m_start, Company.created_at < m_end
+                )
+            ) or 0
+
+            # Active companies up to this month end
+            act_companies = self.db.scalar(
+                select(func.count(Company.id)).filter(
+                    Company.created_at < m_end, Company.status == CompanyStatus.ACTIVE
+                )
+            ) or 0
+
+            # Active users up to this month end
+            act_users = self.db.scalar(
+                select(func.count(User.id)).filter(
+                    User.created_at < m_end, User.is_active.is_(True)
+                )
+            ) or 0
+
+            # New users registered in this month
+            new_users = self.db.scalar(
+                select(func.count(User.id)).filter(
+                    User.created_at >= m_start, User.created_at < m_end
+                )
+            ) or 0
+
+            # AI requests in this month
+            ai_reqs = self.db.scalar(
+                select(func.count(AIJob.id)).filter(
+                    AIJob.created_at >= m_start, AIJob.created_at < m_end
+                )
+            ) or 0
+
+            ai_comp = self.db.scalar(
+                select(func.count(AIJob.id)).filter(
+                    AIJob.created_at >= m_start,
+                    AIJob.created_at < m_end,
+                    AIJob.status == AIJobStatus.COMPLETED,
+                )
+            ) or 0
+
+            ai_fail = self.db.scalar(
+                select(func.count(AIJob.id)).filter(
+                    AIJob.created_at >= m_start,
+                    AIJob.created_at < m_end,
+                    AIJob.status == AIJobStatus.FAILED,
+                )
+            ) or 0
+
+            ai_succ_rate = round((ai_comp / ai_reqs * 100.0), 1) if ai_reqs > 0 else 100.0
+
+            # Total tasks up to this month end
+            tot_tasks = self.db.scalar(
+                select(func.count(Task.id)).filter(Task.created_at < m_end)
+            ) or 0
+
+            points.append(
+                MonthlyMetricPoint(
+                    month_key=m_key,
+                    month_label=m_label,
+                    active_users=act_users,
+                    new_users=new_users,
+                    total_companies=tot_companies,
+                    new_companies=new_companies,
+                    active_companies=act_companies,
+                    ai_requests=ai_reqs,
+                    ai_completed=ai_comp,
+                    ai_failed=ai_fail,
+                    ai_success_rate=ai_succ_rate,
+                    total_tasks=tot_tasks,
+                )
+            )
+
+        # MoM calculations
+        curr = points[-1] if points else None
+        prev = points[-2] if len(points) >= 2 else None
+
+        curr_ai = curr.ai_requests if curr else 0
+        prev_ai = prev.ai_requests if prev else 0
+        ai_growth = (
+            round(((curr_ai - prev_ai) / prev_ai) * 100.0, 1)
+            if prev_ai > 0
+            else (100.0 if curr_ai > 0 else 0.0)
+        )
+
+        curr_users = curr.active_users if curr else 0
+        prev_users = prev.active_users if prev else 0
+        users_growth = (
+            round(((curr_users - prev_users) / prev_users) * 100.0, 1)
+            if prev_users > 0
+            else (100.0 if curr_users > 0 else 0.0)
+        )
+
+        curr_cos = curr.total_companies if curr else 0
+        prev_cos = prev.total_companies if prev else 0
+        cos_growth = (
+            round(((curr_cos - prev_cos) / prev_cos) * 100.0, 1)
+            if prev_cos > 0
+            else (100.0 if curr_cos > 0 else 0.0)
+        )
+
+        return AnalyticsMonthlyResponse(
+            months=points,
+            current_month_ai_requests=curr_ai,
+            last_month_ai_requests=prev_ai,
+            ai_requests_growth_pct=ai_growth,
+            current_month_active_users=curr_users,
+            last_month_active_users=prev_users,
+            active_users_growth_pct=users_growth,
+            current_month_companies=curr_cos,
+            last_month_companies=prev_cos,
+            companies_growth_pct=cos_growth,
         )
 
     def list_enterprise_requests(

@@ -30,6 +30,7 @@ from app.meetings.intelligence_router import router as meeting_intelligence_rout
 from app.notifications.router import router as notifications_router
 from app.subscriptions.router import router as subscriptions_router
 from app.testcases.router import router as testcases_router
+from app.chat.router import router as chat_router
 
 
 # 1. Initialize Structured Logging
@@ -134,6 +135,7 @@ app.include_router(meeting_intelligence_router, prefix="/projects/{project_id}/m
 app.include_router(notifications_router, prefix="/notifications", tags=["Notifications"])
 app.include_router(subscriptions_router, prefix="", tags=["Subscriptions & Billing"])
 app.include_router(testcases_router, prefix="", tags=["Test Cases"])
+app.include_router(chat_router, prefix="", tags=["Project Messaging"])
 
 
 
@@ -148,3 +150,27 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+
+@app.on_event("startup")
+async def start_periodic_deadline_checker():
+    """Starts background periodic deadline and overdue checks runner."""
+    import asyncio
+    from app.db.session import SessionLocal
+
+    async def _loop():
+        # Short initial delay on startup
+        await asyncio.sleep(5)
+        while True:
+            try:
+                db = SessionLocal()
+                try:
+                    from app.notifications.deadline_service import run_deadline_and_risk_checks
+                    run_deadline_and_risk_checks(db)
+                finally:
+                    db.close()
+            except Exception as e:
+                logger.error(f"[Scheduler] Error running deadline checks: {e}")
+            await asyncio.sleep(900)  # Check every 15 minutes
+
+    asyncio.create_task(_loop())

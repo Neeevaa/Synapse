@@ -29,6 +29,7 @@ import {
   Users,
   Database,
   GitFork,
+  MessageSquare,
 } from "lucide-react";
 
 import CompleteProfileModal from "@/components/CompleteProfileModal";
@@ -143,6 +144,7 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
   // Active Project Context State
   const [activeProject, setActiveProject] = useState<{ id: string; name: string } | null>(null);
   const [hasActiveSprint, setHasActiveSprint] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const [projectsExpanded, setProjectsExpanded] = useState(true);
 
   // Extract projectId if on /projects/[id]...
@@ -159,9 +161,10 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
     let isMounted = true;
     const fetchActiveProjectContext = async () => {
       try {
-        const [projRes, sprintRes] = await Promise.allSettled([
+        const [projRes, sprintRes, msgRes] = await Promise.allSettled([
           api.get(`/projects/${currentProjectId}`),
           api.get(`/projects/${currentProjectId}/sprints/active`),
+          api.get(`/projects/${currentProjectId}/chat/unread-count`),
         ]);
 
         if (isMounted) {
@@ -175,6 +178,11 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
             setHasActiveSprint(true);
           } else {
             setHasActiveSprint(false);
+          }
+          if (msgRes.status === "fulfilled" && msgRes.value?.data?.data) {
+            setUnreadMessages(msgRes.value.data.data.unread_count || 0);
+          } else {
+            setUnreadMessages(0);
           }
         }
       } catch {
@@ -382,7 +390,15 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
         icon: GitFork,
         isActive: pathname === `/projects/${currentProjectId}/traceability`,
       },
+      {
+        name: "Messaging",
+        href: `/projects/${currentProjectId}/chat`,
+        icon: MessageSquare,
+        isActive: pathname.startsWith(`/projects/${currentProjectId}/chat`),
+        badge: unreadMessages > 0 ? String(unreadMessages) : undefined,
+      },
     ]
+
     : [];
 
   return (
@@ -526,8 +542,11 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
                           : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-medium"
                       }`}
                     >
-                      <div className="w-[52px] h-10 flex items-center justify-center shrink-0">
+                      <div className="w-[52px] h-10 flex items-center justify-center shrink-0 relative">
                         <Icon className="size-4.5 shrink-0" />
+                        {!isExpanded && item.badge && (
+                          <span className="absolute top-2 right-3.5 size-2 rounded-full bg-primary ring-2 ring-sidebar" />
+                        )}
                       </div>
 
                       <div

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import SuperAdminShell from "@/components/SuperAdminShell";
+import SuperAdminAnalyticsCharts, { AnalyticsMonthlyResponse } from "@/components/admin/SuperAdminAnalyticsCharts";
 import { api } from "@/lib/api";
 import {
   Building2,
@@ -94,6 +95,7 @@ export default function SuperAdminAnalyticsPage() {
   const [growth, setGrowth] = useState<GrowthData | null>(null);
   const [subscriptions, setSubscriptions] = useState<SubscriptionMetrics | null>(null);
   const [aiUsage, setAiUsage] = useState<AIUsageMetrics | null>(null);
+  const [monthly, setMonthly] = useState<AnalyticsMonthlyResponse | null>(null);
   const [topCompanies, setTopCompanies] = useState<CompanyItem[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -104,17 +106,19 @@ export default function SuperAdminAnalyticsPage() {
     setLoading(true);
     setError(null);
     try {
-      const [ovRes, subRes, aiRes, compRes] = await Promise.all([
+      const [ovRes, subRes, aiRes, compRes, moRes] = await Promise.all([
         api.get("/admin/analytics/overview"),
         api.get("/admin/analytics/subscriptions"),
         api.get("/admin/analytics/ai-usage"),
         api.get("/admin/companies?page=1&limit=10"),
+        api.get("/admin/analytics/monthly?months=12"),
       ]);
 
       setOverview(ovRes.data.data);
       setSubscriptions(subRes.data.data);
       setAiUsage(aiRes.data.data);
       setTopCompanies(compRes.data.data.companies || []);
+      setMonthly(moRes.data.data);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to load platform analytics.");
     } finally {
@@ -205,6 +209,15 @@ export default function SuperAdminAnalyticsPage() {
 
         {!loading && !error && overview && (
           <>
+            {/* Interactive Telemetry & Monthly Trends Graph */}
+            <SuperAdminAnalyticsCharts
+              monthlyData={monthly}
+              overviewData={overview}
+              aiUsageData={aiUsage}
+              onRefresh={fetchAnalyticsData}
+              isLoading={loading}
+            />
+
             {/* 1. PLATFORM OVERVIEW METRIC CARDS (7 CARDS GRID) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
               {/* Total Companies */}

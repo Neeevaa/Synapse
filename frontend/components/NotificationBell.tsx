@@ -17,7 +17,12 @@ import {
   ExternalLink,
   Layers,
   CreditCard,
+  Clock,
+  AlertTriangle,
+  AlertOctagon,
+  AlertCircle,
 } from "lucide-react";
+
 
 interface NotificationItem {
   id: string;
@@ -93,7 +98,16 @@ function getNotificationIcon(type: string) {
     case "TASK_PRIORITY_CHANGED":
     case "TASK_REASSIGNED":
       return <CheckSquare className="size-4 text-cyan-500 shrink-0" />;
+    case "TASK_DEADLINE_APPROACHING":
+      return <Clock className="size-4 text-amber-500 shrink-0" />;
+    case "TASK_DUE_DATE_REACHED":
+      return <AlertCircle className="size-4 text-orange-500 shrink-0" />;
+    case "TASK_OVERDUE":
+      return <AlertOctagon className="size-4 text-rose-500 shrink-0" />;
+    case "PROJECT_RISK_ALERT":
+      return <AlertTriangle className="size-4 text-rose-500 shrink-0" />;
     case "SPRINT_ACTIVATED":
+
     case "SPRINT_COMPLETED":
       return <Zap className="size-4 text-amber-500 shrink-0" />;
     case "REQUIREMENT_UPDATED":

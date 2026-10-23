@@ -69,18 +69,18 @@ interface EnterpriseRequestItem {
 }
 
 const CAPABILITY_DEFINITIONS = [
-  { key: "ai_agents", label: "Autonomous AI Agents", category: "Core Intelligence", monthlyRate: 4000 },
-  { key: "knowledge_search", label: "Project Knowledge Search", category: "Core Intelligence", monthlyRate: 2500 },
-  { key: "knowledge_graph", label: "Enterprise Knowledge Graph", category: "Core Intelligence", monthlyRate: 2500 },
-  { key: "predictive_delays", label: "Predictive Delay Detection", category: "Analytics & Governance", monthlyRate: 3000 },
-  { key: "meeting_diagnostics", label: "Meeting Failure Diagnostics", category: "Analytics & Governance", monthlyRate: 3000 },
-  { key: "vulnerability_scanning", label: "Real-Time Vulnerability Scanning", category: "Analytics & Governance", monthlyRate: 2500 },
-  { key: "api_access", label: "Developer REST API Access", category: "Connectivity & Integrations", monthlyRate: 2000 },
-  { key: "webhooks", label: "Real-Time Webhooks", category: "Connectivity & Integrations", monthlyRate: 1500 },
-  { key: "sso_saml", label: "Enterprise SSO & SAML 2.0", category: "Security & Access", monthlyRate: 3500 },
-  { key: "rbac_advanced", label: "Custom Roles & Advanced Permissions", category: "Security & Access", monthlyRate: 2000 },
-  { key: "ai_governance", label: "AI Governance & Audit Logs", category: "Security & Access", monthlyRate: 3000 },
-  { key: "custom_integrations", label: "Custom Enterprise Integrations", category: "Connectivity & Integrations", monthlyRate: 3000 },
+  { key: "ai_agents", label: "Autonomous AI Agents", category: "Core Intelligence", monthlyRate: 400 },
+  { key: "knowledge_search", label: "Project Knowledge Search", category: "Core Intelligence", monthlyRate: 250 },
+  { key: "knowledge_graph", label: "Enterprise Knowledge Graph", category: "Core Intelligence", monthlyRate: 250 },
+  { key: "predictive_delays", label: "Predictive Delay Detection", category: "Analytics & Governance", monthlyRate: 300 },
+  { key: "meeting_diagnostics", label: "Meeting Failure Diagnostics", category: "Analytics & Governance", monthlyRate: 300 },
+  { key: "vulnerability_scanning", label: "Real-Time Vulnerability Scanning", category: "Analytics & Governance", monthlyRate: 250 },
+  { key: "api_access", label: "Developer REST API Access", category: "Connectivity & Integrations", monthlyRate: 200 },
+  { key: "webhooks", label: "Real-Time Webhooks", category: "Connectivity & Integrations", monthlyRate: 150 },
+  { key: "sso_saml", label: "Enterprise SSO & SAML 2.0", category: "Security & Access", monthlyRate: 350 },
+  { key: "rbac_advanced", label: "Custom Roles & Advanced Permissions", category: "Security & Access", monthlyRate: 200 },
+  { key: "ai_governance", label: "AI Governance & Audit Logs", category: "Security & Access", monthlyRate: 300 },
+  { key: "custom_integrations", label: "Custom Enterprise Integrations", category: "Connectivity & Integrations", monthlyRate: 300 },
 ];
 
 function bytesToGb(bytes?: number): number {

@@ -70,6 +70,14 @@ class Notification(BaseModel):
         nullable=True,
     )
 
+    deduplication_key: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+        unique=True,
+        index=True,
+    )
+
+
     recipient = relationship(
         "User",
         foreign_keys=[recipient_user_id],

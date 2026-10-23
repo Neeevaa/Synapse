@@ -44,9 +44,11 @@ class TaskService:
             position=task.position or 0,
             assignee_id=task.assignee_id,
             assignee_name=assignee_name,
+            due_date=task.due_date,
             created_by=task.created_by,
             created_at=task.created_at,
         )
+
 
     def _get_next_backlog_position(self, project_id: UUID) -> int:
         """
@@ -172,6 +174,7 @@ class TaskService:
                 story_points=data.story_points,
                 position=pos,
                 assignee_id=data.assignee_id,
+                due_date=data.due_date,
                 created_by=current_user.id,
             )
             self.repo.create_task(task)
@@ -180,20 +183,24 @@ class TaskService:
             if task.assignee_id:
                 notif_service = NotificationService(self.db)
                 link = f"/projects/{project_id}/board" if task.sprint_id else f"/projects/{project_id}/backlog"
+                proj = self.db.execute(select(Project).filter(Project.id == project_id)).scalar_one_or_none()
+                p_name = proj.name if proj else "Project"
                 notif_service.notify_users(
                     recipient_ids=[task.assignee_id],
                     sender_id=current_user.id,
                     company_id=current_user.company_id,
                     type=NotificationType.TASK_ASSIGNED,
                     title="New Task Assigned",
-                    message=f"You were assigned task: {task.title}",
+                    message=f"You have been assigned '{task.title}' in {p_name}.",
                     project_id=project_id,
                     source_type="TASK",
                     source_id=task.id,
                     deep_link=link,
+                    deduplication_key=f"TASK_ASSIGNED:{task.id}:{task.assignee_id}",
                 )
 
             return self._build_task_response(task)
+
         except Exception as e:
             self.db.rollback()
             raise e
@@ -324,6 +331,8 @@ class TaskService:
                 task.story_points = data.story_points
             if data.position is not None:
                 task.position = data.position
+            if data.due_date is not None:
+                task.due_date = data.due_date
             if data.assignee_id is not None:
                 task.assignee_id = data.assignee_id
 
@@ -343,18 +352,21 @@ class TaskService:
 
             # 1. Assignee reassigned/updated
             if data.assignee_id is not None and data.assignee_id != old_assignee_id:
+                proj = self.db.execute(select(Project).filter(Project.id == task.project_id)).scalar_one_or_none()
+                p_name = proj.name if proj else "Project"
                 notif_service.notify_users(
                     recipient_ids=[data.assignee_id],
                     sender_id=current_user.id,
                     company_id=current_user.company_id,
                     type=NotificationType.TASK_ASSIGNED,
-                    title="Task Assigned",
-                    message=f"You were assigned task: {task.title}",
+                    title="New Task Assigned",
+                    message=f"You have been assigned '{task.title}' in {p_name}.",
                     project_id=task.project_id,
                     source_type="TASK",
                     source_id=task.id,
                     deep_link=link,
                 )
+
 
             # 2. Priority changed
             if data.priority is not None and task.priority != old_priority and task.assignee_id:

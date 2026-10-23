@@ -54,6 +54,7 @@ class NotificationService:
         source_type: Optional[str] = None,
         source_id: Optional[UUID] = None,
         deep_link: Optional[str] = None,
+        deduplication_key: Optional[str] = None,
     ) -> List[Notification]:
         """
         Transactional notification creation targeting multiple users.
@@ -61,6 +62,7 @@ class NotificationService:
         1. Self-notification prevention (excludes sender_id).
         2. Deduplication of recipients.
         3. Multi-tenant company boundary check.
+        4. Optional deterministic deduplication_key check to prevent duplicate deliveries.
         """
         # Exclude sender and deduplicate
         filtered_recipient_ids = set()
@@ -90,6 +92,17 @@ class NotificationService:
 
         notifications = []
         for u_id in valid_user_ids:
+            # Construct per-user deduplication key if needed
+            dedup = None
+            if deduplication_key:
+                dedup = deduplication_key if len(valid_user_ids) == 1 else f"{deduplication_key}:{u_id}"
+                # Check for existing notification with this deduplication_key
+                exists = self.db.scalar(
+                    select(Notification.id).filter(Notification.deduplication_key == dedup)
+                )
+                if exists:
+                    continue
+
             notif = Notification(
                 recipient_user_id=u_id,
                 company_id=company_id,
@@ -100,13 +113,18 @@ class NotificationService:
                 source_type=source_type,
                 source_id=source_id,
                 deep_link=deep_link,
+                deduplication_key=dedup,
                 is_read=False,
             )
             notifications.append(notif)
 
+        if not notifications:
+            return []
+
         created = self.repo.create_many(notifications)
         self.db.commit()
         return created
+
 
     def get_user_notifications(
         self,

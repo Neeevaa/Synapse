@@ -111,3 +111,21 @@ def mark_all_notifications_read(
         message=f"Marked {count} notifications as read.",
         data={"marked_read_count": count},
     )
+
+
+@router.post(
+    "/run-deadline-checks",
+    status_code=status.HTTP_200_OK,
+    summary="Trigger deadline, overdue, and project risk checks",
+)
+def run_deadline_checks(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.notifications.deadline_service import run_deadline_and_risk_checks
+    stats = run_deadline_and_risk_checks(db)
+    return success_response(
+        message="Deadline and risk checks executed successfully.",
+        data=stats,
+    )
+

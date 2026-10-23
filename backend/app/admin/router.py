@@ -19,6 +19,7 @@ from app.admin.schemas import (
     AnalyticsGrowthResponse,
     AnalyticsSubscriptionsResponse,
     AnalyticsAIUsageResponse,
+    AnalyticsMonthlyResponse,
 )
 from app.admin.service import AdminService
 from app.common.responses import APIResponse, success_response
@@ -458,6 +459,25 @@ def get_analytics_ai_usage(
     result = service.get_analytics_ai_usage()
     return success_response(
         message="AI usage analytics retrieved successfully.",
+        data=result,
+    )
+
+
+@router.get(
+    "/analytics/monthly",
+    response_model=APIResponse[AnalyticsMonthlyResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get monthly platform telemetry (active users, AI requests, companies registered) for Super Admin",
+)
+def get_analytics_monthly(
+    months: int = Query(default=12, ge=1, le=36, description="Number of historical months"),
+    current_user: User = Depends(require_super_admin()),
+    db: Session = Depends(get_db),
+):
+    service = AdminService(db)
+    result = service.get_analytics_monthly(months=months)
+    return success_response(
+        message="Monthly analytics retrieved successfully.",
         data=result,
     )
 

@@ -182,3 +182,32 @@ class AnalyticsAIUsageResponse(BaseModel):
     failed_jobs: int
     executions_by_type: dict[str, int] = Field(default_factory=dict)
     executions_this_month: int
+
+
+class MonthlyMetricPoint(BaseModel):
+    month_key: str
+    month_label: str
+    active_users: int
+    new_users: int
+    total_companies: int
+    new_companies: int
+    active_companies: int
+    ai_requests: int
+    ai_completed: int
+    ai_failed: int
+    ai_success_rate: float
+    total_tasks: int
+
+
+class AnalyticsMonthlyResponse(BaseModel):
+    months: list[MonthlyMetricPoint]
+    current_month_ai_requests: int
+    last_month_ai_requests: int
+    ai_requests_growth_pct: float
+    current_month_active_users: int
+    last_month_active_users: int
+    active_users_growth_pct: float
+    current_month_companies: int
+    last_month_companies: int
+    companies_growth_pct: float
+

@@ -28,6 +28,7 @@ def test_admin_analytics_authorization(client: TestClient, db_session: Session):
         "/admin/analytics/growth",
         "/admin/analytics/subscriptions",
         "/admin/analytics/ai-usage",
+        "/admin/analytics/monthly",
     ]
 
     for ep in endpoints:
@@ -221,6 +222,7 @@ def test_admin_analytics_privacy_boundaries(client: TestClient, db_session: Sess
         "/admin/analytics/growth",
         "/admin/analytics/subscriptions",
         "/admin/analytics/ai-usage",
+        "/admin/analytics/monthly",
     ]
 
     sensitive_tokens = [
@@ -238,3 +240,48 @@ def test_admin_analytics_privacy_boundaries(client: TestClient, db_session: Sess
 
         for token in sensitive_tokens:
             assert token not in payload_text, f"Privacy violation: sensitive token '{token}' exposed in response from {ep}"
+
+
+def test_admin_analytics_monthly_telemetry(client: TestClient, db_session: Session):
+    super_admin = User(
+        email="monthly_admin@admin.com",
+        password_hash="hashed_password",
+        first_name="Super",
+        last_name="Admin",
+        company_id=None,
+        is_super_admin=True,
+        is_verified=True,
+    )
+    db_session.add(super_admin)
+
+    co = create_company(db_session, name="Monthly Metrics Co", slug="monthly-metrics-co")
+    co.status = CompanyStatus.ACTIVE
+    u = create_user(db_session, co, email="monthly_u@test.com", role=CompanyRole.OWNER)
+    p = create_project(db_session, co, name="Monthly Project")
+
+    j1 = AIJob(project_id=p.id, type="requirement_review", status=AIJobStatus.COMPLETED, created_by=u.id)
+    j2 = AIJob(project_id=p.id, type="meeting_summary", status=AIJobStatus.COMPLETED, created_by=u.id)
+    j3 = AIJob(project_id=p.id, type="test_cases", status=AIJobStatus.FAILED, created_by=u.id)
+    db_session.add_all([j1, j2, j3])
+    db_session.commit()
+
+    admin_headers = get_auth_headers(super_admin.id)
+
+    res = client.get("/admin/analytics/monthly?months=6", headers=admin_headers)
+    assert res.status_code == 200, res.text
+    data = res.json()["data"]
+
+    assert "months" in data
+    assert len(data["months"]) == 6
+
+    # Verify latest month has our counts
+    latest_month = data["months"][-1]
+    assert latest_month["active_users"] >= 2  # super_admin + u
+    assert latest_month["total_companies"] >= 1
+    assert latest_month["ai_requests"] >= 3
+    assert latest_month["ai_completed"] >= 2
+    assert latest_month["ai_failed"] >= 1
+    assert latest_month["ai_success_rate"] > 0
+    assert "current_month_ai_requests" in data
+    assert "active_users_growth_pct" in data
+
