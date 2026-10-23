@@ -29,6 +29,7 @@ import {
   Users,
   Database,
   GitFork,
+  GitBranch,
   MessageSquare,
 } from "lucide-react";
 
@@ -389,6 +390,12 @@ export default function ProtectedShell({ children, pageTitle }: ProtectedShellPr
         href: `/projects/${currentProjectId}/traceability`,
         icon: GitFork,
         isActive: pathname === `/projects/${currentProjectId}/traceability`,
+      },
+      {
+        name: "Git Collaboration",
+        href: `/projects/${currentProjectId}/git`,
+        icon: GitBranch,
+        isActive: pathname.startsWith(`/projects/${currentProjectId}/git`),
       },
       {
         name: "Messaging",

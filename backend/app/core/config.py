@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     RAZORPAY_KEY_SECRET: str = os.getenv("RAZORPAY_KEY_SECRET", "").strip()
     RAZORPAY_WEBHOOK_SECRET: str = os.getenv("RAZORPAY_WEBHOOK_SECRET", "").strip()
 
+    # Credential Encryption (Fernet)
+    CREDENTIAL_ENCRYPTION_KEY: str = os.getenv("CREDENTIAL_ENCRYPTION_KEY", "").strip()
+
     jwt: JWTSettings = JWTSettings()
     db: DatabaseSettings = DatabaseSettings()
 

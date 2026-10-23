@@ -307,4 +307,9 @@ class TestCaseSource(str, Enum):
 class ConversationType(str, Enum):
     PROJECT_GROUP = "PROJECT_GROUP"
     DIRECT = "DIRECT"
+
+
+class GitReferenceType(str, Enum):
+    COMMIT = "COMMIT"
+    PULL_REQUEST = "PULL_REQUEST"
 

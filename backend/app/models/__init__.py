@@ -45,4 +45,5 @@ from app.models.notification import Notification
 from app.models.subscription import Subscription, PaymentOrder, Payment, EnterpriseSubscriptionRequest
 from app.models.test_case import TestCase
 from app.models.conversation import Conversation, ConversationMember, Message
+from app.models.git_collaboration import ProjectGitRepository, TaskGitReference, ProjectGitConnection
 

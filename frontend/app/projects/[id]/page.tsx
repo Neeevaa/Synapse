@@ -33,6 +33,7 @@ import {
   Kanban,
   Layers,
   GitFork,
+  GitBranch,
   X,
   UserCheck,
   UserMinus,
@@ -151,14 +152,16 @@ export default function ProjectDetailPage() {
 
   // Sync tab with URL search parameter
   useEffect(() => {
-    if (tabParam === "members") {
+    if (tabParam === "git") {
+      router.push(`/projects/${projectId}/git`);
+    } else if (tabParam === "members") {
       setActiveTab("members");
     } else if (tabParam === "settings") {
       setActiveTab("settings");
     } else {
       setActiveTab("overview");
     }
-  }, [tabParam]);
+  }, [tabParam, projectId, router]);
 
   // User & Permission State
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -619,6 +622,13 @@ export default function ProjectDetailPage() {
                 >
                   Team & Members ({members.length})
                 </button>
+                <Link
+                  href={`/projects/${project.id}/git`}
+                  className="pb-3 text-xs font-semibold transition-colors border-b-2 border-transparent text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
+                >
+                  <GitBranch className="size-3.5" />
+                  Git Collaboration
+                </Link>
                 {canManage && (
                   <button
                     onClick={() => setActiveTab("settings")}

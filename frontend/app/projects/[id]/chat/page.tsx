@@ -390,17 +390,13 @@ export default function ProjectChatPage({
               </div>
               <h1 className="text-sm font-semibold text-foreground">Messaging</h1>
             </div>
-
-            <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-muted text-muted-foreground">
-              Database Persisted
-            </span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              title="Refresh messages from database"
+              title="Refresh messages"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-border bg-card hover:bg-muted text-foreground transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
             >
               <RefreshCw className={`size-3.5 ${refreshing ? "animate-spin" : ""}`} />
@@ -649,7 +645,7 @@ export default function ProjectChatPage({
                         No messages yet
                       </h3>
                       <p className="text-xs text-muted-foreground max-w-xs mt-1">
-                        Send the first message to start this database-persisted discussion.
+                        Send the first message to start the conversation.
                       </p>
                     </div>
                   ) : (

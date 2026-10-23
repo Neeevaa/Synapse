@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     RAZORPAY_KEY_SECRET: str = Field("", validation_alias="RAZORPAY_KEY_SECRET")
     RAZORPAY_WEBHOOK_SECRET: str = Field("", validation_alias="RAZORPAY_WEBHOOK_SECRET")
 
+    # Integration Credential Encryption Key
+    CREDENTIAL_ENCRYPTION_KEY: str = Field("", validation_alias="CREDENTIAL_ENCRYPTION_KEY")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",

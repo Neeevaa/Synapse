@@ -31,6 +31,7 @@ from app.notifications.router import router as notifications_router
 from app.subscriptions.router import router as subscriptions_router
 from app.testcases.router import router as testcases_router
 from app.chat.router import router as chat_router
+from app.git_collaboration.router import router as git_router
 
 
 # 1. Initialize Structured Logging
@@ -136,6 +137,7 @@ app.include_router(notifications_router, prefix="/notifications", tags=["Notific
 app.include_router(subscriptions_router, prefix="", tags=["Subscriptions & Billing"])
 app.include_router(testcases_router, prefix="", tags=["Test Cases"])
 app.include_router(chat_router, prefix="", tags=["Project Messaging"])
+app.include_router(git_router, prefix="", tags=["Git Collaboration"])
 
 
 
