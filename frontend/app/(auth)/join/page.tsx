@@ -9,11 +9,31 @@ import { api } from "@/lib/api";
 import { Loader2, CheckCircle2, AlertCircle, ShieldAlert, ArrowRight, LogOut } from "lucide-react";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 
+const nameRegex = /^[a-zA-Z]+$/;
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 const joinSchema = z.object({
-  first_name: z.string().min(1, "First name is required."),
-  last_name: z.string().min(1, "Last name is required."),
-  email: z.string().email("Invalid email format."),
-  password: z.string().min(8, "Password must be at least 8 characters."),
+  first_name: z
+    .string()
+    .min(1, "First name is required.")
+    .max(50, "First name cannot exceed 50 characters.")
+    .regex(nameRegex, "First name must contain only letters (no spaces, numbers, periods, hyphens, or special characters)."),
+  last_name: z
+    .string()
+    .min(1, "Last name is required.")
+    .max(50, "Last name cannot exceed 50 characters.")
+    .regex(nameRegex, "Last name must contain only letters (no spaces, numbers, periods, hyphens, or special characters)."),
+  email: z
+    .string()
+    .min(1, "Email is required.")
+    .email("Invalid email format.")
+    .regex(emailRegex, "Invalid email format (e.g. name@company.com)."),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters.")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter.")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter.")
+    .regex(/[0-9]/, "Password must contain at least one digit."),
 });
 
 type JoinFormValues = z.infer<typeof joinSchema>;

@@ -24,7 +24,12 @@ import {
 
 /* ─── Zod Schemas ─── */
 const createTaskSchema = z.object({
-  title: z.string().min(1, "Task title is required.").max(250),
+  title: z
+    .string()
+    .min(1, "Task title is required.")
+    .max(250, "Task title cannot exceed 250 characters.")
+    .refine((v) => v.trim().length > 0, "Task title cannot be blank or only spaces.")
+    .refine((v) => /[a-zA-Z0-9]/.test(v), "Task title must contain letters or numbers, not only symbols."),
   description: z.string().max(2000).optional().or(z.literal("")),
   priority: z.string(),
   status: z.string(),
@@ -34,9 +39,35 @@ type CreateTaskFormValues = z.infer<typeof createTaskSchema>;
 
 const createSprintSchema = z
   .object({
-    name: z.string().min(1, "Sprint name is required.").max(150),
+    name: z
+      .string()
+      .min(1, "Sprint name is required.")
+      .max(150, "Sprint name cannot exceed 150 characters.")
+      .refine((v) => v.trim().length > 0, "Sprint name cannot be blank or only spaces.")
+      .refine((v) => /[a-zA-Z0-9]/.test(v), "Sprint name must contain letters or numbers, not only symbols."),
     goal: z.string().max(1000).optional().or(z.literal("")),
-    capacity: z.coerce.number().min(0, "Capacity must be non-negative.").max(1000).optional().or(z.literal("")),
+    capacity: z
+      .any()
+      .optional()
+      .refine(
+        (val) => {
+          if (val === undefined || val === null || val === "") return true;
+          return /^[0-9]+$/.test(String(val).trim());
+        },
+        "Capacity must contain only numbers (no decimals, hyphens, spaces, or symbols)."
+      )
+      .refine(
+        (val) => {
+          if (val === undefined || val === null || val === "") return true;
+          const num = Number(val);
+          return num >= 0 && num <= 1000;
+        },
+        "Capacity must be between 0 and 1000."
+      )
+      .transform((val) => {
+        if (val === undefined || val === null || val === "") return undefined;
+        return Number(val);
+      }),
     start_date: z.string().optional().or(z.literal("")),
     end_date: z.string().optional().or(z.literal("")),
   })
@@ -374,7 +405,7 @@ export default function SprintBoardPage() {
     setCreatingSprint(true);
     setCreateSprintError(null);
     try {
-      const cap = data.capacity !== "" && data.capacity !== undefined ? Number(data.capacity) : null;
+      const cap = data.capacity !== undefined ? data.capacity : null;
       await api.post(`/projects/${projectId}/sprints`, {
         name: data.name.trim(),
         goal: data.goal || null,

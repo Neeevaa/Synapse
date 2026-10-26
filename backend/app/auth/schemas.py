@@ -4,12 +4,12 @@ from uuid import UUID
 from app.models.enums import SubscriptionPlan
 
 EMAIL_REGEX = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-NAME_REGEX = r"^[a-zA-Z\s'\-\.]+$"
+NAME_REGEX = r"^[a-zA-Z]+$"
 
 
 class UserRegisterRequest(BaseModel):
     company_name: str = Field(
-        ..., min_length=1, max_length=150, description="Name of the company to create"
+        ..., min_length=2, max_length=150, description="Name of the company to create"
     )
     first_name: str = Field(
         ..., min_length=1, max_length=100, description="Owner's first name"
@@ -36,12 +36,22 @@ class UserRegisterRequest(BaseModel):
         default=None, description="Custom Enterprise limits and capabilities configuration"
     )
 
+    @field_validator("company_name")
+    @classmethod
+    def validate_company_name(cls, v: str) -> str:
+        v_stripped = v.strip()
+        if not v_stripped:
+            raise ValueError("Company name cannot be blank or only spaces.")
+        if not re.search(r"[a-zA-Z0-9]", v_stripped):
+            raise ValueError("Company name must contain letters or numbers, not only symbols.")
+        return v_stripped
+
     @field_validator("first_name", "last_name")
     @classmethod
     def validate_name(cls, v: str) -> str:
         v_stripped = v.strip()
         if not re.match(NAME_REGEX, v_stripped):
-            raise ValueError("Name can only contain letters, spaces, hyphens, and apostrophes")
+            raise ValueError("Name can only contain alphabetic letters (no spaces, numbers, periods, hyphens, or special characters).")
         return v_stripped
 
     @field_validator("email")
@@ -49,8 +59,21 @@ class UserRegisterRequest(BaseModel):
     def validate_email(cls, v: str) -> str:
         v_stripped = v.strip().lower()
         if not re.match(EMAIL_REGEX, v_stripped):
-            raise ValueError("Invalid email address format")
+            raise ValueError("Invalid email address format.")
         return v_stripped
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters long.")
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain at least one uppercase letter.")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain at least one lowercase letter.")
+        if not re.search(r"[0-9]", v):
+            raise ValueError("Password must contain at least one digit.")
+        return v
 
 
 class TeamMemberRegisterRequest(BaseModel):
@@ -65,7 +88,7 @@ class TeamMemberRegisterRequest(BaseModel):
     def validate_name(cls, v: str) -> str:
         v_stripped = v.strip()
         if not re.match(NAME_REGEX, v_stripped):
-            raise ValueError("Name can only contain letters, spaces, hyphens, and apostrophes")
+            raise ValueError("Name can only contain alphabetic letters (no spaces, numbers, periods, hyphens, or special characters).")
         return v_stripped
 
     @field_validator("email")
@@ -73,8 +96,21 @@ class TeamMemberRegisterRequest(BaseModel):
     def validate_email(cls, v: str) -> str:
         v_stripped = v.strip().lower()
         if not re.match(EMAIL_REGEX, v_stripped):
-            raise ValueError("Invalid email address format")
+            raise ValueError("Invalid email address format.")
         return v_stripped
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters long.")
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain at least one uppercase letter.")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain at least one lowercase letter.")
+        if not re.search(r"[0-9]", v):
+            raise ValueError("Password must contain at least one digit.")
+        return v
 
 
 class UserRegisterResponseData(BaseModel):
@@ -183,10 +219,43 @@ class UpdateProfileRequest(BaseModel):
     bio: str | None = Field(None, max_length=500)
     avatar_url: str | None = Field(None)
 
+    @field_validator("first_name", "last_name")
+    @classmethod
+    def validate_name(cls, v: str | None) -> str | None:
+        if v is not None:
+            v_stripped = v.strip()
+            if not re.match(NAME_REGEX, v_stripped):
+                raise ValueError("Name can only contain alphabetic letters (no spaces, numbers, periods, hyphens, or special characters).")
+            return v_stripped
+        return v
+
+    @field_validator("designation")
+    @classmethod
+    def validate_designation(cls, v: str | None) -> str | None:
+        if v is not None:
+            v_stripped = v.strip()
+            if v_stripped and not re.match(r"^[a-zA-Z\s]+$", v_stripped):
+                raise ValueError("Designation can only contain alphabetic letters and spaces.")
+            return v_stripped
+        return v
+
 
 class ChangePasswordRequest(BaseModel):
     old_password: str = Field(..., min_length=1)
     new_password: str = Field(..., min_length=8, max_length=100)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("New password must be at least 8 characters long.")
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("New password must contain at least one uppercase letter.")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("New password must contain at least one lowercase letter.")
+        if not re.search(r"[0-9]", v):
+            raise ValueError("New password must contain at least one digit.")
+        return v
 
 
 class GoogleAuthRequest(BaseModel):

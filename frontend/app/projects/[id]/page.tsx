@@ -51,7 +51,12 @@ import {
 
 /* ─── Zod Schemas ─── */
 const editProjectSchema = z.object({
-  name: z.string().min(1, "Project name is required.").max(150),
+  name: z
+    .string()
+    .min(1, "Project name is required.")
+    .max(150, "Project name cannot exceed 150 characters.")
+    .refine((v) => v.trim().length > 0, "Project name cannot be blank or only spaces.")
+    .refine((v) => /[a-zA-Z0-9]/.test(v), "Project name must contain letters or numbers, not only symbols."),
   description: z.string().max(2000).optional().or(z.literal("")),
   status: z.string(),
 });
@@ -402,8 +407,14 @@ export default function ProjectDetailPage() {
 
   const handleSendInvitation = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteEmail.trim()) {
+    const emailTrimmed = inviteEmail.trim();
+    if (!emailTrimmed) {
       setInviteError("Email address is required.");
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(emailTrimmed)) {
+      setInviteError("Please enter a valid email address format (e.g. member@company.com).");
       return;
     }
     setInvitingMember(true);
@@ -417,7 +428,7 @@ export default function ProjectDetailPage() {
         specialization?: string;
         personal_message?: string;
       } = {
-        email: inviteEmail.trim(),
+        email: emailTrimmed,
         project_role: inviteRole,
         personal_message: inviteMessage.trim() || undefined,
       };

@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field
+import re
+from pydantic import BaseModel, Field, field_validator
 from uuid import UUID
 from datetime import datetime
 
@@ -15,6 +16,23 @@ class CreateTaskRequest(BaseModel):
     story_points: int | None = Field(None, ge=0, le=100, description="Estimated story points")
     position: int | None = Field(None, description="Order position in backlog")
 
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, v: str) -> str:
+        v_stripped = v.strip()
+        if not v_stripped:
+            raise ValueError("Task title cannot be empty or only spaces.")
+        if not re.search(r"[a-zA-Z0-9]", v_stripped):
+            raise ValueError("Task title must contain letters or numbers, not only symbols.")
+        return v_stripped
+
+    @field_validator("story_points")
+    @classmethod
+    def validate_story_points(cls, v: int | None) -> int | None:
+        if v is not None and (v < 0 or v > 100):
+            raise ValueError("Story points must be between 0 and 100.")
+        return v
+
 
 class UpdateTaskRequest(BaseModel):
     title: str | None = Field(None, min_length=1, max_length=250)
@@ -28,6 +46,25 @@ class UpdateTaskRequest(BaseModel):
     due_date: datetime | None = None
     story_points: int | None = Field(None, ge=0, le=100)
     position: int | None = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, v: str | None) -> str | None:
+        if v is not None:
+            v_stripped = v.strip()
+            if not v_stripped:
+                raise ValueError("Task title cannot be empty or only spaces.")
+            if not re.search(r"[a-zA-Z0-9]", v_stripped):
+                raise ValueError("Task title must contain letters or numbers, not only symbols.")
+            return v_stripped
+        return v
+
+    @field_validator("story_points")
+    @classmethod
+    def validate_story_points(cls, v: int | None) -> int | None:
+        if v is not None and (v < 0 or v > 100):
+            raise ValueError("Story points must be between 0 and 100.")
+        return v
 
 
 class UpdateTaskStatusRequest(BaseModel):

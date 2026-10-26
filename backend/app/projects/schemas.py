@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field
+import re
+from pydantic import BaseModel, Field, field_validator
 from uuid import UUID
 from datetime import datetime
 
@@ -11,11 +12,33 @@ class CreateProjectRequest(BaseModel):
         None, max_length=2000, description="Project description"
     )
 
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        v_stripped = v.strip()
+        if not v_stripped:
+            raise ValueError("Project name cannot be empty or only spaces.")
+        if not re.search(r"[a-zA-Z0-9]", v_stripped):
+            raise ValueError("Project name must contain letters or numbers, not only symbols.")
+        return v_stripped
+
 
 class UpdateProjectRequest(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=200)
     description: str | None = Field(None, max_length=2000)
     status: str | None = Field(None)
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str | None) -> str | None:
+        if v is not None:
+            v_stripped = v.strip()
+            if not v_stripped:
+                raise ValueError("Project name cannot be empty or only spaces.")
+            if not re.search(r"[a-zA-Z0-9]", v_stripped):
+                raise ValueError("Project name must contain letters or numbers, not only symbols.")
+            return v_stripped
+        return v
 
 
 class ProjectResponse(BaseModel):

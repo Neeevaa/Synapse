@@ -26,6 +26,9 @@ import {
   PieChart,
   UserCheck,
   Search,
+  Trash2,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 
 interface TaskItem {
@@ -150,6 +153,14 @@ export default function ProjectBacklogPage() {
   const [creatingTask, setCreatingTask] = useState(false);
   const [createTaskError, setCreateTaskError] = useState<string | null>(null);
 
+  // Toggle Task Status (Enable / Disable)
+  const [togglingTaskId, setTogglingTaskId] = useState<string | null>(null);
+
+  // Delete Task Modal State
+  const [deletingTask, setDeletingTask] = useState<TaskItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const canManage =
     userRole === "OWNER" ||
     userRole === "ADMIN" ||
@@ -249,10 +260,18 @@ export default function ProjectBacklogPage() {
   // Save Inline Task Edits
   const handleSaveInlineEdit = async (taskId: string) => {
     if (!canManage) return;
-    const pts = tempPoints.trim() === "" ? null : parseInt(tempPoints.trim(), 10);
-    if (pts !== null && (isNaN(pts) || pts < 0)) {
-      alert("Story points must be a valid non-negative number.");
-      return;
+    const trimmed = tempPoints.trim();
+    let pts: number | null = null;
+    if (trimmed !== "") {
+      if (!/^[0-9]+$/.test(trimmed)) {
+        alert("Story points must contain whole digits only (no fullstops, decimals, hyphens, spaces, or symbols).");
+        return;
+      }
+      pts = parseInt(trimmed, 10);
+      if (pts < 0 || pts > 100) {
+        alert("Story points must be between 0 and 100.");
+        return;
+      }
     }
 
     try {
@@ -265,6 +284,47 @@ export default function ProjectBacklogPage() {
       fetchProjectAndBacklog();
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to update task.");
+    }
+  };
+
+  // Toggle Task Status (Enable / Disable)
+  const handleToggleTaskStatus = async (task: TaskItem) => {
+    if (!canManage) return;
+    const isCurrentlyEnabled = task.status !== "CANCELLED";
+    const nextStatus = isCurrentlyEnabled ? "CANCELLED" : "TODO";
+    setTogglingTaskId(task.id);
+
+    try {
+      await api.patch(`/tasks/${task.id}/status`, { status: nextStatus });
+      setBacklogTasks((prev) =>
+        prev.map((t) => (t.id === task.id ? { ...t, status: nextStatus } : t))
+      );
+      setAllProjectTasks((prev) =>
+        prev.map((t) => (t.id === task.id ? { ...t, status: nextStatus } : t))
+      );
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to update task status.");
+      fetchProjectAndBacklog();
+    } finally {
+      setTogglingTaskId(null);
+    }
+  };
+
+  // Delete Task Confirm
+  const handleDeleteTaskConfirm = async () => {
+    if (!deletingTask || !canManage) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      await api.delete(`/tasks/${deletingTask.id}`);
+      setBacklogTasks((prev) => prev.filter((t) => t.id !== deletingTask.id));
+      setAllProjectTasks((prev) => prev.filter((t) => t.id !== deletingTask.id));
+      setDeletingTask(null);
+    } catch (err: any) {
+      setDeleteError(err.response?.data?.message || "Failed to delete task.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -293,17 +353,31 @@ export default function ProjectBacklogPage() {
   // Create Task
   const handleCreateTaskSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim()) {
+    const titleTrimmed = newTitle.trim();
+    if (!titleTrimmed) {
       setCreateTaskError("Task title is required.");
+      return;
+    }
+    if (!/[a-zA-Z0-9]/.test(titleTrimmed)) {
+      setCreateTaskError("Task title must contain alphanumeric characters (not only symbols).");
       return;
     }
 
     setCreatingTask(true);
-    const points = newStoryPoints.trim() === "" ? null : parseInt(newStoryPoints.trim(), 10);
-    if (points !== null && (isNaN(points) || points < 0 || points > 100)) {
-      setCreateTaskError("Story points must be a valid non-negative number between 0 and 100.");
-      setCreatingTask(false);
-      return;
+    const pointsTrimmed = newStoryPoints.trim();
+    let points: number | null = null;
+    if (pointsTrimmed !== "") {
+      if (!/^[0-9]+$/.test(pointsTrimmed)) {
+        setCreateTaskError("Story points must contain whole digits only (no fullstops, decimals, hyphens, spaces, or symbols).");
+        setCreatingTask(false);
+        return;
+      }
+      points = parseInt(pointsTrimmed, 10);
+      if (points < 0 || points > 100) {
+        setCreateTaskError("Story points must be between 0 and 100.");
+        setCreatingTask(false);
+        return;
+      }
     }
 
     try {
@@ -629,7 +703,11 @@ export default function ProjectBacklogPage() {
                   {filteredBacklogTasks.map((task, idx) => (
                     <div
                       key={task.id}
-                      className="group p-4 rounded-xl border border-border bg-background hover:bg-muted/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                      className={`group p-4 rounded-xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                        task.status === "CANCELLED"
+                          ? "border-border/60 bg-muted/20 opacity-70"
+                          : "border-border bg-background hover:bg-muted/30"
+                      }`}
                     >
                       {/* Left Section: Reorder Handle & Info */}
                       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -674,7 +752,13 @@ export default function ProjectBacklogPage() {
                               {task.priority}
                             </span>
 
-                            <h4 className="text-sm font-bold text-foreground truncate">
+                            {task.status === "CANCELLED" && (
+                              <span className="text-[0.68rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border">
+                                Disabled
+                              </span>
+                            )}
+
+                            <h4 className={`text-sm font-bold text-foreground truncate ${task.status === "CANCELLED" ? "line-through text-muted-foreground" : ""}`}>
                               {task.title}
                             </h4>
                           </div>
@@ -779,6 +863,45 @@ export default function ProjectBacklogPage() {
                             </button>
                           )}
                         </div>
+
+                        {/* Enable / Disable Toggle Action */}
+                        {canManage && (
+                          <button
+                            onClick={() => handleToggleTaskStatus(task)}
+                            disabled={togglingTaskId === task.id}
+                            title={task.status === "CANCELLED" ? "Click to enable task" : "Click to disable task"}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                              task.status === "CANCELLED"
+                                ? "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                                : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                            }`}
+                          >
+                            {togglingTaskId === task.id ? (
+                              <Loader2 className="size-3.5 animate-spin" />
+                            ) : task.status === "CANCELLED" ? (
+                              <ToggleLeft className="size-4 text-muted-foreground" />
+                            ) : (
+                              <ToggleRight className="size-4 text-emerald-600 dark:text-emerald-400" />
+                            )}
+                            <span className="text-[0.68rem] uppercase font-bold tracking-wider">
+                              {task.status === "CANCELLED" ? "Disabled" : "Enabled"}
+                            </span>
+                          </button>
+                        )}
+
+                        {/* Delete Task Action */}
+                        {canManage && (
+                          <button
+                            onClick={() => {
+                              setDeleteError(null);
+                              setDeletingTask(task);
+                            }}
+                            title="Delete task from backlog"
+                            className="p-1.5 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        )}
 
                         {/* Move to Sprint Action */}
                         {canManage && (
@@ -1036,6 +1159,71 @@ export default function ProjectBacklogPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Task Confirmation Modal */}
+        {deletingTask && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+            <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h3 className="text-base font-bold text-destructive flex items-center gap-2">
+                  <Trash2 className="size-5" /> Delete Backlog Task
+                </h3>
+                <button
+                  onClick={() => setDeletingTask(null)}
+                  className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+
+              {deleteError && (
+                <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-xs text-destructive">
+                  <AlertCircle className="size-4 shrink-0" />
+                  <span>{deleteError}</span>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <p className="text-sm text-foreground">
+                  Are you sure you want to delete this task?
+                </p>
+                <div className="rounded-xl bg-muted/50 p-3 border border-border">
+                  <span className="text-xs font-bold text-foreground block truncate">
+                    {deletingTask.title}
+                  </span>
+                  {deletingTask.description && (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {deletingTask.description}
+                    </p>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  This will permanently delete the task from the backlog. This action cannot be undone.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeletingTask(null)}
+                  disabled={isDeleting}
+                  className="px-4 py-2 rounded-xl border border-border bg-background text-xs font-semibold text-muted-foreground hover:bg-muted cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteTaskConfirm}
+                  disabled={isDeleting}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-destructive text-xs font-bold text-destructive-foreground shadow-2xs hover:bg-destructive/90 disabled:opacity-50 cursor-pointer"
+                >
+                  {isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                  Delete Task
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -32,21 +32,42 @@ import {
   AuthoritativePlan,
 } from "@/lib/plans";
 
-const nameRegex = /^[a-zA-Z\s'\-\.]+$/;
+const nameRegex = /^[a-zA-Z]+$/;
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const registerSchema = z.object({
-  company_name: z.string().min(2, "Company name must be at least 2 characters."),
+  company_name: z
+    .string()
+    .min(2, "Company name must be at least 2 characters.")
+    .max(150, "Company name cannot exceed 150 characters.")
+    .refine((v) => v.trim().length >= 2, "Company name cannot be blank or only spaces.")
+    .refine((v) => /[a-zA-Z0-9]/.test(v), "Company name must contain letters or numbers, not only symbols."),
   first_name: z
     .string()
     .min(1, "First name is required.")
-    .regex(nameRegex, "First name can only contain letters, spaces, hyphens, and apostrophes."),
+    .max(50, "First name cannot exceed 50 characters.")
+    .regex(nameRegex, "First name must contain only letters (no spaces, numbers, periods, hyphens, or special characters)."),
   last_name: z
     .string()
     .min(1, "Last name is required.")
-    .regex(nameRegex, "Last name can only contain letters, spaces, hyphens, and apostrophes."),
-  email: z.string().email("Invalid email format."),
-  password: z.string().min(8, "Password must be at least 8 characters."),
-  designation: z.string().optional(),
+    .max(50, "Last name cannot exceed 50 characters.")
+    .regex(nameRegex, "Last name must contain only letters (no spaces, numbers, periods, hyphens, or special characters)."),
+  email: z
+    .string()
+    .min(1, "Email is required.")
+    .email("Invalid email format.")
+    .regex(emailRegex, "Invalid email format (e.g. name@company.com)."),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters.")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter.")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter.")
+    .regex(/[0-9]/, "Password must contain at least one digit."),
+  designation: z
+    .string()
+    .max(100, "Designation cannot exceed 100 characters.")
+    .refine((v) => !v || /^[a-zA-Z\s]+$/.test(v.trim()), "Designation can only contain letters and spaces.")
+    .optional(),
   subscription_plan: z.enum(["FREE", "STARTER", "PRO", "ENTERPRISE"]).default("FREE"),
 });
 

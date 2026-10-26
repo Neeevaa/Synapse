@@ -19,7 +19,12 @@ import {
 
 /* ─── Zod Schema ─── */
 const createProjectSchema = z.object({
-  name: z.string().min(1, "Project name is required.").max(200),
+  name: z
+    .string()
+    .min(1, "Project name is required.")
+    .max(200, "Project name cannot exceed 200 characters.")
+    .refine((v) => v.trim().length > 0, "Project name cannot be blank or only spaces.")
+    .refine((v) => /[a-zA-Z0-9]/.test(v), "Project name must contain letters or numbers, not only symbols."),
   description: z.string().max(2000).optional().or(z.literal("")),
 });
 

@@ -146,9 +146,19 @@ export default function MyProfilePage() {
     setProfileSuccess(false);
     setProfileError(null);
 
-    const nameRegex = /^[a-zA-Z\s'\-\.]+$/;
+    const nameRegex = /^[a-zA-Z]+$/;
+    if (!firstName.trim() || !lastName.trim()) {
+      setProfileError("First and last names are required.");
+      setSavingProfile(false);
+      return;
+    }
     if (!nameRegex.test(firstName.trim()) || !nameRegex.test(lastName.trim())) {
-      setProfileError("First and last names can only contain letters, spaces, hyphens, and apostrophes.");
+      setProfileError("First and last names can only contain letters (no spaces, numbers, periods, hyphens, or special characters).");
+      setSavingProfile(false);
+      return;
+    }
+    if (designation.trim() && !/^[a-zA-Z\s]+$/.test(designation.trim())) {
+      setProfileError("Designation can only contain letters and spaces.");
       setSavingProfile(false);
       return;
     }
